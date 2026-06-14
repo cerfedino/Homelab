@@ -1,0 +1,19 @@
+#cloud-config
+hostname: ${hostname}
+preserve_hostname: false
+package_update: true
+packages:
+%{ for p in packages ~}
+  - ${p}
+%{ endfor ~}
+users:
+  - name: ${username}
+    groups: [sudo]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+runcmd:
+%{ for s in runcmd ~}
+  - ${s}
+%{ endfor ~}
