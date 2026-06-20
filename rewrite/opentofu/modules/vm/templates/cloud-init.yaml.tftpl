@@ -12,7 +12,9 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     ssh_authorized_keys:
-      - ${ssh_public_key}
+%{ for pubkey in ssh_public_keys ~}
+        - ${pubkey}
+%{ endfor ~}
 runcmd:
 %{ for s in runcmd ~}
   - ${s}

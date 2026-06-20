@@ -42,8 +42,12 @@ variable "username" {
   type = string
 }
 
-variable "ssh_public_key" {
-  type = string
+variable "ssh_public_key_paths" {
+  type = list(string)
+}
+
+variable "ssh_private_key_paths" {
+  type = list(string)
 }
 
 variable "packages" {

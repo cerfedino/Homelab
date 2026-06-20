@@ -19,7 +19,7 @@ resource "proxmox_virtual_environment_file" "user_data" {
       packages       = var.packages
       runcmd = var.runcmd
       username       = var.username
-      ssh_public_key = var.ssh_public_key
+      ssh_public_keys = [for pubkey in var.ssh_public_key_paths : trimspace(file(pubkey))]
     })
   }
 }

@@ -15,6 +15,7 @@ provider "proxmox" {
   ssh {
     agent    = true
     username = "root"
+    private_key = core::file("/home/cerfe/.ssh/keys/NUC/pve1/pve1_root")
   }
 }
 
@@ -37,15 +38,15 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   url       = "https://cloud-images.ubuntu.com/resolute/current/resolute-server-cloudimg-amd64.img"
   file_name = "resolute-server-cloudimg-amd64.qcow2"
 
-  checksum           = "dced94c031cc1f23dee14419a3723a5b110df9938de0ac31913a2bfd07c755b4"
+  checksum           = "0c9fb915bab0b36b361d3bf8aeae2115dda19d81a306656964de048033481670"
   checksum_algorithm = "sha256"
 }
 
-module "vm" {
+module "vm_k8s" {
   source   = "./modules/vm"
-  for_each = var.nodes
+  for_each = var.vm_k8s
 
-  name      = coalesce(each.value.display_name, each.key)
+  name      = each.value.display_name
   vm_id     = each.value.vm_id
   node_name = each.value.node_name
   cores     = each.value.cores
@@ -64,6 +65,33 @@ module "vm" {
   snippet_datastore = "local"
 
   username = each.value.username
-  ssh_public_key    = trimspace(file("${path.module}/keys/nodes.pub"))
+  ssh_public_key_paths    = each.value.ssh_public_key_paths
+  ssh_private_key_paths    = each.value.ssh_private_key_paths
 }
 
+
+module "vm_tailscale" {
+  source = "./modules/vm"
+
+  name      = var.vm_tailscale.display_name
+  vm_id     = var.vm_tailscale.vm_id
+  node_name = var.vm_tailscale.node_name
+  cores     = var.vm_tailscale.cores
+  memory    = var.vm_tailscale.memory
+  disk_size = var.vm_tailscale.disk_size
+
+  dns_servers        = var.vm_tailscale.dns_servers
+  network_interfaces = var.vm_tailscale.network_interfaces
+
+  runcmd = var.vm_tailscale.runcmd
+  packages = var.vm_tailscale.packages
+
+  image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
+  disk_datastore    = "zfs"
+  init_datastore    = "zfs"
+  snippet_datastore = "local"
+
+  username = var.vm_tailscale.username
+  ssh_public_key_paths    = var.vm_tailscale.ssh_public_key_paths
+  ssh_private_key_paths    = var.vm_tailscale.ssh_private_key_paths
+}
