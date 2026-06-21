@@ -1,0 +1,10 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "code-runner.ignoreSelection": true,
+  "code-runner.executorMapByGlob": {
+    "execution-environment.yml": "cd $dir && ansible-builder build --tag ansible_ee",
+    "playbook-*.yaml": "ansible-playbook",
+    "main.tofu": "cd $dir && tofu validate && tofu apply"
+  }
+}
