@@ -1,0 +1,15 @@
+---
+ansible-navigator:
+  ansible:
+    inventory:
+      entries:
+        - inventory.yaml
+  execution-environment:
+    enabled: true
+    volume-mounts:
+      - src: "${PWD}/../opentofu/keys"
+        dest: "${PWD}/../opentofu/keys"
+        options: "ro"
+    container-options:
+      - "--userns=keep-id"
+  mode: stdout
