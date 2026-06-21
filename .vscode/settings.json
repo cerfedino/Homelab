@@ -4,7 +4,7 @@
   "code-runner.ignoreSelection": true,
   "code-runner.executorMapByGlob": {
     "execution-environment.yml": "cd $dir && ansible-builder build --tag ansible_ee",
-    "playbook-*.yaml": "cd $dir && ansible-navigator run $fileName --execution-environment-image ansible_ee --mode stdout --pull-policy missing",
+    "playbook-*.yaml": "cd $dir && ansible-navigator run $fileName",
     "main.tofu": "cd $dir && tofu validate && tofu apply"
   }
 }

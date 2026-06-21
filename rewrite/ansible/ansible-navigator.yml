@@ -12,4 +12,8 @@ ansible-navigator:
         options: "ro"
     container-options:
       - "--userns=keep-id"
+    image: ansible_ee:latest
+    pull:
+      policy: missing
   mode: stdout
+  enable-prompts: true
