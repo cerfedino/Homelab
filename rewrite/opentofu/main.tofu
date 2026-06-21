@@ -2,9 +2,18 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.66"
+      version = "~> 0.110"
+    }
+    http = {
+      source = "hashicorp/http"
+      version = "3.6.0"
     }
   }
+}
+
+data "http" "ubuntu_images_checksums" {
+  url    = "https://cloud-images.ubuntu.com/resolute/current/SHA256SUMS"
+  method = "GET"
 }
 
 provider "proxmox" {
@@ -15,7 +24,7 @@ provider "proxmox" {
   ssh {
     agent    = true
     username = "root"
-    private_key = core::file("/home/cerfe/.ssh/keys/NUC/pve1/pve1_root")
+    private_key = core::file(var.proxmox.root_privkey_path)
   }
 }
 
@@ -28,17 +37,18 @@ provider "proxmox" {
 #   autostart = true
 # }
 
-
-# Shared Ubuntu cloud image — downloaded once, reused by every VM.
+locals {
+  ubuntu_image_filename = "resolute-server-cloudimg-amd64"
+}
 resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   content_type = "import"
   datastore_id = "local"
   node_name    = "pve1"
 
-  url       = "https://cloud-images.ubuntu.com/resolute/current/resolute-server-cloudimg-amd64.img"
-  file_name = "resolute-server-cloudimg-amd64.qcow2"
+  url       = "https://cloud-images.ubuntu.com/resolute/current/${local.ubuntu_image_filename}.img"
+  file_name = "${local.ubuntu_image_filename}.qcow2"
 
-  checksum           = "0c9fb915bab0b36b361d3bf8aeae2115dda19d81a306656964de048033481670"
+  checksum           = regex("(?m)^([a-f0-9]{64}) \\*${local.ubuntu_image_filename}.img$",data.http.ubuntu_images_checksums.response_body)[0]
   checksum_algorithm = "sha256"
 }
 
