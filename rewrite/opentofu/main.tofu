@@ -28,14 +28,24 @@ provider "proxmox" {
   }
 }
 
-# resource "proxmox_network_linux_bridge" "vmbr1" {
-#   node_name = "pve1"
-#   name      = "vmbr1"
+resource "proxmox_network_linux_bridge" "network_lan" {
+  node_name = "pve1"
+  name      = var.network_lan.bridge
 
-#   address = "10.10.10.202/24"
-#   comment = "proxmox_internal"
-#   autostart = true
-# }
+  address = var.network_lan.cidr
+  comment = "LAN"
+  autostart = true
+  ports = var.network_lan.bridge_ports
+}
+
+resource "proxmox_network_linux_bridge" "network_internal" {
+  node_name = "pve1"
+  name      = var.network_internal.bridge
+
+  address = var.network_internal.cidr
+  comment = "proxmox_internal"
+  autostart = true
+}
 
 locals {
   ubuntu_image_filename = "resolute-server-cloudimg-amd64"
@@ -58,6 +68,7 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
 module "vm_k8s" {
   source   = "./modules/vm"
   for_each = var.vm_k8s
+  depends_on = [ proxmox_network_linux_bridge.network_internal, proxmox_network_linux_bridge.network_lan ]
 
   name      = each.value.display_name
   vm_id     = each.value.vm_id
@@ -87,6 +98,7 @@ module "vm_k8s" {
 
 module "vm_tailscale" {
   source = "./modules/vm"
+  depends_on = [ proxmox_network_linux_bridge.network_internal, proxmox_network_linux_bridge.network_lan ]
 
   name      = var.vm_tailscale.display_name
   vm_id     = var.vm_tailscale.vm_id

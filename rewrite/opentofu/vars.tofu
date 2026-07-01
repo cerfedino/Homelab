@@ -12,6 +12,7 @@ variable "network_lan" {
     cidr    = string # e.g. "192.168.1.0/24"
     bridge  = string # e.g. "vmbr0"
     gateway = string
+    bridge_ports = list(string)
   })
 
   validation {
