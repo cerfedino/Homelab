@@ -1,0 +1,9 @@
+- name: Setup tailscale
+  hosts: tailscale
+  vars_files:
+    - vars/tailscale.yml
+  roles:
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ tailscale_key }}"
+        tailscale_args: "--reset --advertise-routes={{ network_lan.cidr }} --accept-dns=false --advertise-exit-node"

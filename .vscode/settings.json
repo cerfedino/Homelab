@@ -5,6 +5,7 @@
   "code-runner.executorMapByGlob": {
     "execution-environment.yml": "cd $dir && ansible-builder build --tag ansible_ee",
     "playbook-*.yaml": "cd $dir && ansible-navigator run $fileName",
-    "main.tofu": "cd $dir && tofu validate && tofu apply"
+    // "requirements.yml": "cd $dir && ansible-galaxy install -r $fileName",
+    "main.tofu": "cd $dir && tofu validate && ./generate_ansible_data.sh"
   }
 }

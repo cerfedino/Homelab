@@ -16,4 +16,5 @@ dependencies:
     - sshpass
   galaxy:
     collections:
-      - name: community.postgresql
+      # - name: community.postgresql
+      - name: artis3n.tailscale
