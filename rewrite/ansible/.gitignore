@@ -1,3 +1,5 @@
 context/
 ansible-navigator.log
 *-artifact-*.json
+group_vars/all/generated.yaml
+inventory.yaml
