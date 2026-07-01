@@ -1,4 +1,6 @@
 context/
+.ansible
+.ssh
 ansible-navigator.log
 *-artifact-*.json
 
