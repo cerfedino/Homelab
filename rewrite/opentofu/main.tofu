@@ -39,6 +39,9 @@ provider "proxmox" {
 
 locals {
   ubuntu_image_filename = "resolute-server-cloudimg-amd64"
+
+  lan_prefix      = split("/", var.network_lan.cidr)[1]
+  internal_prefix = split("/", var.network_internal.cidr)[1]
 }
 resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   content_type = "import"
@@ -64,8 +67,10 @@ module "vm_k8s" {
   disk_size = each.value.disk_size
 
   dns_servers        = each.value.dns_servers
-  network_interfaces = each.value.network_interfaces
-
+  network_interfaces = [
+    { bridge = var.network_lan.bridge,      address = "${cidrhost(var.network_lan.cidr, each.value.vm_id)}/${local.lan_prefix}",           gateway = var.network_lan.gateway },
+    { bridge = var.network_internal.bridge, address = "${cidrhost(var.network_internal.cidr, each.value.vm_id)}/${local.internal_prefix}", gateway = var.network_internal.gateway },
+  ]
   runcmd = each.value.runcmd
   packages = each.value.packages
 
@@ -74,7 +79,7 @@ module "vm_k8s" {
   init_datastore    = "zfs"
   snippet_datastore = "local"
 
-  username = each.value.username
+  username = "cerfe"
   ssh_public_key_paths    = each.value.ssh_public_key_paths
   ssh_private_key_paths    = each.value.ssh_private_key_paths
 }
@@ -91,7 +96,10 @@ module "vm_tailscale" {
   disk_size = var.vm_tailscale.disk_size
 
   dns_servers        = var.vm_tailscale.dns_servers
-  network_interfaces = var.vm_tailscale.network_interfaces
+  network_interfaces = [
+    { bridge = var.network_lan.bridge,      address = "${cidrhost(var.network_lan.cidr, var.vm_tailscale.vm_id)}/${local.lan_prefix}",           gateway = var.network_lan.gateway },
+    { bridge = var.network_internal.bridge, address = "${cidrhost(var.network_internal.cidr, var.vm_tailscale.vm_id)}/${local.internal_prefix}", gateway = var.network_internal.gateway },
+  ]
 
   runcmd = var.vm_tailscale.runcmd
   packages = var.vm_tailscale.packages
@@ -101,7 +109,7 @@ module "vm_tailscale" {
   init_datastore    = "zfs"
   snippet_datastore = "local"
 
-  username = var.vm_tailscale.username
+  username = "cerfe"
   ssh_public_key_paths    = var.vm_tailscale.ssh_public_key_paths
   ssh_private_key_paths    = var.vm_tailscale.ssh_private_key_paths
 }
