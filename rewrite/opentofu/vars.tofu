@@ -65,8 +65,6 @@ variable "vm_k8s" {
     memory      = number
     disk_size   = number
     dns_servers = list(string)
-    packages = optional(list(string), [])
-    runcmd =  optional(list(string), [])
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)
   }))
@@ -97,8 +95,6 @@ variable "vm_tailscale" {
     memory      = number
     disk_size   = number
     dns_servers = list(string)
-    packages = optional(list(string), [])
-    runcmd =  optional(list(string), [])
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)
   })

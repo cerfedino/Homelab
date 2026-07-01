@@ -36,6 +36,10 @@ resource "proxmox_network_linux_bridge" "network_lan" {
   comment = "LAN"
   autostart = true
   ports = var.network_lan.bridge_ports
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
 resource "proxmox_network_linux_bridge" "network_internal" {
@@ -82,8 +86,8 @@ module "vm_k8s" {
     { bridge = var.network_lan.bridge,      address = "${cidrhost(var.network_lan.cidr, each.value.vm_id)}/${local.lan_prefix}",           gateway = var.network_lan.gateway },
     { bridge = var.network_internal.bridge, address = "${cidrhost(var.network_internal.cidr, each.value.vm_id)}/${local.internal_prefix}", gateway = var.network_internal.gateway },
   ]
-  runcmd = each.value.runcmd
-  packages = each.value.packages
+  packages = ["qemu-guest-agent"]
+  runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
   disk_datastore    = "zfs"
@@ -113,8 +117,8 @@ module "vm_tailscale" {
     { bridge = var.network_internal.bridge, address = "${cidrhost(var.network_internal.cidr, var.vm_tailscale.vm_id)}/${local.internal_prefix}", gateway = var.network_internal.gateway },
   ]
 
-  runcmd = var.vm_tailscale.runcmd
-  packages = var.vm_tailscale.packages
+  packages = ["qemu-guest-agent"]
+  runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
   disk_datastore    = "zfs"
