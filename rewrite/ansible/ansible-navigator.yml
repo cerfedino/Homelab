@@ -4,6 +4,8 @@ ansible-navigator:
     inventory:
       entries:
         - inventory.yaml
+    config:
+      path: ansible.cfg
   execution-environment:
     enabled: true
     volume-mounts:
