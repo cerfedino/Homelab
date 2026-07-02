@@ -1,0 +1,3 @@
+- import_playbook: playbook-k8s.yaml
+- import_playbook: playbook-fetch-kubeconfig.yaml
+- import_playbook: playbook-tailscale.yaml
