@@ -69,9 +69,9 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   checksum_algorithm = "sha256"
 }
 
-module "vm_k8s" {
+module "vm_k3s" {
   source   = "./modules/vm"
-  for_each = var.vm_k8s
+  for_each = var.vm_k3s
   depends_on = [ proxmox_network_linux_bridge.network_internal, proxmox_network_linux_bridge.network_lan ]
 
   name      = each.value.display_name

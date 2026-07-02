@@ -55,7 +55,7 @@ variable "network_internal" {
 }
 
 # VMs to create
-variable "vm_k8s" {
+variable "vm_k3s" {
   type = map(object({
     vm_id        = number
     display_name = string
@@ -70,17 +70,17 @@ variable "vm_k8s" {
   }))
 
   validation {
-    condition     = length([for k, v in var.vm_k8s : 1 if length(v.ssh_public_key_paths) < 1]) == 0
+    condition     = length([for k, v in var.vm_k3s : 1 if length(v.ssh_public_key_paths) < 1]) == 0
     error_message = "At least one SSH pubkey for each VM such that Ansible can connect to the VM"
   }
 
   validation {
-    condition     = length([for k, v in var.vm_k8s : 1 if length(v.ssh_private_key_paths) < 1]) == 0
+    condition     = length([for k, v in var.vm_k3s : 1 if length(v.ssh_private_key_paths) < 1]) == 0
     error_message = "At least one SSH pubkey for each VM such that Ansible can connect to the VM"
   }
 
   validation {
-    condition     = length([for k, v in var.vm_k8s : 1 if v.vm_id <=0 || v.vm_id >= 255 ]) == 0
+    condition     = length([for k, v in var.vm_k3s : 1 if v.vm_id <=0 || v.vm_id >= 255 ]) == 0
     error_message = "VM ID has to be in range [1, 254]"
   }
 }

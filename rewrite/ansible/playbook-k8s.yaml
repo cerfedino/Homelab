@@ -1,0 +1,61 @@
+# ---
+# - name: "Setup k8s"
+#   hosts: k3s_cluster
+#   become: true
+#   tasks:
+#     - name: Configure UFW rules
+#       community.general.ufw:
+#         rule: "{{ item.rule | default(omit)}}"
+#         port: "{{ item.port |  default(omit)}}"
+#         proto: "{{ item.proto | default(omit) }}"
+#         from: "{{ item.from |  default(omit)}}"
+#         to: "{{ item.to | default('any')}}"
+#       loop:
+#         - { port: "22", rule: allow }
+#         - { rule: allow, port: "6443", proto: tcp } # apiserver
+#         - { rule: allow, port: "10250", proto: tcp } # kubelet metrics and API
+#         - { rule: allow, from: "10.42.0.0/16", to: "any" } # pods
+#         - { rule: allow, from: "10.43.0.0/16", to: "any" } # services
+#       loop_control:
+#         label: "{{ item.rule |  default(omit)}} {{ item.port |  default(omit)}}/{{ item.proto |  default(omit) }} from:{{ item.from |  default(omit) }} to:{{ item.to |  default(omit) }}"
+
+#     - name: Enable UFW
+#       community.general.ufw:
+#         state: enabled
+
+#     - name: Install packages that allow apt to be used over HTTPS
+#       ansible.builtin.apt:
+#         name:
+#           - apt-transport-https
+#           - ca-certificates
+#           - curl
+#           - gnupg-agent
+#           - software-properties-common
+
+#         state: present
+#         update_cache: true
+
+#     - name: Add repo using key from URL
+#       ansible.builtin.deb822_repository:
+#         name: docker
+#         types: deb
+#         uris: https://download.docker.com/linux/ubuntu
+#         suites: "{{ ansible_facts['distribution_release'] }}"
+#         components: stable
+#         architectures: amd64
+#         signed_by: https://download.docker.com/linux/ubuntu/gpg
+
+#     - name: Install docker and its dependecies
+#       ansible.builtin.apt:
+#         name:
+#           - docker-ce
+#           - docker-ce-cli
+#           - containerd.io
+#           - docker-buildx-plugin
+#           - docker-compose-plugin
+#         state: present
+#         update_cache: true
+#       # notify:
+#       #   - docker status
+- name: K3s playbook
+  ansible.builtin.import_playbook: k3s.orchestration.site
