@@ -1,0 +1,2 @@
+# Cluster admin credentials — never commit
+kubeconfig.yaml

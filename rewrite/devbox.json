@@ -5,11 +5,12 @@
     "opentofu@latest",
     "ansible-navigator@latest",
     "kubectl@latest",
-    "podman@latest"
+    "podman@latest",
+    "ansible-builder@latest"
   ],
   "shell": {
     "init_hook": [
-      "echo 'Welcome to devbox!' > /dev/null"
+      "export KUBECONFIG=\"$DEVBOX_PROJECT_ROOT/ansible/kubeconfig.yaml\""
     ],
     "scripts": {
       "test": [

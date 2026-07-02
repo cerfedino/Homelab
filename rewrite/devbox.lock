@@ -1,6 +1,70 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "ansible-builder@latest": {
+      "last_modified": "2026-06-28T17:12:19Z",
+      "resolved": "github:NixOS/nixpkgs/534ee3d8beb1737b5342995f8837e2b2705ce0d8#ansible-builder",
+      "source": "devbox-search",
+      "version": "3.1.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/z520k1diq2z4c9ijghip42nkdgyy1k42-python3.13-ansible-builder-3.1.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/rqrmhzyrv487s54f8mzhqxdin5hxzb4g-python3.13-ansible-builder-3.1.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/z520k1diq2z4c9ijghip42nkdgyy1k42-python3.13-ansible-builder-3.1.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fbm2bnl87k2i7minwljslv1pjx11miqr-python3.13-ansible-builder-3.1.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/avbd494v1cw9rxl6rzra1xxmknipj3f3-python3.13-ansible-builder-3.1.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/fbm2bnl87k2i7minwljslv1pjx11miqr-python3.13-ansible-builder-3.1.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8g4babrzpq3kq9qbwi4jpclgh5jljl1r-python3.13-ansible-builder-3.1.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/652j61bvqscgzxqchd1kgqnxrc706xxs-python3.13-ansible-builder-3.1.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/8g4babrzpq3kq9qbwi4jpclgh5jljl1r-python3.13-ansible-builder-3.1.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wcm0224g5a72wz6799l4p036shnr66gj-python3.13-ansible-builder-3.1.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/5lhzrpa9302wx0hkh3dizq3mnng9rkw8-python3.13-ansible-builder-3.1.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/wcm0224g5a72wz6799l4p036shnr66gj-python3.13-ansible-builder-3.1.1"
+        }
+      }
+    },
     "ansible-navigator@latest": {
       "last_modified": "2026-06-28T17:12:19Z",
       "resolved": "github:NixOS/nixpkgs/534ee3d8beb1737b5342995f8837e2b2705ce0d8#ansible-navigator",
@@ -128,6 +192,10 @@
           "store_path": "/nix/store/vl7gpdqdd384wsnrbiz69jwr01lkzwwb-python3.13-ansible-core-2.21.1"
         }
       }
+    },
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2026-07-01T15:14:03Z",
+      "resolved": "github:NixOS/nixpkgs/e8273b29fe1390ec8d4603f2477357555291432e?lastModified=1782918843&narHash=sha256-ETYnV9U7Sr%2BA45dohzZdfCZKOss4qrTkO%2BwgNZNvEc0%3D"
     },
     "kubectl@latest": {
       "last_modified": "2026-06-27T07:37:20Z",

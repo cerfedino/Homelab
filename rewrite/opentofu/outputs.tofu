@@ -16,9 +16,6 @@ output "ansible_yaml_inventory" {
                     }
                 }
             }
-            vars = {
-                api_endpoint= "{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}"
-            }
         }
         tailscale = {
           hosts = {
