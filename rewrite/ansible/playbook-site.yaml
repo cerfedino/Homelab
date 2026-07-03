@@ -1,3 +1,16 @@
-- import_playbook: playbook-k8s.yaml
+# Full bring-up in dependency order. Idempotent — safe on a from-scratch build
+# AND an already-running cluster.
+
+# 1. Pre-seed kube-vip so the control-plane VIP exists the moment k3s starts.
+#    Must come BEFORE the cluster play, because api_endpoint = VIP: the servers
+#    configure themselves to reach the VIP, so it has to be up first.
+- import_playbook: playbook-kube-vip.yaml
+
+# 2. Install/upgrade the cluster (joins via the VIP; adds it to tls-san).
+- import_playbook: playbook-k3s.yaml
+
+# 3. Drop a local kubeconfig pointed at the VIP.
 - import_playbook: playbook-fetch-kubeconfig.yaml
+
+# 4. Tailscale exit node / routes.
 - import_playbook: playbook-tailscale.yaml

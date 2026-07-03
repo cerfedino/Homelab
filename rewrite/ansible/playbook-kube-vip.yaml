@@ -1,0 +1,37 @@
+---
+# Get current leader: $ kubectl -n kube-system get lease plndr-cp-lock -o jsonpath='{.spec.holderIdentity}{"\n"}'
+- name: Deploy kube-vip control-plane VIP
+  hosts: server
+  become: true
+  run_once:
+    true # k3s auto-deploy manifests live on ONE server; the DaemonSet
+    # it defines then runs on every control-plane node.
+  # Safe to run BEFORE k3s is installed: k3s applies whatever is already in the
+  # auto-deploy dir the moment it starts, so the VIP is up as the first server
+  # boots — which is what makes a from-scratch build (api_endpoint = VIP) work.
+  tasks:
+    - name: Detect the LAN interface (the one carrying the default route)
+      ansible.builtin.set_fact:
+        kube_vip_interface: "{{ ansible_default_ipv4.interface }}"
+
+    - name: Show what we resolved (sanity check)
+      ansible.builtin.debug:
+        msg: "VIP {{ kube_vip_address }} will be announced on interface {{ kube_vip_interface }}"
+
+    - name: Ensure the k3s auto-deploy manifests directory exists
+      ansible.builtin.file:
+        path: /var/lib/rancher/k3s/server/manifests
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Render kube-vip into the k3s auto-deploy directory
+      ansible.builtin.template:
+        src: templates/kube-vip.yaml.j2
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+        owner: root
+        group: root
+        mode: "0600"
+      # No handler/restart needed: k3s watches this directory and applies the
+      # manifest automatically within a few seconds.

@@ -35,6 +35,7 @@ output "ansible_yaml_inventory" {
 
 output "ansible_group_vars" {
   value = yamlencode({
+    kube_vip_address = var.kube_vip_address
     network_lan = {
       cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
       bridge  = var.network_lan.bridge
@@ -46,4 +47,16 @@ output "ansible_group_vars" {
       gateway = var.network_internal.gateway
     }
   })
+
+  # The VIP must live on the LAN subnet (so ARP works) ...
+  precondition {
+    condition     = cidrhost("${var.kube_vip_address}/${local.lan_prefix}", 0) == cidrhost(var.network_lan.cidr, 0)
+    error_message = "kube_vip_address ${var.kube_vip_address} is not inside network_lan (${var.network_lan.cidr})."
+  }
+
+  # ... and must not collide with any VM's LAN IP.
+  precondition {
+    condition     = !contains(local.vm_lan_ips, var.kube_vip_address)
+    error_message = "kube_vip_address ${var.kube_vip_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
+  }
 }

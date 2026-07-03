@@ -54,6 +54,16 @@ variable "network_internal" {
   }
 }
 
+# kube-vip control-plane VIP. The VIP floats between k3s servers for HA
+variable "kube_vip_address" {
+  type = string
+
+  validation {
+    condition     = can(cidrhost("${var.kube_vip_address}/32", 0))
+    error_message = "kube_vip_address must be a valid IPv4 address."
+  }
+}
+
 # VMs to create
 variable "vm_k3s" {
   type = map(object({

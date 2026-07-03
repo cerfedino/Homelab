@@ -1,9 +1,16 @@
 k3s_version: v1.36.2+k3s1
 
-# API server endpoint for the cluster and kubectl. Derived from the inventory:
-# the first host in the `server` group (its internal ansible_host IP).
-# Swap for a control-plane VIP later without changing the generated inventory.
+# Only used to FORM the cluster (joining servers reach the first server here).
+# kubectl uses the kube-vip VIP instead
 api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] }}"
+
+# kube_vip_address is provided by OpenTofu via group_vars/all/generated.yaml
+
+server_config_yaml: |
+  tls-san:
+    - "{{ kube_vip_address }}"
+  node-ip: "{{ ansible_host }}"        # pin etcd/kubelet to the stable internal net
+  flannel-iface: eth1                  # internal NIC
 
 # The token should be a random string of reasonable length. You can generate
 # one with the following commands:
