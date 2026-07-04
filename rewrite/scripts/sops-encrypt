@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Encrypt SOPS secrets in place
+set -euo pipefail
+
+if [ "$#" -gt 0 ]; then
+  files=("$@")
+else
+  mapfile -t files < <(find . -type f \( -name '*.yaml' -o -name '*.yml' \) -path '*/secrets/*')
+fi
+
+for f in "${files[@]}"; do
+  if grep -q '^sops:' "$f"; then
+    echo "skip (already encrypted) $f"
+  else
+    echo "encrypting $f"; sops -e -i "$f"
+  fi
+done

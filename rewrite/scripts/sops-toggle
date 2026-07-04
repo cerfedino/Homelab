@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Flip each given secrets file between encrypted and plaintext.
+# Requires a file path
+set -euo pipefail
+[ "$#" -gt 0 ] || { echo "sops-toggle: requires a file path" >&2; exit 1; }
+
+for f in "$@"; do
+  case "$f" in */secrets/*) : ;; *) echo "skip (not under a secrets/ folder) $f"; continue ;; esac
+  if grep -q '^sops:' "$f"; then
+    echo "decrypting $f"; sops -d -i "$f"
+  else
+    echo "encrypting $f"; sops -e -i "$f"
+  fi
+done

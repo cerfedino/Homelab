@@ -1,0 +1,7 @@
+# SOPS policy for encrypting k3s secrets
+creation_rules:
+  # Any YAML inside any secrets/ folder
+  - path_regex: (^|/)secrets/.*\.ya?ml$
+    # Only encrypt the secret contents
+    encrypted_regex: "^(data|stringData)$"
+    age: "age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh"

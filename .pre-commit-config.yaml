@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: sops-encrypt
+        name: sops-encrypt secrets
+        entry: rewrite/scripts/sops-encrypt
+        language: script
+        files: (^|/)secrets/.*\.ya?ml$
