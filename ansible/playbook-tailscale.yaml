@@ -1,7 +1,5 @@
 - name: Setup tailscale
-  hosts: tailscale
-  vars_files:
-    - vars/tailscale.yml
+  hosts: tailscale_gw
   roles:
     - role: artis3n.tailscale.machine
       vars:

@@ -6,4 +6,3 @@ ansible-navigator.log
 
 group_vars/all/generated.yaml
 inventory.yaml
-vault_password.txt
