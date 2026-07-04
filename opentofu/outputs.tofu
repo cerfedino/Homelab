@@ -17,9 +17,9 @@ output "ansible_yaml_inventory" {
                 }
             }
         }
-        tailscale = {
+        tailscale_gw = {
           hosts = {
-            tailscale = {
+            (module.vm_tailscale.name) = {
               vm_id:  module.vm_tailscale.vm_id
               ansible_host = split("/", [for ni in module.vm_tailscale.network_interfaces : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
               ansible_user = module.vm_tailscale.username

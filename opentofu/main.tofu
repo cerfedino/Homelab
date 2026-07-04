@@ -12,7 +12,7 @@ terraform {
 }
 
 data "http" "ubuntu_images_checksums" {
-  url    = "https://cloud-images.ubuntu.com/resolute/current/SHA256SUMS"
+  url    = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/SHA256SUMS"
   method = "GET"
 }
 
@@ -33,12 +33,13 @@ resource "proxmox_network_linux_bridge" "network_lan" {
   name      = var.network_lan.bridge
 
   address = var.network_lan.cidr
+  gateway = var.network_lan.gateway
   comment = "LAN"
   autostart = true
   ports = var.network_lan.bridge_ports
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
 }
 
@@ -49,9 +50,14 @@ resource "proxmox_network_linux_bridge" "network_internal" {
   address = var.network_internal.cidr
   comment = "proxmox_internal"
   autostart = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 locals {
+  ubuntu_image_release  = "20260627"
   ubuntu_image_filename = "resolute-server-cloudimg-amd64"
 
   lan_prefix      = split("/", var.network_lan.cidr)[1]
@@ -67,8 +73,9 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   content_type = "import"
   datastore_id = "local"
   node_name    = "pve1"
+  depends_on = [proxmox_network_linux_bridge.network_lan]
 
-  url       = "https://cloud-images.ubuntu.com/resolute/current/${local.ubuntu_image_filename}.img"
+  url       = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/${local.ubuntu_image_filename}.img"
   file_name = "${local.ubuntu_image_filename}.qcow2"
 
   checksum           = regex("(?m)^([a-f0-9]{64}) \\*${local.ubuntu_image_filename}.img$",data.http.ubuntu_images_checksums.response_body)[0]

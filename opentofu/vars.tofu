@@ -93,6 +93,11 @@ variable "vm_k3s" {
     condition     = length([for k, v in var.vm_k3s : 1 if v.vm_id <=0 || v.vm_id >= 255 ]) == 0
     error_message = "VM ID has to be in range [1, 254]"
   }
+
+  validation {
+    condition     = length(distinct([for k, v in var.vm_k3s : v.vm_id])) == length(var.vm_k3s)
+    error_message = "vm_k3s VM IDs must be unique"
+  }
 }
 
 variable "vm_tailscale" {
@@ -122,6 +127,11 @@ variable "vm_tailscale" {
   validation {
     condition     = var.vm_tailscale.vm_id > 0 && var.vm_tailscale.vm_id < 255
     error_message = "VM ID has to be in range [1, 254]"
+  }
+
+  validation {
+    condition     = !contains([for k, v in var.vm_k3s : v.vm_id], var.vm_tailscale.vm_id)
+    error_message = "vm_tailscale.vm_id collides with a vm_k3s VM ID"
   }
 }
 
