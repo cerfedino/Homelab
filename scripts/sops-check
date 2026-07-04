@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fail if any given secrets file is not sops-encrypted
+set -euo pipefail
+
+rc=0
+for f in "$@"; do
+  if ! sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
+    echo "not encrypted: $f" >&2
+    rc=1
+  fi
+done
+exit $rc

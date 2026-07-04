@@ -6,7 +6,7 @@ set -euo pipefail
 
 for f in "$@"; do
   case "$f" in */secrets/*) : ;; *) echo "skip (not under a secrets/ folder) $f"; continue ;; esac
-  if grep -q '^sops:' "$f"; then
+  if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
     echo "decrypting $f"; sops -d -i "$f"
   else
     echo "encrypting $f"; sops -e -i "$f"

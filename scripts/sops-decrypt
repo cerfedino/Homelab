@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Encrypt SOPS secrets in place
+# Decrypt SOPS secrets in place
 set -euo pipefail
 
 if [ "$#" -gt 0 ]; then
@@ -9,9 +9,9 @@ else
 fi
 
 for f in "${files[@]}"; do
-  if grep -q '^sops:' "$f"; then
-    echo "skip (already encrypted) $f"
+  if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
+    echo "decrypting $f"; sops -d -i "$f"
   else
-    echo "encrypting $f"; sops -e -i "$f"
+    echo "skip (already plaintext) $f"
   fi
 done

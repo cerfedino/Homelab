@@ -9,7 +9,7 @@
     "main.tofu": "cd $dir && tofu validate && ./generate_ansible_data.sh",
 
     // Tries to toggle encryption on every yaml file in case its a k3s SOPS-encrypted secret
-    "*.yaml": "cd $workspaceRoot/rewrite && devbox run sops-toggle $fullFileName",
-    "*.yml": "cd $workspaceRoot/rewrite && devbox run sops-toggle $fullFileName"
+    "*.yaml": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
+    "*.yml": "cd $workspaceRoot && devbox run sops-toggle $fullFileName"
   }
 }
