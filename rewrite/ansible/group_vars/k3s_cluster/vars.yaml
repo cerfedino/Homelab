@@ -11,6 +11,8 @@ server_config_yaml: |
     - "{{ kube_vip_address }}"
   node-ip: "{{ ansible_host }}"        # pin etcd/kubelet to the stable internal net
   flannel-iface: eth1                  # internal NIC
+  disable:
+    - traefik
 
 # The token should be a random string of reasonable length. You can generate
 # one with the following commands:
