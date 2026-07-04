@@ -26,6 +26,15 @@
             ],
             "sops-toggle": [
                 "\"$DEVBOX_PROJECT_ROOT/scripts/sops-toggle\" \"$@\""
+            ],
+            "tfvars-sync": [
+                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-sync\" \"$@\""
+            ],
+            "tfvars-restore": [
+                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-restore\""
+            ],
+            "tfvars-check": [
+                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-check\""
             ]
         }
     }

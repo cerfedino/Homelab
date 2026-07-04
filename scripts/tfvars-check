@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Fail if any tfvars mirror is missing or out of sync with its plaintext
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+rc=0
+mapfile -t files < <(find . -type f -name '*.tfvars' -not -path '*/.terraform/*')
+
+for plain in "${files[@]}"; do
+  enc="$plain.sops.yaml"
+  if [ ! -f "$enc" ]; then
+    echo "missing $enc  (fix: devbox run tfvars-sync)" >&2; rc=1
+  elif ! sops -d --output-type binary "$enc" | cmp -s - "$plain"; then
+    echo "$enc is out of sync with $plain  (fix: devbox run tfvars-sync)" >&2; rc=1
+  fi
+done
+exit $rc

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Encrypt *.tfvars files into their committed sops mirrors
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+if [ "$#" -gt 0 ]; then
+  files=("$@")
+else
+  mapfile -t files < <(find . -type f -name '*.tfvars' -not -path '*/.terraform/*')
+fi
+
+for f in "${files[@]}"; do
+  sops -e --input-type binary --output-type yaml "$f" > "$f.sops.yaml"
+  echo "synced $f.sops.yaml"
+done

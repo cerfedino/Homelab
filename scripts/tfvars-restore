@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Restore *.tfvars files from their committed sops mirrors
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+mapfile -t files < <(find . -type f -name '*.tfvars.sops.yaml' -not -path '*/.terraform/*')
+
+for enc in "${files[@]}"; do
+  plain="${enc%.sops.yaml}"
+  sops -d --output-type binary "$enc" > "$plain"
+  echo "restored $plain"
+done

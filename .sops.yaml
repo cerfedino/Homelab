@@ -7,3 +7,6 @@ creation_rules:
   # Everything else (e.g. ansible group_vars): fully encrypted
   - path_regex: \.sops\.ya?ml$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+  # Encrypt whole .tfvars files
+  - path_regex: \.tfvars$
+    age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh

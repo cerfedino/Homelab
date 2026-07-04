@@ -7,3 +7,9 @@ repos:
         language: system
         files: \.sops\.ya?ml$
         exclude: ^\.sops\.yaml$
+      - id: tfvars-check
+        name: Check tfvars sops encrypted mirror is in sync with plaintext
+        entry: devbox run --quiet --recompute=false -- scripts/tfvars-check
+        language: system
+        always_run: true
+        pass_filenames: false

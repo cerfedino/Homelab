@@ -9,7 +9,7 @@ else
 fi
 
 for f in "${files[@]}"; do
-  case "${f##*/}" in .sops.yaml|.sops.yml) echo "skip (sops config) $f"; continue ;; esac
+  case "${f##*/}" in .sops.yaml|.sops.yml) echo "skip (sops config) $f"; continue ;; *.tfvars.sops.yaml) echo "skip (managed by tfvars-sync) $f"; continue ;; esac
   if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
     echo "skip (already encrypted) $f"
   else
