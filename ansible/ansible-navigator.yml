@@ -12,6 +12,12 @@ ansible-navigator:
       - src: "${PWD}/../opentofu/keys"
         dest: "${PWD}/../opentofu/keys"
         options: "ro"
+      - src: "${PWD}/../.sops"
+        dest: "${PWD}/../.sops"
+        options: "ro"
+    environment-variables:
+      pass:
+        - SOPS_AGE_KEY_FILE
     container-options:
       - "--userns=keep-id"
     image: ansible_ee:latest

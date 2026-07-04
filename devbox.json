@@ -14,7 +14,7 @@
     "shell": {
         "init_hook": [
             "export KUBECONFIG=\"$DEVBOX_PROJECT_ROOT/ansible/kubeconfig.yaml\"",
-            "export SOPS_AGE_KEY_FILE=\"$DEVBOX_PROJECT_ROOT/k3s/.sops/keys.txt\"",
+            "export SOPS_AGE_KEY_FILE=\"$DEVBOX_PROJECT_ROOT/.sops/keys.txt\"",
             "command -v pre-commit >/dev/null && [ ! -f \"$(git rev-parse --git-path hooks/pre-commit 2>/dev/null)\" ] && pre-commit install >/dev/null 2>&1 || true"
         ],
         "scripts": {

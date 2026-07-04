@@ -5,7 +5,7 @@ set -euo pipefail
 [ "$#" -gt 0 ] || { echo "sops-toggle: requires a file path" >&2; exit 1; }
 
 for f in "$@"; do
-  case "$f" in */secrets/*) : ;; *) echo "skip (not under a secrets/ folder) $f"; continue ;; esac
+  case "${f##*/}" in .sops.yaml|.sops.yml) echo "skip (sops config) $f"; continue ;; *.sops.yaml|*.sops.yml) : ;; *) echo "skip (not a .sops file) $f"; continue ;; esac
   if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
     echo "decrypting $f"; sops -d -i "$f"
   else

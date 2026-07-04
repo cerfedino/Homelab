@@ -5,4 +5,5 @@ repos:
         name: Check k3s secrets are sops-encrypted
         entry: devbox run --quiet --recompute=false -- scripts/sops-check
         language: system
-        files: (^|/)secrets/.*\.ya?ml$
+        files: \.sops\.ya?ml$
+        exclude: ^\.sops\.yaml$

@@ -5,10 +5,11 @@ set -euo pipefail
 if [ "$#" -gt 0 ]; then
   files=("$@")
 else
-  mapfile -t files < <(find . -type f \( -name '*.yaml' -o -name '*.yml' \) -path '*/secrets/*')
+  mapfile -t files < <(find . -type f \( -name '*.sops.yaml' -o -name '*.sops.yml' \) ! -name '.sops.yaml' ! -name '.sops.yml')
 fi
 
 for f in "${files[@]}"; do
+  case "${f##*/}" in .sops.yaml|.sops.yml) echo "skip (sops config) $f"; continue ;; esac
   if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
     echo "decrypting $f"; sops -d -i "$f"
   else

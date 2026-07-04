@@ -1,2 +1,5 @@
 # Cluster admin credentials — never commit
 kubeconfig.yaml
+
+# SOPS age private key
+/.sops/
