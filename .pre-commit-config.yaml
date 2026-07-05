@@ -5,7 +5,7 @@ repos:
         name: Check k3s secrets are sops-encrypted
         entry: devbox run --quiet --recompute=false -- scripts/sops-check
         language: system
-        files: \.sops\.ya?ml$
+        files: \.sops\.(ya?ml|tfvars)$
         exclude: ^\.sops\.yaml$
       - id: tfvars-check
         name: Check tfvars sops encrypted mirror is in sync with plaintext

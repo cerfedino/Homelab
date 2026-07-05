@@ -3,3 +3,7 @@ kubeconfig.yaml
 
 # SOPS age private key
 /.sops/
+
+# Commit only the *.sops.tfvars mirrors
+*.tfvars
+!*.sops.tfvars
