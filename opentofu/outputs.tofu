@@ -35,7 +35,9 @@ output "ansible_yaml_inventory" {
 
 output "ansible_group_vars" {
   value = yamlencode({
-    kube_vip_address = var.kube_vip_address
+    kube_vip_cp_address  = var.kube_vip_cp_address
+    kube_vip_svc_address = var.kube_vip_svc_address
+    k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
     network_lan = {
       cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
       bridge  = var.network_lan.bridge
@@ -48,15 +50,25 @@ output "ansible_group_vars" {
     }
   })
 
-  # The VIP must live on the LAN subnet (so ARP works) ...
+  # The VIPs must live on the LAN subnet (so ARP works) ...
   precondition {
-    condition     = cidrhost("${var.kube_vip_address}/${local.lan_prefix}", 0) == cidrhost(var.network_lan.cidr, 0)
-    error_message = "kube_vip_address ${var.kube_vip_address} is not inside network_lan (${var.network_lan.cidr})."
+    condition     = cidrhost("${var.kube_vip_cp_address}/${local.lan_prefix}", 0) == cidrhost(var.network_lan.cidr, 0)
+    error_message = "kube_vip_cp_address ${var.kube_vip_cp_address} is not inside network_lan (${var.network_lan.cidr})."
+  }
+
+  precondition {
+    condition     = cidrhost("${var.kube_vip_svc_address}/${local.lan_prefix}", 0) == cidrhost(var.network_lan.cidr, 0)
+    error_message = "kube_vip_svc_address ${var.kube_vip_svc_address} is not inside network_lan (${var.network_lan.cidr})."
   }
 
   # ... and must not collide with any VM's LAN IP.
   precondition {
-    condition     = !contains(local.vm_lan_ips, var.kube_vip_address)
-    error_message = "kube_vip_address ${var.kube_vip_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
+    condition     = !contains(local.vm_lan_ips, var.kube_vip_cp_address)
+    error_message = "kube_vip_cp_address ${var.kube_vip_cp_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
+  }
+
+  precondition {
+    condition     = !contains(local.vm_lan_ips, var.kube_vip_svc_address)
+    error_message = "kube_vip_svc_address ${var.kube_vip_svc_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
   }
 }

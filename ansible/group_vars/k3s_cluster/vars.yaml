@@ -4,15 +4,13 @@ k3s_version: v1.36.2+k3s1
 # kubectl uses the kube-vip VIP instead
 api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] }}"
 
-# kube_vip_address is provided by OpenTofu via group_vars/all/generated.yaml
-
 server_config_yaml: |
-  tls-san:
-    - "{{ kube_vip_address }}"
+  tls-san: {{ ([kube_vip_cp_address] + k3s_server_lan_ips) | to_json }}
   node-ip: "{{ ansible_host }}"        # pin etcd/kubelet to the stable internal net
   flannel-iface: eth1                  # internal NIC
   disable:
     - traefik
+    - servicelb # kube-vip owns LoadBalancer services
 
 # # Optional vars
 # extra_server_args: ""

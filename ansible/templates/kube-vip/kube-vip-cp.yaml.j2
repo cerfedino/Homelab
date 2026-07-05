@@ -1,0 +1,67 @@
+# kube-vip DaemonSet for CP VIP election, one pod per control-plane node
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-vip-ds-cp
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: kube-vip-ds-cp
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-vip-ds-cp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kube-vip-ds-cp
+    spec:
+      # Only run on control-plane (server) nodes because they're the ones that can own the API VIP.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+      containers:
+        - name: kube-vip
+          image: ghcr.io/kube-vip/kube-vip:v0.8.9
+          args: ["manager"]
+          env:
+            - name: vip_arp # layer-2 mode: announce via ARP
+              value: "true"
+            - name: vip_cidr # a single-host VIP
+              value: "32"
+            - name: vip_leaderelection # exactly one node owns the VIP at a time
+              value: "true"
+            - name: vip_leaseduration
+              value: "5"
+            - name: vip_renewdeadline
+              value: "3"
+            - name: vip_retryperiod
+              value: "1"
+
+            - name: cp_enable # control-plane VIP mode (not Services)
+              value: "true"
+            - name: cp_namespace
+              value: "kube-system"
+            - name: port # the API server port the VIP fronts
+              value: "6443"
+            - name: svc_enable
+              value: "false"
+
+            - name: vip_interface # which NIC to announce on (the LAN one)
+              value: "{{ kube_vip_cp_interface }}"
+            - name: address # the VIP itself
+              value: "{{ kube_vip_cp_address }}"
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN", "NET_RAW"] # needed to bind the VIP + send ARP
+      hostNetwork: true # kube-vip manipulates the host's network stack
+      serviceAccountName: kube-vip
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists

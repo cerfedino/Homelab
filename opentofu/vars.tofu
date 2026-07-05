@@ -55,12 +55,27 @@ variable "network_internal" {
 }
 
 # kube-vip control-plane VIP. The VIP floats between k3s servers for HA
-variable "kube_vip_address" {
+variable "kube_vip_cp_address" {
   type = string
 
   validation {
-    condition     = can(cidrhost("${var.kube_vip_address}/32", 0))
-    error_message = "kube_vip_address must be a valid IPv4 address."
+    condition     = can(cidrhost("${var.kube_vip_cp_address}/32", 0))
+    error_message = "kube_vip_cp_address must be a valid IPv4 address."
+  }
+}
+
+# kube-vip LoadBalancer-service VIP (LAN entrypoint, e.g. Traefik)
+variable "kube_vip_svc_address" {
+  type = string
+
+  validation {
+    condition     = can(cidrhost("${var.kube_vip_svc_address}/32", 0))
+    error_message = "kube_vip_svc_address must be a valid IPv4 address."
+  }
+
+  validation {
+    condition     = var.kube_vip_svc_address != var.kube_vip_cp_address
+    error_message = "kube_vip_svc_address must differ from kube_vip_cp_address"
   }
 }
 
