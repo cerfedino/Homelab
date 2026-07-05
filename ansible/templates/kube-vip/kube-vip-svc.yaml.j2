@@ -26,6 +26,8 @@ spec:
           env:
             - name: vip_arp # layer-2 mode: announce via ARP
               value: "true"
+            - name: prometheus_server
+              value: ":{{ kube_vip_metrics_port + 1 }}"
             - name: vip_leaseduration
               value: "5"
             - name: vip_renewdeadline

@@ -33,6 +33,8 @@ spec:
               value: "true"
             - name: vip_cidr # a single-host VIP
               value: "32"
+            - name: prometheus_server
+              value: ":{{ kube_vip_metrics_port }}"
             - name: vip_leaderelection # exactly one node owns the VIP at a time
               value: "true"
             - name: vip_leaseduration
