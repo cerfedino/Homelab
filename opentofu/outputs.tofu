@@ -15,6 +15,11 @@ output "ansible_yaml_inventory" {
                         }
                     }
                 }
+            },
+            vars = {
+                kube_vip_cp_address  = var.kube_vip_cp_address
+                kube_vip_svc_address = var.kube_vip_svc_address
+                k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
             }
         }
         tailscale_gw = {
@@ -28,27 +33,21 @@ output "ansible_yaml_inventory" {
           }
         }
       }
+      vars: {
+        network_lan = {
+            cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
+            bridge  = var.network_lan.bridge
+            gateway = var.network_lan.gateway
+        }
+        network_internal = {
+            cidr    = "${cidrhost(var.network_internal.cidr, 0)}/${split("/", var.network_internal.cidr)[1]}"
+            bridge = var.network_internal.bridge
+            gateway = var.network_internal.gateway
+        }
+      }
     }
   })
-}
 
-
-output "ansible_group_vars" {
-  value = yamlencode({
-    kube_vip_cp_address  = var.kube_vip_cp_address
-    kube_vip_svc_address = var.kube_vip_svc_address
-    k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
-    network_lan = {
-      cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
-      bridge  = var.network_lan.bridge
-      gateway = var.network_lan.gateway
-    }
-    network_internal = {
-      cidr    = "${cidrhost(var.network_internal.cidr, 0)}/${split("/", var.network_internal.cidr)[1]}"
-      bridge = var.network_internal.bridge
-      gateway = var.network_internal.gateway
-    }
-  })
 
   # The VIPs must live on the LAN subnet (so ARP works) ...
   precondition {
