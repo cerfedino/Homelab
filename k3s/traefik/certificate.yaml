@@ -1,0 +1,15 @@
+# wildcard certificates for the homelab
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-crfda
+  namespace: traefik
+spec:
+  secretName: wildcard-crfda-tls
+  dnsNames:
+    - "*.new.crfda.com"
+    - "*.crfda.com"
+    - "crfda.com"
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

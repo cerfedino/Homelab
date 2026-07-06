@@ -3,6 +3,11 @@ k3s_version: v1.36.2+k3s1
 # Both kube-vip instances are hostNetwork on every node, so their metrics listeners must never share a port. cp binds this, svc binds this+1
 kube_vip_metrics_port: 2112
 
+# Lease timings tolerant to IO-delay spikes
+kube_vip_lease_duration: 30
+kube_vip_renew_deadline: 20
+kube_vip_retry_period: 4
+
 # Only used to FORM the cluster (joining servers reach the first server here).
 # kubectl uses the kube-vip VIP instead
 api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] }}"

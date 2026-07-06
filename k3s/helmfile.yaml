@@ -1,0 +1,53 @@
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: "v1.20.3"
+    wait: true
+    values:
+      - cert-manager/values.yaml
+    hooks:
+      # Need to apply the Cloudflare token secret, but to do so we need to create the namespace already and also decrypt it.
+      - events: ["presync"]
+        showlogs: true
+        command: bash
+        args:
+          - -c
+          - >-
+            kubectl get ns cert-manager >/dev/null 2>&1 || kubectl create ns cert-manager;
+            sops -d cert-manager/cloudflare-dns-token.sops.yaml | kubectl apply -f -
+      - events: ["postsync"]
+        showlogs: true
+        command: kubectl
+        args: ["apply", "-f", "cert-manager/cluster-issuer.yaml"]
+
+  - name: traefik
+    namespace: traefik
+    createNamespace: true
+    chart: traefik/traefik
+    version: "41.0.1"
+    wait: true
+    disableValidation: true
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - traefik/values.yaml
+    hooks:
+      - events: ["postsync"]
+        showlogs: true
+        command: kubectl
+        args:
+          [
+            "apply",
+            "-f",
+            "traefik/certificate.yaml",
+            "-f",
+            "traefik/dynamic-config.yaml",
+          ]

@@ -7,6 +7,8 @@
         "kubectl@1.36.2",
         "podman@5.8.4",
         "ansible-builder@3.1.1",
+        "kubernetes-helm@4.2.2",
+        "helmfile@1.6.0",
         "sops@3.13.1",
         "age@1.3.1",
         "pre-commit@4.5.1"
@@ -15,7 +17,8 @@
         "init_hook": [
             "export KUBECONFIG=\"$DEVBOX_PROJECT_ROOT/ansible/kubeconfig.yaml\"",
             "export SOPS_AGE_KEY_FILE=\"$DEVBOX_PROJECT_ROOT/.sops/keys.txt\"",
-            "command -v pre-commit >/dev/null && [ ! -f \"$(git rev-parse --git-path hooks/pre-commit 2>/dev/null)\" ] && pre-commit install >/dev/null 2>&1 || true"
+            "command -v pre-commit >/dev/null && [ ! -f \"$(git rev-parse --git-path hooks/pre-commit 2>/dev/null)\" ] && pre-commit install >/dev/null 2>&1 || true",
+            "helm plugin list 2>/dev/null | grep -q '^diff' || helm plugin install --verify=false https://github.com/databus23/helm-diff >/dev/null 2>&1 || true"
         ],
         "scripts": {
             "sops-encrypt": [

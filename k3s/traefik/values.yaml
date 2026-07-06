@@ -1,0 +1,69 @@
+service:
+  type: LoadBalancer
+  annotations:
+    kube-vip.io/loadbalancerIPs: "192.168.1.241"
+
+deployment:
+  replicas: 2
+  # External dynamic traefik config
+  additionalVolumes:
+    - name: dynamic
+      configMap:
+        name: traefik-dynamic
+        optional: true # don't block pod start while the CM doesn't exist yet
+
+additionalVolumeMounts:
+  - name: dynamic
+    mountPath: /dynamic
+    readOnly: true
+
+providers:
+  kubernetesCRD:
+    enabled: true # IngressRoutes for in-cluster apps
+  kubernetesIngress:
+    enabled: false # not using plain Ingress objects
+  kubernetesGateway:
+    enabled: false # no Gateway API (IngressRoute only)
+
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: false
+
+# entrypoints
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+  websecure:
+    port: 8443
+    exposedPort: 443
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.new.crfda.com`)
+    entryPoints:
+      - websecure
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: wildcard-crfda-tls
+
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+
+experimental:
+  plugins:
+    cloudflarewarp:
+      moduleName: github.com/BetterCorp/cloudflarewarp
+      version: v1.3.3
+
+additionalArguments:
+  - "--providers.file.directory=/dynamic"
+  - "--providers.file.watch=true"
+  - "--entrypoints.websecure.http.tls=true"
+  - "--log.level=WARN"
+  - "--accesslog=true"

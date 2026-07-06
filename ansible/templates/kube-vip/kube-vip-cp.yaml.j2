@@ -38,11 +38,11 @@ spec:
             - name: vip_leaderelection # exactly one node owns the VIP at a time
               value: "true"
             - name: vip_leaseduration
-              value: "5"
+              value: "{{ kube_vip_lease_duration }}"
             - name: vip_renewdeadline
-              value: "3"
+              value: "{{ kube_vip_renew_deadline }}"
             - name: vip_retryperiod
-              value: "1"
+              value: "{{ kube_vip_retry_period }}"
 
             - name: cp_enable # control-plane VIP mode (not Services)
               value: "true"
