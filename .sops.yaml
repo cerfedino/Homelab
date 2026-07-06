@@ -1,7 +1,7 @@
 # SOPS policy to encrypt any *.sops.yaml file
 creation_rules:
   # k8s Secret manifests: only encrypt the secret contents
-  - path_regex: ^k3s/.*\.sops\.ya?ml$
+  - path_regex: ^30-applications/.*\.sops\.ya?ml$
     encrypted_regex: ^(data|stringData)$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
   # Everything else (e.g. ansible group_vars): fully encrypted

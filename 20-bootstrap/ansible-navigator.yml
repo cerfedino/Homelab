@@ -9,8 +9,8 @@ ansible-navigator:
   execution-environment:
     enabled: true
     volume-mounts:
-      - src: "${PWD}/../opentofu/keys"
-        dest: "${PWD}/../opentofu/keys"
+      - src: "${PWD}/../10-infra/keys"
+        dest: "${PWD}/../10-infra/keys"
         options: "ro"
       - src: "${PWD}/../.sops"
         dest: "${PWD}/../.sops"
