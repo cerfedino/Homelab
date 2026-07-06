@@ -71,3 +71,11 @@ output "ansible_yaml_inventory" {
     error_message = "kube_vip_svc_address ${var.kube_vip_svc_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
   }
 }
+
+output "helmfile_values" {
+  value = yamlencode({
+    kube_vip_svc_address = var.kube_vip_svc_address
+    domain               = var.domain
+    domain_lan           = var.domain_lan
+  })
+}

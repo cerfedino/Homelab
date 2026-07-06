@@ -54,6 +54,14 @@ variable "network_internal" {
   }
 }
 
+variable "domain" {
+  type = string # e.g. "example.com"
+}
+
+variable "domain_lan" {
+  type = string # e.g. "lan.example.com"
+}
+
 # kube-vip control-plane VIP. The VIP floats between k3s servers for HA
 variable "kube_vip_cp_address" {
   type = string

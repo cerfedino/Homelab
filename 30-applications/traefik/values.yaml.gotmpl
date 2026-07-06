@@ -1,7 +1,8 @@
 service:
   type: LoadBalancer
   annotations:
-    kube-vip.io/loadbalancerIPs: "192.168.1.241"
+    # prettier-ignore
+    kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
 
 deployment:
   replicas: 2
@@ -42,9 +43,9 @@ ports:
 ingressRoute:
   dashboard:
     enabled: true
-    matchRule: Host(`traefik.new.crfda.com`)
     entryPoints:
       - websecure
+    matchRule: Host(`traefik.{{ .Values.domain_lan }}`)
 
 tlsStore:
   default:

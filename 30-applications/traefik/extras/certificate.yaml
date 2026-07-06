@@ -7,9 +7,9 @@ metadata:
 spec:
   secretName: wildcard-crfda-tls
   dnsNames:
-    - "*.new.crfda.com"
-    - "*.crfda.com"
-    - "crfda.com"
+    - "*.{{ .Values.domain_lan }}"
+    - "*.{{ .Values.domain }}"
+    - "{{ .Values.domain }}"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
