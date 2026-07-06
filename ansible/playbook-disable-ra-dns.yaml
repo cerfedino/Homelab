@@ -1,0 +1,21 @@
+---
+# Make sure the router's advertised DNS servers are not picked up.
+- name: Node base configuration
+  hosts: all
+  become: true
+  tasks:
+    - name: Ignore router advertisements on eth0
+      ansible.builtin.copy:
+        dest: /etc/netplan/60-no-ra.yaml
+        mode: "0600"
+        content: |
+          network:
+            version: 2
+            ethernets:
+              eth0:
+                accept-ra: false
+      register: _no_ra
+
+    - name: Apply netplan and drop RA-learned DNS
+      ansible.builtin.shell: resolvectl revert eth0 || true; netplan apply
+      when: _no_ra.changed

@@ -103,7 +103,7 @@ module "vm_k3s" {
   runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
-  disk_datastore    = "zfs"
+  disk_datastore    = "local-zfs"
   init_datastore    = "zfs"
   snippet_datastore = "local"
 
@@ -134,7 +134,7 @@ module "vm_tailscale" {
   runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
-  disk_datastore    = "zfs"
+  disk_datastore    = "local-zfs"
   init_datastore    = "zfs"
   snippet_datastore = "local"
 

@@ -1,16 +1,14 @@
-# Full bring-up in dependency order. Idempotent — safe on a from-scratch build
-# AND an already-running cluster.
+# Disable the router-advertised DNS IPs
+- import_playbook: playbook-disable-ra-dns.yaml
 
-# 1. Pre-seed kube-vip so the control-plane VIP exists the moment k3s starts.
-#    Must come BEFORE the cluster play, because api_endpoint = VIP: the servers
-#    configure themselves to reach the VIP, so it has to be up first.
+# Configure kube-VIP before the cluster exists
 - import_playbook: playbook-kube-vip.yaml
 
-# 2. Install/upgrade the cluster (joins via the VIP; adds it to tls-san).
+# Install/upgrade the cluster
 - import_playbook: playbook-k3s.yaml
 
-# 3. Drop a local kubeconfig pointed at the VIP.
+# Fetch kubeconfig from one of the k3s nodes such that kubectl can pick it up
 - import_playbook: playbook-fetch-kubeconfig.yaml
 
-# 4. Tailscale exit node / routes.
+# Deploy the Tailscale exit node
 - import_playbook: playbook-tailscale.yaml
