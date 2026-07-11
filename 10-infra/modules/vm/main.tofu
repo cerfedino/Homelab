@@ -35,6 +35,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     enabled = true
   }
 
+  tags = [ "tofu" ]
+
   cpu {
     cores = var.cores
     type  = "host"

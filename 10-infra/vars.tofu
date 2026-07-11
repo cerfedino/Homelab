@@ -7,6 +7,11 @@ variable "proxmox" {
   sensitive = true
 }
 
+# Root of the cloned repository. Variable set by the devbox environment
+variable "REPO_ROOT" {
+    type = string
+}
+
 variable "network_lan" {
   type = object({
     cidr    = string # e.g. "192.168.1.0/24"
@@ -98,6 +103,7 @@ variable "vm_k3s" {
     memory      = number
     disk_size   = number
     dns_servers = list(string)
+    # Paths relative to REPO_ROOT
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)
   }))
@@ -133,6 +139,7 @@ variable "vm_tailscale" {
     memory      = number
     disk_size   = number
     dns_servers = list(string)
+    # Paths relative to REPO_ROOT
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)
   })

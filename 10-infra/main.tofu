@@ -108,8 +108,8 @@ module "vm_k3s" {
   snippet_datastore = "local"
 
   username = "cerfe"
-  ssh_public_key_paths    = each.value.ssh_public_key_paths
-  ssh_private_key_paths    = each.value.ssh_private_key_paths
+  ssh_public_key_paths    = [for i, v in each.value.ssh_public_key_paths : "${var.REPO_ROOT}/${v}"]
+  ssh_private_key_paths    = [for i, v in each.value.ssh_private_key_paths : "${var.REPO_ROOT}/${v}"]
 }
 
 
@@ -139,6 +139,6 @@ module "vm_tailscale" {
   snippet_datastore = "local"
 
   username = "cerfe"
-  ssh_public_key_paths    = var.vm_tailscale.ssh_public_key_paths
-  ssh_private_key_paths    = var.vm_tailscale.ssh_private_key_paths
+  ssh_public_key_paths    = [for i, v in var.vm_tailscale.ssh_public_key_paths : "${var.REPO_ROOT}/${v}"]
+  ssh_private_key_paths    = [for i, v in var.vm_tailscale.ssh_private_key_paths : "${var.REPO_ROOT}/${v}"]
 }

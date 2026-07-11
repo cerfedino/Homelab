@@ -6,7 +6,7 @@
     "execution-environment.yml": "cd $dir && ansible-builder build --tag ansible_ee",
     "playbook-*.yaml": "cd $dir && ansible-navigator run $fileName",
     // "requirements.yml": "cd $dir && ansible-galaxy install -r $fileName",
-    "main.tofu": "cd $dir && tofu validate && ./generate_stage_data.sh",
+    "main.tofu": "cd $dir && tofu validate && source generate_stage_data.sh",
 
     // Tries to toggle encryption on every yaml file in case its a k3s SOPS-encrypted secret
     "*.sops.yaml": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
