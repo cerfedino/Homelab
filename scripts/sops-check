@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-# Fail if any given secrets file is not sops-encrypted
+# Fail if any given secrets file is in cleartext (sops filestatus)
 set -euo pipefail
 
 rc=0
 for f in "$@"; do
-  if ! sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
-    echo "not encrypted: $f" >&2
+  case "${f##*/}" in
+    *.yaml | *.yml | *.yaml.* | *.yml.*) store=yaml ;;
+    *.json | *.json.*)                   store=json ;;
+    *)                                   store=binary ;;
+  esac
+  if ! sops filestatus --input-type "$store" "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
+    echo "not encrypted: $f  (fix: devbox run sops-toggle '$f')" >&2
     rc=1
   fi
 done

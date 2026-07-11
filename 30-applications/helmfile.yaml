@@ -28,7 +28,7 @@ releases:
           - -c
           - >-
             kubectl get ns cert-manager >/dev/null 2>&1 || kubectl create ns cert-manager;
-            sops -d cert-manager/cloudflare-dns-token.sops.yaml | kubectl apply -f -
+            sops -d --input-type yaml --output-type yaml cert-manager/cloudflare-dns-token.yaml.k3ssecret.enc | kubectl apply -f -
 
   - name: traefik
     namespace: traefik

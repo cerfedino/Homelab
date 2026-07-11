@@ -8,9 +8,7 @@
     // "requirements.yml": "cd $dir && ansible-galaxy install -r $fileName",
     "main.tofu": "cd $dir && tofu validate && source generate_stage_data.sh",
 
-    // Tries to toggle encryption on every yaml file in case its a k3s SOPS-encrypted secret
-    "*.sops.yaml": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
-    "*.sops.yml": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
-    "*.tfvars": "cd $workspaceRoot && devbox run tfvars-sync $fullFileName"
+    // Toggle secret files between encrypted and cleartext
+    "*.enc*": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
   }
 }

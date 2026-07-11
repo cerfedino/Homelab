@@ -1,12 +1,12 @@
-# SOPS policy to encrypt any *.sops.yaml file
+# SOPS policy
 creation_rules:
-  # k8s Secret manifests: only encrypt the secret contents
-  - path_regex: ^30-applications/.*\.sops\.ya?ml$
+    # k3s Secret
+  - path_regex: \.k3ssecret\.enc$
     encrypted_regex: ^(data|stringData)$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
-  # Everything else (e.g. ansible group_vars): fully encrypted
-  - path_regex: \.sops\.ya?ml$
+  # Any file ending with .enc, whole
+  - path_regex: \.enc$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
-  # Encrypt whole .tfvars files
-  - path_regex: \.tfvars$
+  # Same for tfvars
+  - path_regex: \.enc\.auto\.tfvars$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh

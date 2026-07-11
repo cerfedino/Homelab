@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
-# Flip each given secrets file between encrypted and plaintext.
-# Requires a file path
+# Flip secrets files (any name containing ".enc") between encrypted and cleartext, in place.
 set -euo pipefail
-[ "$#" -gt 0 ] || { echo "sops-toggle: requires a file path" >&2; exit 1; }
+[ "$#" -gt 0 ] || { echo "usage: sops-toggle FILE..." >&2; exit 1; }
 
 for f in "$@"; do
-  case "${f##*/}" in .sops.yaml|.sops.yml) echo "skip (sops config) $f"; continue ;; *.sops.tfvars) echo "skip (managed by tfvars-sync/restore) $f"; continue ;; *.sops.yaml|*.sops.yml) : ;; *) echo "skip (not a .sops file) $f"; continue ;; esac
-  if sops filestatus "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
-    echo "decrypting $f"; sops -d -i "$f"
+  name="${f##*/}"
+  case "$name" in
+    *.enc | *.enc.*) ;;
+    *) echo "skip (no .enc in name) $f"; continue ;;
+  esac
+  [ -f "$f" ] || { echo "skip (not a regular file) $f"; continue; }
+
+  case "$name" in
+    *.yaml | *.yml | *.yaml.* | *.yml.*)      type=yaml   store=yaml ;;
+    *.json | *.json.*)                        type=json   store=json ;;
+    *)                                        type=binary store=binary ;;
+  esac
+
+  if sops filestatus --input-type "$store" "$f" 2>/dev/null | grep -q '"encrypted": *true'; then
+    echo "decrypting $f"
+    sops -d -i --input-type "$store" --output-type "$type" "$f"
   else
-    echo "encrypting $f"; sops -e -i "$f"
+    echo "encrypting $f"
+    sops -e -i --input-type "$type" --output-type "$store" "$f"
   fi
 done

@@ -18,23 +18,11 @@
             ". \"$DEVBOX_PROJECT_ROOT/env.sh\""
         ],
         "scripts": {
-            "sops-encrypt": [
-                "\"$DEVBOX_PROJECT_ROOT/scripts/sops-encrypt\" \"$@\""
-            ],
-            "sops-decrypt": [
-                "\"$DEVBOX_PROJECT_ROOT/scripts/sops-decrypt\" \"$@\""
+            "sops-check": [
+                "\"$DEVBOX_PROJECT_ROOT/scripts/sops-check\" \"$@\""
             ],
             "sops-toggle": [
                 "\"$DEVBOX_PROJECT_ROOT/scripts/sops-toggle\" \"$@\""
-            ],
-            "tfvars-sync": [
-                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-sync\" \"$@\""
-            ],
-            "tfvars-restore": [
-                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-restore\""
-            ],
-            "tfvars-check": [
-                "\"$DEVBOX_PROJECT_ROOT/scripts/tfvars-check\""
             ]
         }
     }
