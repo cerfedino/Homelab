@@ -12,6 +12,12 @@ variable "REPO_ROOT" {
     type = string
 }
 
+# Tofu state/plan encryption
+variable "state_passphrase" {
+  type      = string
+  sensitive = true
+}
+
 variable "network_lan" {
   type = object({
     cidr    = string # e.g. "192.168.1.0/24"
@@ -164,4 +170,3 @@ variable "vm_tailscale" {
     error_message = "vm_tailscale.vm_id collides with a vm_k3s VM ID"
   }
 }
-
