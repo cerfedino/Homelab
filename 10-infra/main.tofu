@@ -48,7 +48,7 @@ provider "proxmox" {
   ssh {
     agent    = true
     username = "root"
-    private_key = core::file(var.proxmox.root_privkey_path)
+    private_key = core::file("${var.REPO_ROOT}/${var.proxmox.root_privkey_path}")
   }
 }
 

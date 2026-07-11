@@ -2,6 +2,7 @@ variable "proxmox" {
   type = object({
     endpoint  = string
     api_token = string # format: USER@REALM!TOKENID=SECRET
+    # Path relative to REPO_ROOT
     root_privkey_path = string
   })
   sensitive = true
