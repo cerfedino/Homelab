@@ -19,16 +19,6 @@ releases:
     values:
       - cert-manager/values.yaml.gotmpl
       - cert-manager/extras/extras.yaml.gotmpl
-    hooks:
-      # Need to apply the Cloudflare token secret, but to do so we need to create the namespace already and also decrypt it.
-      - events: ["presync"]
-        showlogs: true
-        command: bash
-        args:
-          - -c
-          - >-
-            kubectl get ns cert-manager >/dev/null 2>&1 || kubectl create ns cert-manager;
-            sops -d --input-type yaml --output-type yaml cert-manager/cloudflare-dns-token.yaml.k3ssecret.enc | kubectl apply -f -
 
   - name: traefik
     namespace: traefik

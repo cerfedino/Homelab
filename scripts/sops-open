@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Decrypt secrets in place, every .enc file in the repo, or only the given paths
+set -euo pipefail
+
+if [ "$#" -gt 0 ]; then
+  files=()
+  for a in "$@"; do files+=("$(realpath -- "$a")"); done
+  cd "$(dirname "$0")/.."
+else
+  cd "$(dirname "$0")/.."
+  mapfile -t files < <(find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
+      -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*')
+fi
+
+for f in "${files[@]}"; do
+  if scripts/sops-check "$f" >/dev/null 2>&1; then
+    scripts/sops-toggle "$f"
+  else
+    echo "already cleartext $f"
+  fi
+done

@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: sops-check
         name: Check that every .enc file is not in cleartext
-        entry: devbox run --quiet --recompute=false -- scripts/sops-check
+        entry: devbox run --quiet --recompute=false -- scripts/sops-check --staged
         language: system
         files: \.enc(\.|$)

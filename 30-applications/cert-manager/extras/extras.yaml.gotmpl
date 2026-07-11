@@ -1,5 +1,5 @@
 extraObjects:
-{{- range tuple "cluster-issuer.yaml" }}
+{{- range tuple "cluster-issuer.yaml" "cloudflare-dns-token.yaml.k3ssecret.enc" }}
   - |
 {{ tpl (readFile .) $ | nindent 4 }}
 {{- end }}

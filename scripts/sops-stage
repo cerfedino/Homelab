@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Encrypt every cleartext .enc secrets file in the repo, then force-stage them all
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# Drop any previously staged .enc entries
+git diff --cached --name-only -z -- '*.enc' '*.enc.*' |
+  while IFS= read -r -d '' f; do
+    git restore --staged -- "$f"
+    echo "unstaged $f"
+  done
+
+# Stage deletions: tracked .enc files that no longer exist on disk
+git ls-files -z -- '*.enc' '*.enc.*' |
+  while IFS= read -r -d '' f; do
+    if [ ! -f "$f" ]; then
+      git update-index --no-skip-worktree "$f" 2>/dev/null || true
+      git rm --cached --quiet -- "$f"
+      echo "staged deletion of $f"
+    fi
+  done
+
+find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
+    -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' |
+  while IFS= read -r f; do
+    # skip-worktree keeps unencrypted secrets out of git status so we can avoid making the tree unnecessarily dirty
+    git ls-files --error-unmatch "$f" >/dev/null 2>&1 && git update-index --no-skip-worktree "$f"
+    # If the file is encrypted already, stage directly
+    if scripts/sops-check "$f" >/dev/null 2>&1; then
+      git add -f "$f"
+      echo "staged $f"
+    else
+      # File is cleartext. Stage only if the cleartext version of the git index file is different
+      tmp_dir="$(mktemp -d)"
+      tmp="$tmp_dir/${f##*/}"
+
+      unchanged=0
+      if git show ":$f" > "$tmp" 2>/dev/null; then
+        if ! scripts/sops-check "$tmp" >/dev/null 2>&1; then
+          # never treat an index copy as ciphertext when it isn't
+          echo "WARNING: $f is CLEARTEXT in the index — re-staging encrypted, audit git history" >&2
+        elif scripts/sops-toggle "$tmp" >/dev/null 2>&1 && cmp -s "$tmp" "$f"; then
+          unchanged=1
+        fi
+      fi
+      if [ "$unchanged" = 1 ]; then
+        echo "unchanged $f (kept existing ciphertext)"
+      else
+        scripts/sops-toggle "$f"
+        git add -f "$f"
+        scripts/sops-toggle "$f"
+        echo "staged $f (kept decrypted in worktree)"
+      fi
+      rm -rf "$tmp_dir"
+    fi
+    git update-index --skip-worktree "$f"
+  done

@@ -4,3 +4,5 @@ kubeconfig.yaml
 # SOPS age private key
 /.sops/
 
+*.enc
+*.enc.*

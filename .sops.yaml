@@ -4,9 +4,6 @@ creation_rules:
   - path_regex: \.k3ssecret\.enc$
     encrypted_regex: ^(data|stringData)$
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
-  # Any file ending with .enc, whole
-  - path_regex: \.enc$
-    age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
-  # Same for tfvars
-  - path_regex: \.enc\.auto\.tfvars$
+  # Anything else containing .enc or .enc. whole-file encrypted
+  - path_regex: \.enc(\.|$)
     age: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
