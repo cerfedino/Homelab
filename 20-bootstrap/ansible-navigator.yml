@@ -20,6 +20,8 @@ ansible-navigator:
         - SOPS_AGE_KEY_FILE
     container-options:
       - "--userns=keep-id"
+      # --ipc=host: keep-id + host IPC can't mount /dev/mqueue
+      - "--ipc=private"
     image: ansible_ee:latest
     pull:
       policy: missing
