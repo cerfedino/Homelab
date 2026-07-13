@@ -1,6 +1,9 @@
 variable "proxmox" {
   type = object({
     endpoint  = string
+
+    # User with following Role permissions on /:
+    # VM.Config.HWType, Pool.Allocate, Sys.Modify, VM.Config.CDROM, VM.Config.Cloudinit, VM.Clone, VM.Config.Network, Sys.Console, VM.Config.Memory, VM.PowerMgmt, VM.Config.CPU, VM.Config.Disk, VM.Migrate, VM.Allocate, User.Modify, Sys.Audit, VM.Config.Options, Datastore.Allocate, VM.Audit, SDN.Use, VM.Monitor, Datastore.AllocateTemplate, Datastore.Audit, Realm.AllocateUser, Datastore.AllocateSpace, Pool.Audit
     api_token = string # format: USER@REALM!TOKENID=SECRET
     # Path relative to REPO_ROOT
     root_privkey_path = string
@@ -15,6 +18,11 @@ variable "REPO_ROOT" {
 
 # Tofu state/plan encryption
 variable "state_passphrase" {
+  type      = string
+  sensitive = true
+}
+
+variable "CSI_user_password" {
   type      = string
   sensitive = true
 }

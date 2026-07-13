@@ -10,6 +10,11 @@ variable "node_name" {
   type = string
 }
 
+variable "pool" {
+  type = string
+  default = ""
+}
+
 variable "cores" {
   type    = number
 }

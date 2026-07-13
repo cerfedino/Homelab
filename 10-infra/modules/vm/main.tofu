@@ -29,6 +29,8 @@ resource "proxmox_virtual_environment_vm" "this" {
   description = "Managed by OpenTofu"
   node_name   = var.node_name
 
+  pool_id = var.pool
+
   stop_on_destroy = true
 
   agent {

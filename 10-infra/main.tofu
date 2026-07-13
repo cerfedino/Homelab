@@ -35,6 +35,35 @@ terraform {
   }
 }
 
+
+resource "proxmox_virtual_environment_role" "CSI" {
+  role_id = "CSI"
+
+  privileges = [
+    "VM.Audit","VM.Allocate","VM.Clone","VM.Config.CPU","VM.Config.Disk","VM.Config.HWType","VM.Config.Memory","VM.Config.Options","VM.Migrate","VM.PowerMgmt","Datastore.Allocate","Datastore.AllocateSpace","Datastore.Audit"
+  ]
+}
+resource "proxmox_virtual_environment_user" "CSI" {
+  comment  = "Managed by OpenTofu"
+  password =var.CSI_user_password
+  user_id  = "CSI@pve"
+}
+
+resource "proxmox_acl" "CSI" {
+  user_id = proxmox_virtual_environment_user.CSI.user_id
+  role_id = proxmox_virtual_environment_role.CSI.role_id
+
+  path      = "/pool/${local.k3s_pool}"
+  propagate = true
+}
+
+resource "proxmox_virtual_environment_user_token" "CSI" {
+  comment    = "Kubernetes CSI - Managed by OpenTofu"
+  token_name = "CSI"
+  user_id    = proxmox_virtual_environment_user.CSI.user_id
+}
+
+
 data "http" "ubuntu_images_checksums" {
   url    = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/SHA256SUMS"
   method = "GET"
@@ -87,6 +116,8 @@ locals {
   lan_prefix      = split("/", var.network_lan.cidr)[1]
   internal_prefix = split("/", var.network_internal.cidr)[1]
 
+  k3s_pool = "k3s"
+
   # Every VM's LAN IP. Used to guarantee the kube-vip VIP doesn't collide with a VM.
   vm_lan_ips = concat(
     [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)],
@@ -106,10 +137,15 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   checksum_algorithm = "sha256"
 }
 
+resource "proxmox_virtual_environment_pool" "k3s" {
+  comment = "Managed by OpenTofu"
+  pool_id = local.k3s_pool
+}
+
 module "vm_k3s" {
   source   = "./modules/vm"
   for_each = var.vm_k3s
-  depends_on = [ proxmox_network_linux_bridge.network_internal, proxmox_network_linux_bridge.network_lan ]
+  depends_on = [ proxmox_network_linux_bridge.network_internal, proxmox_network_linux_bridge.network_lan, proxmox_virtual_environment_pool.k3s ]
 
   name      = each.value.display_name
   vm_id     = each.value.vm_id
@@ -117,6 +153,9 @@ module "vm_k3s" {
   cores     = each.value.cores
   memory    = each.value.memory
   disk_size = each.value.disk_size
+
+  pool = local.k3s_pool
+
 
   dns_servers        = each.value.dns_servers
   network_interfaces = [

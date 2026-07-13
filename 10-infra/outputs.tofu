@@ -1,4 +1,5 @@
 output "ansible_yaml_inventory" {
+  sensitive = true
   value = yamlencode({
     all = {
       children = {
@@ -27,6 +28,7 @@ output "ansible_yaml_inventory" {
                 kube_vip_cp_address  = var.kube_vip_cp_address
                 kube_vip_svc_address = var.kube_vip_svc_address
                 k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
+                csi_pvetoken = proxmox_virtual_environment_user_token.CSI.value
             }
         }
         tailscale_gw = {
