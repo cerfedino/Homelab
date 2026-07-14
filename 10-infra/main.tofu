@@ -57,7 +57,7 @@ resource "proxmox_acl" "CSI" {
   propagate = true
 }
 
-resource "proxmox_virtual_environment_user_token" "CSI" {
+resource "proxmox_user_token" "CSI" {
   comment    = "Kubernetes CSI - Managed by OpenTofu"
   token_name = "CSI"
   user_id    = proxmox_virtual_environment_user.CSI.user_id
