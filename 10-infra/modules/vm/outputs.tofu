@@ -10,6 +10,10 @@ output "username" {
   value = var.username
 }
 
+output "node_name" {
+  value = var.node_name
+}
+
 output "ipv4_addresses" {
   description = "All IPv4 addresses reported by the guest agent (one list per interface)"
   value       = proxmox_virtual_environment_vm.this.ipv4_addresses

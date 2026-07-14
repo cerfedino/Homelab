@@ -1,0 +1,29 @@
+
+config:
+  clusters:
+    - url: "{{.Values.proxmox_endpoint_internal}}/api2/json"
+      insecure: true
+      token_id: "{{.Values.csi_tokenid}}"
+      token_secret: "{{.Values.csi_tokensecret}}"
+      region: "{{.Values.proxmox_cluster_name}}"
+
+# Deploy Node CSI driver only on proxmox nodes
+node:
+  tolerations:
+    - operator: Exists
+
+# Deploy CSI controller only on control-plane nodes
+nodeSelector:
+  node-role.kubernetes.io/control-plane: "true"
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    effect: NoSchedule
+
+# Define storage classes
+# See https://pve.proxmox.com/wiki/Storage
+storageClass:
+  - name: proxmox-data-zfs
+    storage: "{{.Values.proxmox_storage_name}}"
+    reclaimPolicy: Delete
+    fstype: ext4
+    ssd: true

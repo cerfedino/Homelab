@@ -1,6 +1,7 @@
 variable "proxmox" {
   type = object({
-    endpoint  = string
+    endpoint_lan  = string
+    endpoint_internal = string
 
     # User with following Role permissions on /:
     # VM.Config.HWType, Pool.Allocate, Sys.Modify, VM.Config.CDROM, VM.Config.Cloudinit, VM.Clone, VM.Config.Network, Sys.Console, VM.Config.Memory, VM.PowerMgmt, VM.Config.CPU, VM.Config.Disk, VM.Migrate, VM.Allocate, User.Modify, Sys.Audit, VM.Config.Options, Datastore.Allocate, VM.Audit, SDN.Use, VM.Monitor, Datastore.AllocateTemplate, Datastore.Audit, Realm.AllocateUser, Datastore.AllocateSpace, Pool.Audit
@@ -20,6 +21,19 @@ variable "REPO_ROOT" {
 variable "state_passphrase" {
   type      = string
   sensitive = true
+}
+
+
+variable "proxmox_cluster_name" {
+  type      = string
+}
+
+variable "proxmox_node_name" {
+  type      = string
+}
+
+variable "proxmox_storage_name" {
+  type      = string
 }
 
 variable "CSI_user_password" {

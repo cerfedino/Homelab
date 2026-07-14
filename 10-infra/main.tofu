@@ -34,7 +34,18 @@ terraform {
     }
   }
 }
+provider proxmox {
 
+  endpoint  = var.proxmox.endpoint_lan
+  api_token = var.proxmox.api_token
+  insecure  = true
+
+  ssh {
+    agent    = true
+    username = "root"
+    private_key = core::file("${var.REPO_ROOT}/${var.proxmox.root_privkey_path}")
+  }
+}
 
 resource "proxmox_virtual_environment_role" "CSI" {
   role_id = "CSI"
@@ -69,20 +80,8 @@ data "http" "ubuntu_images_checksums" {
   method = "GET"
 }
 
-provider "proxmox" {
-  endpoint  = var.proxmox.endpoint
-  api_token = var.proxmox.api_token
-  insecure  = true
-
-  ssh {
-    agent    = true
-    username = "root"
-    private_key = core::file("${var.REPO_ROOT}/${var.proxmox.root_privkey_path}")
-  }
-}
-
 resource "proxmox_network_linux_bridge" "network_lan" {
-  node_name = "pve1"
+  node_name = var.proxmox_node_name
   name      = var.network_lan.bridge
 
   address = var.network_lan.cidr
@@ -97,7 +96,7 @@ resource "proxmox_network_linux_bridge" "network_lan" {
 }
 
 resource "proxmox_network_linux_bridge" "network_internal" {
-  node_name = "pve1"
+  node_name = var.proxmox_node_name
   name      = var.network_internal.bridge
 
   address = var.network_internal.cidr
@@ -127,7 +126,7 @@ locals {
 resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   content_type = "import"
   datastore_id = "local"
-  node_name    = "pve1"
+  node_name = var.proxmox_node_name
   depends_on = [proxmox_network_linux_bridge.network_lan]
 
   url       = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/${local.ubuntu_image_filename}.img"

@@ -9,17 +9,15 @@ output "ansible_yaml_inventory" {
                     hosts = {
                         for instance in module.vm_k3s :
                         instance.name => {
-                            vm_id: instance.vm_id
-                            
                             ansible_host = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-
-                            ansible_host_lan = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-
-                            ansible_host_internal = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
-
                             ansible_user = instance.username
-                            
                             ansible_ssh_private_key_file : instance.ssh_private_key_paths[0]
+                        
+                            vm_id = instance.vm_id
+                            proxmox_node_name = instance.node_name
+                            ip_lan = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
+                            ip_internal = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
+
                         }
                     }
                 }
@@ -29,6 +27,7 @@ output "ansible_yaml_inventory" {
                 kube_vip_svc_address = var.kube_vip_svc_address
                 k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
                 csi_pvetoken = proxmox_user_token.CSI.value
+                proxmox_cluster_name = var.proxmox_cluster_name
             }
         }
         tailscale_gw = {
@@ -94,5 +93,11 @@ output "helmfile_values" {
     kube_vip_svc_address = var.kube_vip_svc_address
     domain               = var.domain
     domain_lan           = var.domain_lan
+    proxmox_endpoint_internal = var.proxmox.endpoint_internal
+    proxmox_cluster_name = var.proxmox_cluster_name
+    proxmox_storage_name = var.proxmox_storage_name
+    csi_tokenid = proxmox_user_token.CSI.id
+    csi_tokensecret = split("=", proxmox_user_token.CSI.value)[1]
   })
+  sensitive = true
 }

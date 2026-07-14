@@ -10,12 +10,17 @@ kube_vip_retry_period: 4
 
 # Only used to FORM the cluster (joining servers reach the first server here).
 # kubectl uses the kube-vip VIP instead
-api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host_internal'] }}"
+api_endpoint: "{{ hostvars[groups['server'][0]]['ip_internal'] }}"
 
 server_config_yaml: |
   tls-san: {{ ([kube_vip_cp_address] + k3s_server_lan_ips) | to_json }}
-  node-ip: "{{ ansible_host_internal }}"        # pin etcd/kubelet to the stable internal net
+  node-ip: "{{ ip_internal }}"        # pin etcd/kubelet to the stable internal net
   flannel-iface: eth1                  # internal NIC
+  kubelet-arg:
+    - provider-id=proxmox://{{ proxmox_cluster_name }}/{{ vm_id }}
+  node-label:
+    - topology.kubernetes.io/region={{ proxmox_cluster_name }}
+    - topology.kubernetes.io/zone={{ proxmox_node_name }}
   disable:
     - traefik
     - servicelb # kube-vip owns LoadBalancer services

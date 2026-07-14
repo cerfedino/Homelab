@@ -10,6 +10,15 @@ repositories:
     url: https://charts.jetstack.io
 
 releases:
+  - name: csi-proxmox
+    namespace: csi-proxmox
+    createNamespace: true
+    chart: oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
+    version: "0.5.9"
+    wait: true
+    values:
+      - csi-proxmox/values.yaml.gotmpl
+
   - name: cert-manager
     namespace: cert-manager
     createNamespace: true
