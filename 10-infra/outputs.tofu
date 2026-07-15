@@ -93,7 +93,7 @@ output "helmfile_values" {
     kube_vip_svc_address = var.kube_vip_svc_address
     domain               = var.domain
     domain_lan           = var.domain_lan
-    proxmox_endpoint_internal = var.proxmox.endpoint_internal
+    proxmox_endpoint_internal = trimsuffix(var.proxmox.endpoint_internal, "/")
     proxmox_cluster_name = var.proxmox_cluster_name
     proxmox_storage_name = var.proxmox_storage_name
     csi_tokenid = proxmox_user_token.CSI.id

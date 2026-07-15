@@ -68,10 +68,20 @@ resource "proxmox_acl" "CSI" {
   propagate = true
 }
 
+resource "proxmox_acl" "CSI_storage" {
+  user_id = proxmox_virtual_environment_user.CSI.user_id
+  role_id = proxmox_virtual_environment_role.CSI.role_id
+
+  path      = "/storage/${var.proxmox_storage_name}"
+  propagate = true
+}
+
 resource "proxmox_user_token" "CSI" {
   comment    = "Kubernetes CSI - Managed by OpenTofu"
   token_name = "CSI"
   user_id    = proxmox_virtual_environment_user.CSI.user_id
+  # token carries the user's ACLs
+  privileges_separation = false
 }
 
 

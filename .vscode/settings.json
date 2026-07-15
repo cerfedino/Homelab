@@ -11,6 +11,9 @@
     "helmfile.yaml": "cd $dir && helmfile apply",
 
     // Toggle secret files between encrypted and cleartext
-    "*.enc*": "cd $workspaceRoot && devbox run sops-toggle $fullFileName",
+    "*.enc*": "cd $workspaceRoot && devbox run sops-toggle $fullFileName"
+  },
+  "[opentofu]": {
+    "editor.defaultFormatter": "opentofu.vscode-opentofu"
   }
 }
