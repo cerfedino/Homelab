@@ -3,6 +3,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 export TF_VAR_REPO_ROOT="$REPO_ROOT"
 
 export KUBECONFIG="$REPO_ROOT/20-bootstrap/kubeconfig.yaml"
+export KUBE_EDITOR="code --wait"
 
 export SOPS_AGE_KEY_FILE="$REPO_ROOT/.sops/keys.txt"
 

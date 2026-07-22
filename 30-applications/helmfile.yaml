@@ -8,6 +8,8 @@ repositories:
     url: https://traefik.github.io/charts
   - name: jetstack
     url: https://charts.jetstack.io
+  - name: authentik
+    url: https://charts.goauthentik.io
 
 releases:
   - name: csi-proxmox
@@ -41,3 +43,12 @@ releases:
     values:
       - traefik/values.yaml.gotmpl
       - traefik/extras/extras.yaml.gotmpl
+
+  - name: authentik
+    namespace: authentik
+    createNamespace: true
+    chart: authentik/authentik
+    version: "2026.5.5"
+    values:
+      - authentik/values.yaml.gotmpl
+      - authentik/extras/extras.yaml.gotmpl

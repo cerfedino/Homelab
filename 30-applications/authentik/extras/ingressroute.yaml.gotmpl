@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: authentik-server
+  namespace: "authentik"
+  labels:
+    app.kubernetes.io/name: "authentik"
+    app.kubernetes.io/instance: "authentik"
+    app.kubernetes.io/component: "server"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/part-of: "authentik"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`authentik.{{ .Values.domain_lan }}`)
+      kind: Rule
+      services:
+        - name: authentik-server
+          port: 80
