@@ -5,7 +5,7 @@ resource "authentik_brand" "homelab" {
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
   domain              = "authentik.${local.generated.domain_lan}"
-  default             = true
+  default             = false
   flow_authentication = authentik_flow.login.uuid
   flow_recovery       = authentik_flow.recovery.uuid
 }
@@ -29,7 +29,7 @@ resource "authentik_stage_identification" "recovery" {
 resource "authentik_stage_email" "recovery" {
   name                     = "recovery-email"
   use_global_settings      = true
-  activate_user_on_success = true
+  activate_user_on_success = false
   subject                  = "Set your password"
   template                 = "email/password_reset.html"
   token_expiry             = "minutes=30"

@@ -4,6 +4,7 @@ resource "authentik_user" "users" {
   name = each.key
   username = each.key
   email    = each.value.init_email
+  is_active = each.value.enabled
 
   lifecycle {
     ignore_changes = [name, email]
