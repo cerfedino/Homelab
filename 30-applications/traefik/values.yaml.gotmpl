@@ -5,7 +5,7 @@ service:
     kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
 
 deployment:
-  replicas: 2
+  replicas: 3
   # External dynamic traefik config
   additionalVolumes:
     - name: dynamic
@@ -46,6 +46,8 @@ ingressRoute:
     entryPoints:
       - websecure
     matchRule: Host(`traefik.{{ .Values.domain_lan }}`)
+    middlewares:
+      - name: authentik-foward-auth
 
 tlsStore:
   default:
