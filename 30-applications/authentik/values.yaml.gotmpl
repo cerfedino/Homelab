@@ -5,9 +5,19 @@ global:
     tag: 2026.5.5
 
 authentik:
-  bootstrap_email: {{ $secrets.authentik.bootstrap_email | quote }}
-  bootstrap_token: {{ $secrets.authentik.bootstrap_token | quote }}
+  bootstrap_email:    {{ $secrets.authentik.bootstrap_email | quote }}
+  bootstrap_token:    {{ $secrets.authentik.bootstrap_token | quote }}
   bootstrap_password: {{ $secrets.authentik.bootstrap_password | quote }}
+
+  
+  email:
+    from: {{ $secrets.authentik.email.from | quote }}
+    host: {{ $secrets.authentik.email.host | quote }}
+    password: {{ $secrets.authentik.email.password | quote }}
+    port: {{ $secrets.authentik.email.port }}
+    use_ssl: {{ $secrets.authentik.email.use_ssl }}
+    use_tls: {{ $secrets.authentik.email.use_tls }}
+    username: {{ $secrets.authentik.email.username }}
 
 
   log_level: "info"

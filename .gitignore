@@ -1,5 +1,9 @@
 .serena
 
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate.backup
+
 # Cluster admin credentials — never commit
 kubeconfig.yaml
 
