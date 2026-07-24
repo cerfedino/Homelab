@@ -1,8 +1,8 @@
 terraform {
   required_providers {
-    authentik = {
-      source  = "goauthentik/authentik"
-      version = "2026.5.0"
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
     }
   }
 
@@ -32,12 +32,7 @@ terraform {
   }
 }
 
-locals {
-  values    = yamldecode(file("./values.enc.yaml"))
-  generated = yamldecode(file("../infra.generated.yaml"))
-}
 
-provider "authentik" {
-  url   = "https://authentik.${local.generated.domain_lan}"
-  token = local.values.authentik.bootstrap_token
+provider "cloudflare" {
+  api_token = var.cloudflare_token
 }

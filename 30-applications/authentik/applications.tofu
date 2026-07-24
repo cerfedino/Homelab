@@ -36,11 +36,12 @@ resource "authentik_application" "apps" {
 
   group = each.value.group
   policy_engine_mode= each.value.policy_engine_mode
+  meta_hide = each.value.hidden
 
   meta_description = each.value.meta_description
   meta_publisher = each.value.meta_publisher
   meta_icon = each.value.meta_icon
-  meta_launch_url = each.value.meta_launch_url
+  meta_launch_url = each.value.external_host
 }
 
 

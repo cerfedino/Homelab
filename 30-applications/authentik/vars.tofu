@@ -22,13 +22,19 @@ variable "groups" {
 
 
 
-
+# TODO: Optional parameters make the variables hard to read
 variable "applications" {
     type = map(object({
       display_name = string
 
       type = string
+
+      # Whether to show it on the Authentik dashboard
       hidden = optional(bool, false)
+
+      # Whether it should be exposed to the open internet using Cloudflare Tunnels
+      exposed = optional(bool, false)
+
 
       allowed_users = optional(list(string), [])
       allowed_groups = optional(list(string), [])
@@ -40,7 +46,6 @@ variable "applications" {
       meta_description = string
       meta_publisher = string
       meta_icon = string
-      meta_launch_url = string
     }))
 
     validation {

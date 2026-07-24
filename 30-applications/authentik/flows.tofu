@@ -1,7 +1,7 @@
 
 
 
-resource "authentik_brand" "homelab" {
+resource "authentik_brand" "homelab_lan" {
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
   domain              = "authentik.${local.generated.domain_lan}"
@@ -10,6 +10,16 @@ resource "authentik_brand" "homelab" {
   flow_recovery       = authentik_flow.recovery.uuid
 }
 
+resource "authentik_brand" "homelab_external" {
+  branding_favicon    = "/static/dist/assets/icons/icon.png"
+  branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
+  domain              = "authentik.${local.generated.domain}"
+  default             = false
+  flow_authentication = authentik_flow.login.uuid
+  flow_recovery       = authentik_flow.recovery.uuid
+}
+
+# TODO: FInd a way to undefault the default one in favour of one branding
 
 # RECOVERY FLOW
 

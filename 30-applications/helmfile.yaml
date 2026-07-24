@@ -1,13 +1,15 @@
 environments:
   default:
     values:
-      - values.generated.yaml
+      - infra.generated.yaml
 ---
 repositories:
   - name: traefik
     url: https://traefik.github.io/charts
   - name: jetstack
     url: https://charts.jetstack.io
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
   - name: authentik
     url: https://charts.goauthentik.io
 
@@ -52,3 +54,13 @@ releases:
     values:
       - authentik/values.yaml.gotmpl
       - authentik/extras/extras.yaml.gotmpl
+
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel
+    createNamespace: true
+    chart: bedag/raw
+    version: "2.0.2"
+    wait: true
+
+    values:
+      - cloudflare-tunnel/extras/extras.yaml.gotmpl

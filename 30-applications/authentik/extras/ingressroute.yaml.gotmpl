@@ -13,7 +13,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`authentik.{{ .Values.domain_lan }}`)
+    - match: Host(`authentik.{{ .Values.domain_lan }}`) || Host(`authentik.{{ .Values.domain }}`)
       kind: Rule
       services:
         - name: authentik-server
