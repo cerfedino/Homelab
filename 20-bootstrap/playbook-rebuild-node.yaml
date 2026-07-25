@@ -1,0 +1,86 @@
+# Rebuild a dead or sick k3s server
+#
+# ansible-navigator run playbook-rebuild-node.yaml -e rebuild_node=<host>
+- name: Validate input
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Refuse bad input
+      ansible.builtin.assert:
+        that:
+          - rebuild_node is defined
+          - rebuild_node in groups['server']
+        fail_msg: "rebuild_node must name a host in the server group"
+
+- name: Evict the dead node from the cluster
+  hosts: "{{ rebuild_node }}"
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Set helper_node
+      ansible.builtin.set_fact:
+        helper_node: "{{ groups['server'] | difference([rebuild_node]) | first }}"
+
+    - name: Show the plan
+      ansible.builtin.debug:
+        msg: "rebuilding {{ rebuild_node }}, cluster operations via {{ helper_node }}"
+
+    - name: Drain the node in case its still alive
+      ansible.builtin.command: >-
+        k3s kubectl drain {{ rebuild_node }}
+        --ignore-daemonsets --delete-emptydir-data --force --timeout=90s
+      delegate_to: "{{ helper_node }}"
+      become: true
+      failed_when: false
+      changed_when: false
+
+    - name: Remove the node from the cluster
+      ansible.builtin.command: k3s kubectl delete node {{ rebuild_node }} --ignore-not-found
+      delegate_to: "{{ helper_node }}"
+      become: true
+
+# Wipe k3s on the node in case its already present
+- name: Wipe stale k3s state on the rebuilt node
+  hosts: "{{ rebuild_node }}"
+  become: true
+  tasks:
+    - name: Check for an existing k3s install
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_bin
+
+    - name: Stop k3s and wipe stale etcd state
+      when: k3s_bin.stat.exists
+      block:
+        - name: Stop k3s
+          ansible.builtin.systemd_service:
+            name: k3s
+            state: stopped
+        - name: Remove stale etcd db
+          ansible.builtin.file:
+            path: /var/lib/rancher/k3s/server/db
+            state: absent
+
+- name: OS prep
+  ansible.builtin.import_playbook: playbook-disable-ra-dns.yaml
+
+- name: Kube-vip manifests
+  ansible.builtin.import_playbook: playbook-kube-vip.yaml
+
+- name: Join via the creation playbook
+  ansible.builtin.import_playbook: playbook-k3s.yaml
+
+- name: Verify the node rejoined
+  hosts: "{{ rebuild_node }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for the node to join Ready
+      ansible.builtin.command: >-
+        k3s kubectl wait --for=condition=Ready node/{{ rebuild_node }} --timeout=15s
+      delegate_to: "{{ hostvars[rebuild_node]['helper_node'] }}"
+      register: wait_ready
+      until: wait_ready.rc == 0
+      retries: 24
+      delay: 5
+      changed_when: false

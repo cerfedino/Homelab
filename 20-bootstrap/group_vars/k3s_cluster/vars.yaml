@@ -8,8 +8,8 @@ kube_vip_lease_duration: 30
 kube_vip_renew_deadline: 20
 kube_vip_retry_period: 4
 
-# Only used to FORM the cluster (joining servers reach the first server here).
-# kubectl uses the kube-vip VIP instead
+# Only used to FORM/JOIN the cluster (joining servers reach the init server here).
+# kubectl uses the kube-vip VIP instead.
 api_endpoint: "{{ hostvars[groups['server'][0]]['ip_internal'] }}"
 
 server_config_yaml: |
@@ -25,6 +25,10 @@ server_config_yaml: |
     - traefik
     - servicelb # kube-vip owns LoadBalancer services
     - local-storage # csi-proxmox will be the default pvc
+  {% if rebuild_node is defined and inventory_hostname == rebuild_node %}
+  {# rebuild: this node is supposed to REJOIN the cluster through the IP of a survivor #}
+  server: https://{{ hostvars[groups['server'] | difference([rebuild_node]) | first]['ip_internal'] }}:6443
+  {% endif %}
 
 # # Optional vars
 # extra_server_args: ""
