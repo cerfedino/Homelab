@@ -33,6 +33,15 @@ releases:
       - cert-manager/values.yaml.gotmpl
       - cert-manager/extras/extras.yaml.gotmpl
 
+  - name: cert-manager-issuers
+    namespace: cert-manager
+    createNamespace: true
+    chart: bedag/raw
+    version: "2.0.2"
+    wait: true
+    values:
+      - cert-manager-issuers/extras/extras.yaml.gotmpl
+
   - name: traefik
     namespace: traefik
     createNamespace: true

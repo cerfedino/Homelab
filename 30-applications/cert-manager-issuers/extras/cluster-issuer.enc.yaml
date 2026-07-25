@@ -1,0 +1,31 @@
+apiVersion: ENC[AES256_GCM,data:727/J/2Xx9PmXGPCRMle8srl,iv:VGY2ajPaWUQ967zR5eUtbRecfpH9iPdnmiCCErIT+0s=,tag:KMevclEcpaeYpk/0Tiyl4g==,type:str]
+kind: ENC[AES256_GCM,data:F9te4SkNqbEn/4tRxQ==,iv:C+cG6jAwZdyxktTiJOI8/VSotfHe+61o9Q3j3rnwAbA=,tag:X3KPjxwwBmbsAEecG9etqA==,type:str]
+metadata:
+    name: ENC[AES256_GCM,data:kpzj4MGtwyfxO4c=,iv:Ptub83O9OPmjFR7rqKODeS2j6vjO+HREFwzpQLNLaL4=,tag:6sv6HR7/ehdYlrGDJlNutg==,type:str]
+spec:
+    acme:
+        email: ENC[AES256_GCM,data:Hlxd5CfnBR6ATnpDmS2UQtOChl6VNujr,iv:p2EBrwgKwjM2T/zSgH5CynafAe8rWUAEcTEtxhPwR+s=,tag:BoDDsakpU3AH6rwUAcHFlQ==,type:str]
+        server: ENC[AES256_GCM,data:5BuqM0EcpiHV8zEc6dtQMHLj4K96uQ6NJOS4dbYk0+5pjAqU589ZylcQQcg9FA==,iv:rmS+l3IMgnFgo0lehL8PE1Kg2CNiVGVOBfMVWcG5Oq4=,tag:ot9lh3bVxsfoObrSbCVC5Q==,type:str]
+        privateKeySecretRef:
+            name: ENC[AES256_GCM,data:UbKkTiqlIoQmQYFo/0OucPqusHwM0H0=,iv:eRaFWB2TiE2CoGsEVT9HI+FfH1Tq6hhEbe+S5ni37gQ=,tag:M3H9RdSFIArTBKpDr9mMGg==,type:str]
+        solvers:
+            - dns01:
+                cloudflare:
+                    apiTokenSecretRef:
+                        name: ENC[AES256_GCM,data:dYLbsCGHhUQ1sRFeYH4TQfSU8rk=,iv:hLYAixitMIUcWSber2PA+iaD3j5mwYNuVG0D3sSMnIc=,tag:j91R4bJe4WQ+z6CFikhe1A==,type:str]
+                        key: ENC[AES256_GCM,data:EocsSoo=,iv:TXEd+erg/JKv9RjtxS4ep1PirTsGqVTJdmD1W6TwwjY=,tag:Rc5Xt9b0Hhee1AEanEJIuQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBmcldBdnZTSGwrb003L0lr
+            U3JwUjRBNDJ1RkdHbkxuQWhvcDNrNDlFUkdVClZsR3oxM1JjYlFUNnpoa1crL3BM
+            UktnVE82S1hmZXVnUEtpMzJVRVlvcEUKLS0tIGtIc2wzZGxHS2cyS2tHYUpWQ1ZK
+            VlJpa25yUThxeUV4N2k3cU9KVDR6dVkKmZK/iPOsbEej6nkuouYdCas5FVoXS5by
+            krwQRINVcheWeh4AQnCYjVFNC158ISLsfcuQ8iXLq2UnbAuyIW5cwg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-07-25T12:49:29Z"
+    mac: ENC[AES256_GCM,data:BCvOtMyHixMHFl3hv5M2T0MRIA8ZB9UuAVVrBUy0+qKE5nHlMCXKB4Jzrb/vbtbcTjKX/jUkniVCOHlctl7d7EzEzxlepIHInFhsJCFraiAHVlEcfhiqSOzAo0T4lWYR7Iz/sNIBLDjox7+cl13NWMoenkupCHAuOG063WDovM0=,iv:DSBedVXBAf9hLY0kQPj0nKSbtwX3XjWQNMmgDyHK3tw=,tag:Es9eJq6G5zuNzSLQeU7gBA==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.1
