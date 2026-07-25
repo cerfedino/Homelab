@@ -1,0 +1,17 @@
+global:
+  image:
+    tag: 2026.5.5
+
+authentik:
+  log_level: "info"
+
+  # This sends anonymous usage-data, stack traces on errors and performance data to authentik.error-reporting.a7k.io, and is fully opt-in
+  error_reporting:
+    enabled: false
+
+server:
+  ingress:
+    enabled: false
+
+postgresql:
+  enabled: true
