@@ -1,22 +1,13 @@
-apply: helmfile-apply configure
+.NOTPARALLEL:
 
-configure: tofu-apply artifacts
-
+apply: helmfile-apply tofu-apply artifacts
 
 helmfile-apply:
 	cd ..; helmfile apply -l name=authentik
-tofu-apply: helmfile-apply
+
+tofu-apply:
 	tofu init; tofu apply
 
-
-
-
-
-
-artifacts: generated/generated.exposed-apps.yaml
-
-generated/generated.exposed-apps.yaml: generated/
-	tofu output -show-sensitive -raw helm_exposed_apps > $@
-
-generated/:
+artifacts:
 	mkdir -p generated
+	tofu output -show-sensitive -raw helm_exposed_apps > generated/generated.exposed-apps.yaml
