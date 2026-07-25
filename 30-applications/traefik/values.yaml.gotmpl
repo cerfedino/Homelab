@@ -47,7 +47,7 @@ ingressRoute:
       - websecure
     matchRule: Host(`traefik.{{ .Values.domain_lan }}`)
     middlewares:
-      - name: authentik-forward-auth-local
+      - name: authentik-forward-auth-local@file
 
 tlsStore:
   default:
