@@ -3,7 +3,6 @@
 - name: Deploy kube-vip for Control Plan and Service
   hosts: server
   become: true
-  run_once: true
   tasks:
     - name: Detect the LAN interface (the one carrying the default route)
       ansible.builtin.set_fact:
