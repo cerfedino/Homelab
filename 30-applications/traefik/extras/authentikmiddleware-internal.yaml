@@ -1,7 +1,7 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: authentik-foward-auth
+  name: authentik-forward-auth-local
 spec:
   forwardAuth:
     # This address should point to the cluster endpoint provided by the kubernetes service, not the Ingress.

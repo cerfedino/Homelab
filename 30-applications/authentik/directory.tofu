@@ -8,6 +8,7 @@ resource "authentik_user" "users" {
 
   lifecycle {
     ignore_changes = [name, email]
+    prevent_destroy = true
   }
 }
 

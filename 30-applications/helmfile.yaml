@@ -51,6 +51,7 @@ releases:
     createNamespace: true
     chart: authentik/authentik
     version: "2026.5.5"
+    wait: true
     values:
       - authentik/values.yaml.gotmpl
       - authentik/extras/extras.yaml.gotmpl
