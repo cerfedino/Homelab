@@ -27,6 +27,7 @@ server_config_yaml: |
     - local-storage # csi-proxmox will be the default pvc
   {% if rebuild_node is defined and inventory_hostname == rebuild_node %}
   {# rebuild: this node is supposed to REJOIN the cluster through the IP of a survivor #}
+  cluster-init: false
   server: https://{{ hostvars[groups['server'] | difference([rebuild_node]) | first]['ip_internal'] }}:6443
   {% endif %}
 
