@@ -60,7 +60,8 @@ releases:
     version: "2026.5.5"
     wait: true
     values:
-      - authentik/values.yaml.gotmpl
+      - authentik/values.yaml
+      - authentik/values.enc.yaml
       - authentik/extras/extras.yaml.gotmpl
 
   - name: cloudflare-tunnel
