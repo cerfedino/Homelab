@@ -26,7 +26,6 @@ output "ansible_yaml_inventory" {
                 kube_vip_cp_address  = var.kube_vip_cp_address
                 kube_vip_svc_address = var.kube_vip_svc_address
                 k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
-                csi_pvetoken = proxmox_user_token.CSI.value
                 proxmox_cluster_name = var.proxmox_cluster_name
             }
         }
@@ -97,7 +96,7 @@ output "helmfile_values" {
     proxmox_cluster_name = var.proxmox_cluster_name
     proxmox_storage_name = var.proxmox_storage_name
     csi_tokenid = proxmox_user_token.CSI.id
-    csi_tokensecret = split("=", proxmox_user_token.CSI.value)[1]
+    csi_tokensecret = trimprefix(proxmox_user_token.CSI.value, "${proxmox_user_token.CSI.id}=")
   })
   sensitive = true
 }
