@@ -34,7 +34,7 @@ terraform {
 
 locals {
   values    = yamldecode(file("./values.enc.yaml"))
-  generated = yamldecode(file("../infra.generated.yaml"))
+  generated = yamldecode(file("../../10-infra/generated/generated.infra.yaml"))
 }
 
 provider "authentik" {

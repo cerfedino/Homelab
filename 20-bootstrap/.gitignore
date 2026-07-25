@@ -3,5 +3,3 @@ context/
 .ssh
 ansible-navigator.log
 *-artifact-*.json
-
-inventory.yaml

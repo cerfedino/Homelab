@@ -1,4 +1,4 @@
-output "helm_cloudflare_proxies" {
+output "helm_exposed_apps" {
   sensitive = true
   value = yamlencode({
     endpoints = [

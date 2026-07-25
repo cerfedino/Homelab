@@ -1,5 +1,5 @@
 locals {
-  proxies = yamldecode(file("./proxies.generated.yaml"))
+  proxies = yamldecode(file("../authentik/generated/generated.exposed-apps.yaml"))
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "homelab" {

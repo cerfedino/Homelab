@@ -1,7 +1,7 @@
 environments:
   default:
     values:
-      - infra.generated.yaml
+      - ../10-infra/generated/generated.infra.yaml
 ---
 repositories:
   - name: traefik
@@ -40,8 +40,6 @@ releases:
     version: "41.0.1"
     wait: true
     disableValidation: true
-    needs:
-      - cert-manager/cert-manager
     values:
       - traefik/values.yaml.gotmpl
       - traefik/extras/extras.yaml.gotmpl
@@ -62,6 +60,5 @@ releases:
     chart: bedag/raw
     version: "2.0.2"
     wait: true
-
     values:
       - cloudflare-tunnel/extras/extras.yaml.gotmpl

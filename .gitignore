@@ -12,3 +12,6 @@ kubeconfig.yaml
 
 *.enc
 *.enc.*
+
+
+generated.*
