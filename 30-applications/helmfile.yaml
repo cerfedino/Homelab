@@ -18,7 +18,7 @@ releases:
     namespace: csi-proxmox
     createNamespace: true
     chart: oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
-    version: "0.5.9"
+    version: "~0.5"
     wait: true
     values:
       - csi-proxmox/values.yaml.gotmpl
@@ -27,7 +27,7 @@ releases:
     namespace: cert-manager
     createNamespace: true
     chart: jetstack/cert-manager
-    version: "v1.20.3"
+    version: "~1.20"
     wait: true
     values:
       - cert-manager/values.yaml.gotmpl
@@ -37,7 +37,7 @@ releases:
     namespace: cert-manager
     createNamespace: true
     chart: bedag/raw
-    version: "2.0.2"
+    version: "~2.0"
     wait: true
     values:
       - cert-manager-issuers/extras/extras.yaml.gotmpl
@@ -46,7 +46,7 @@ releases:
     namespace: traefik
     createNamespace: true
     chart: traefik/traefik
-    version: "41.0.1"
+    version: "~41.0"
     wait: true
     disableValidation: true
     values:
@@ -57,7 +57,7 @@ releases:
     namespace: authentik
     createNamespace: true
     chart: authentik/authentik
-    version: "2026.5.5"
+    version: "~2026.5"
     wait: true
     values:
       - authentik/values.yaml
@@ -68,7 +68,7 @@ releases:
     namespace: cloudflare-tunnel
     createNamespace: true
     chart: bedag/raw
-    version: "2.0.2"
+    version: "~2.0"
     wait: true
     values:
       - cloudflare-tunnel/extras/extras.yaml.gotmpl

@@ -1,7 +1,3 @@
-global:
-  image:
-    tag: 2026.5.5
-
 authentik:
   log_level: "info"
 
