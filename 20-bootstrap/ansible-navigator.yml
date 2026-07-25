@@ -3,7 +3,8 @@ ansible-navigator:
   ansible:
     inventory:
       entries:
-        - generated.inventory.yaml
+        - ../10-infra/generated/generated.inventory.yaml
+        - inventory-anchor.yaml
     config:
       path: ansible.cfg
   execution-environment:
@@ -12,12 +13,6 @@ ansible-navigator:
       - src: "${PWD}/../10-infra/keys"
         dest: "${PWD}/../10-infra/keys"
         options: "ro"
-      - src: "${PWD}/../.sops"
-        dest: "${PWD}/../.sops"
-        options: "ro"
-    environment-variables:
-      pass:
-        - SOPS_AGE_KEY_FILE
     container-options:
       - "--userns=keep-id"
       # --ipc=host: keep-id + host IPC can't mount /dev/mqueue
