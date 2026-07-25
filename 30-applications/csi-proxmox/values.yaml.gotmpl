@@ -24,6 +24,8 @@ tolerations:
 storageClass:
   - name: proxmox-data-zfs
     storage: "{{.Values.proxmox_storage_name}}"
-    reclaimPolicy: Delete
+    reclaimPolicy: Retain
     fstype: ext4
     ssd: true
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"

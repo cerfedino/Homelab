@@ -24,6 +24,7 @@ server_config_yaml: |
   disable:
     - traefik
     - servicelb # kube-vip owns LoadBalancer services
+    - local-storage # csi-proxmox will be the default pvc
 
 # # Optional vars
 # extra_server_args: ""
