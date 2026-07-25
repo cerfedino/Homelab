@@ -35,6 +35,9 @@
             ],
             "sops-open": [
                 "\"$DEVBOX_PROJECT_ROOT/scripts/sops-open\" \"$@\""
+            ],
+            "sops-seal": [
+                "\"$DEVBOX_PROJECT_ROOT/scripts/sops-seal\" \"$@\""
             ]
         }
     }
