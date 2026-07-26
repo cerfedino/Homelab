@@ -106,4 +106,8 @@ resource "proxmox_virtual_environment_vm" "this" {
   operating_system {
     type = "l26"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
