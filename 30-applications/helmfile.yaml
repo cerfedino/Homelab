@@ -54,6 +54,15 @@ releases:
       - traefik/values.yaml.gotmpl
       - traefik/extras/extras.yaml.gotmpl
 
+  - name: kuma
+    namespace: kuma
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - kuma/extras/extras.yaml.gotmpl
+
   - name: authentik
     namespace: authentik
     createNamespace: true

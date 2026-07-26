@@ -47,16 +47,13 @@ resource "authentik_outpost" "embedded" {
 locals {
     applications = yamldecode(file("../app-registry/generated/generated.applications.yaml"))
 
-    # Inject into each app whether its external or internal
-    app_variants = {
+    fwauth_variants = {
         for k, app in local.applications : k => merge(app, {
             variant = endswith(k, "_external") ? "external" : "internal"
-        })
+        }) if app.type == "forward-auth" && app.dns_hostname != null
     }
-
-    proxy_variants      = {for k, v in local.app_variants : k => v if v.type == "forward-auth" && v.dns_hostname != null}
-    proxy_apps_local    = {for k, v in local.proxy_variants : k => v if v.variant == "internal"}
-    proxy_apps_external = {for k, v in local.proxy_variants : k => v if v.variant == "external"}
+    proxy_apps_local    = {for k, v in local.fwauth_variants : k => v if v.variant == "internal"}
+    proxy_apps_external = {for k, v in local.fwauth_variants : k => v if v.variant == "external"}
 }
 
 data "authentik_flow" "default-authorization-flow" {
@@ -67,7 +64,7 @@ data "authentik_flow" "default-invalidation-flow" {
 }
 
 resource "authentik_provider_proxy" "proxies" {
-  for_each = local.proxy_variants
+  for_each = local.fwauth_variants
   mode               = "forward_single"
   name               = each.key
   external_host      = "https://${each.value.dns_hostname}"

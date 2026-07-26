@@ -12,6 +12,3 @@ variable "groups" {
       users = list(string)
     }))
 }
-
-
-
