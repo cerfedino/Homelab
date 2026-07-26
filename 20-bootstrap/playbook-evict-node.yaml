@@ -1,0 +1,43 @@
+# Make a k3s server leave the cluster.
+#
+# ansible-navigator run playbook-evict-node.yaml -e node=<host>
+#
+# The cluster record is deleted through a survivor.
+
+- name: Validate input
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Refuse bad input
+      ansible.builtin.assert:
+        that:
+          - node is defined
+          - node in groups['server']
+        fail_msg: "node must name a host in the server group"
+
+- name: Evict the node from the cluster
+  hosts: "{{ node }}"
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Set helper_node
+      ansible.builtin.set_fact:
+        helper_node: "{{ groups['server'] | difference([node]) | first }}"
+
+    - name: Show the plan
+      ansible.builtin.debug:
+        msg: "evicting {{ node }}, cluster operations via {{ helper_node }}"
+
+    - name: Drain the node in case its still alive
+      ansible.builtin.command: >-
+        k3s kubectl drain {{ node }}
+        --ignore-daemonsets --delete-emptydir-data --force --timeout=90s
+      delegate_to: "{{ helper_node }}"
+      become: true
+      failed_when: false
+      changed_when: false
+
+    - name: Remove the node from the cluster
+      ansible.builtin.command: k3s kubectl delete node {{ node }} --ignore-not-found
+      delegate_to: "{{ helper_node }}"
+      become: true
