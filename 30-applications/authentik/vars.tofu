@@ -1,11 +1,4 @@
 
-
-variable "state_passphrase" {
-  type = string
-}
-
-
-
 variable "users" {
     type = map(object({
       init_email = string

@@ -1,7 +1,3 @@
-variable "state_passphrase" {
-    type = string
-    sensitive = true
-}
 
 variable "tunnel_secret" {
     type = string
