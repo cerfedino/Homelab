@@ -36,6 +36,23 @@ variable "proxmox_storage_name" {
   type      = string
 }
 
+variable "proxmox_pool_name" {
+  type      = string
+}
+
+variable "proxmox_datastores" {
+  type = object({
+    disk    = string # VM root disks
+    init    = string # cloud-init drives
+    snippet = string # cloud-init user-data snippets
+  })
+}
+
+# Operator account cloud-init creates on every VM
+variable "vm_username" {
+  type      = string
+}
+
 variable "CSI_user_password" {
   type      = string
   sensitive = true
@@ -128,8 +145,8 @@ variable "vm_k3s" {
     display_name = string
     node_name    = string
     cores       = number
-    pool = optional(string)
     memory      = number
+    ballooning  = optional(bool, false)
     disk_size   = number
     dns_servers = list(string)
     # Paths relative to REPO_ROOT
@@ -164,8 +181,8 @@ variable "vm_tailscale" {
     display_name = string
     node_name    = string
     cores       = number
-    pool = optional(string)
     memory      = number
+    ballooning  = optional(bool, false)
     disk_size   = number
     dns_servers = list(string)
     # Paths relative to REPO_ROOT

@@ -64,7 +64,7 @@ resource "proxmox_acl" "CSI" {
   user_id = proxmox_virtual_environment_user.CSI.user_id
   role_id = proxmox_virtual_environment_role.CSI.role_id
 
-  path      = "/pool/${local.k3s_pool}"
+  path      = "/pool/${var.proxmox_pool_name}"
   propagate = true
 }
 
@@ -125,8 +125,6 @@ locals {
   lan_prefix      = split("/", var.network_lan.cidr)[1]
   internal_prefix = split("/", var.network_internal.cidr)[1]
 
-  k3s_pool = "k3s"
-
   # Every VM's LAN IP. Used to guarantee the kube-vip VIP doesn't collide with a VM.
   vm_lan_ips = concat(
     [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)],
@@ -148,7 +146,7 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
 
 resource "proxmox_virtual_environment_pool" "k3s" {
   comment = "Managed by OpenTofu"
-  pool_id = local.k3s_pool
+  pool_id = var.proxmox_pool_name
 }
 
 module "vm_k3s" {
@@ -162,8 +160,9 @@ module "vm_k3s" {
   cores     = each.value.cores
   memory    = each.value.memory
   disk_size = each.value.disk_size
+  ballooning = each.value.ballooning
 
-  pool = local.k3s_pool
+  pool = var.proxmox_pool_name
 
 
   dns_servers        = each.value.dns_servers
@@ -175,11 +174,11 @@ module "vm_k3s" {
   runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
-  disk_datastore    = "local-zfs"
-  init_datastore    = "zfs"
-  snippet_datastore = "local"
+  disk_datastore    = var.proxmox_datastores.disk
+  init_datastore    = var.proxmox_datastores.init
+  snippet_datastore = var.proxmox_datastores.snippet
 
-  username = "cerfe"
+  username = var.vm_username
   ssh_public_key_paths    = [for i, v in each.value.ssh_public_key_paths : "${var.REPO_ROOT}/${v}"]
   ssh_private_key_paths    = [for i, v in each.value.ssh_private_key_paths : "${var.REPO_ROOT}/${v}"]
 }
@@ -195,6 +194,7 @@ module "vm_tailscale" {
   cores     = var.vm_tailscale.cores
   memory    = var.vm_tailscale.memory
   disk_size = var.vm_tailscale.disk_size
+  ballooning = var.vm_tailscale.ballooning
 
   dns_servers        = var.vm_tailscale.dns_servers
   network_interfaces = [
@@ -206,11 +206,11 @@ module "vm_tailscale" {
   runcmd =  ["systemctl enable --now qemu-guest-agent"]
 
   image_file_id     = proxmox_download_file.ubuntu_resolute_cloudinit.id
-  disk_datastore    = "local-zfs"
-  init_datastore    = "zfs"
-  snippet_datastore = "local"
+  disk_datastore    = var.proxmox_datastores.disk
+  init_datastore    = var.proxmox_datastores.init
+  snippet_datastore = var.proxmox_datastores.snippet
 
-  username = "cerfe"
+  username = var.vm_username
   ssh_public_key_paths    = [for i, v in var.vm_tailscale.ssh_public_key_paths : "${var.REPO_ROOT}/${v}"]
   ssh_private_key_paths    = [for i, v in var.vm_tailscale.ssh_private_key_paths : "${var.REPO_ROOT}/${v}"]
 }

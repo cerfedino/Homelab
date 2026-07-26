@@ -23,6 +23,11 @@ variable "memory" {
   type    = number
 }
 
+variable "ballooning" {
+  type    = bool
+  default = false
+}
+
 variable "image_file_id" {
   type = string
 }

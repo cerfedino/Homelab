@@ -46,6 +46,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   memory {
     dedicated = var.memory
+    floating  = var.ballooning ? var.memory : 0
   }
 
   disk {
