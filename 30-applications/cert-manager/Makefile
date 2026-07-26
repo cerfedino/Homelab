@@ -1,5 +1,5 @@
 apply: helmfile-apply
 
 helmfile-apply:
-	cd ..; helmfile apply -l name=cert-manager
-	cd ..; helmfile apply -l name=cert-manager-issuers
+	cd ..; helmfile apply --skip-refresh -l name=cert-manager
+	cd ..; helmfile apply --skip-refresh -l name=cert-manager-issuers

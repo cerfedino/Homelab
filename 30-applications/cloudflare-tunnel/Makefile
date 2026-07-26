@@ -10,4 +10,4 @@ artifacts:
 	tofu output -show-sensitive -raw helm_cloudflare_tunnel_token > generated/generated.cloudflare-tunnel-token.yaml
 
 helmfile-apply:
-	cd ..; helmfile apply -l name=cloudflare-tunnel
+	cd ..; helmfile apply --skip-refresh -l name=cloudflare-tunnel

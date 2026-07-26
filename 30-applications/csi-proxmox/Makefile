@@ -1,4 +1,4 @@
 apply: helmfile-apply
 
 helmfile-apply:
-	cd ..; helmfile apply -l name=csi-proxmox
+	cd ..; helmfile apply --skip-refresh -l name=csi-proxmox
