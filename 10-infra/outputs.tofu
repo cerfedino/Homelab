@@ -7,16 +7,16 @@ output "ansible_yaml_inventory" {
             children = {
                 server = {
                     hosts = {
-                        for instance in module.vm_k3s :
-                        instance.name => {
-                            ansible_host = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-                            ansible_user = instance.username
-                            ansible_ssh_private_key_file : instance.ssh_private_key_paths[0]
-                        
-                            vm_id = instance.vm_id
-                            proxmox_node_name = instance.node_name
-                            ip_lan = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-                            ip_internal = split("/", [for ni in instance.network_interfaces : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
+                        for k, v in var.vm_k3s :
+                        proxmox_virtual_environment_vm.this[k].name => {
+                            ansible_host = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
+                            ansible_user = var.vm_username
+                            ansible_ssh_private_key_file : "${var.REPO_ROOT}/${v.ssh_private_key_paths[0]}"
+
+                            vm_id = proxmox_virtual_environment_vm.this[k].vm_id
+                            proxmox_node_name = v.node_name
+                            ip_lan = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
+                            ip_internal = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
 
                         }
                     }
@@ -31,19 +31,19 @@ output "ansible_yaml_inventory" {
         }
         tailscale_gw = {
           hosts = {
-            (module.vm_tailscale.name) = {
-              vm_id:  module.vm_tailscale.vm_id
-              
-              ansible_host = split("/", [for ni in module.vm_tailscale.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
+            (proxmox_virtual_environment_vm.this["tailscale"].name) = {
+              vm_id:  proxmox_virtual_environment_vm.this["tailscale"].vm_id
+
+              ansible_host = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
 
 
-              ansible_host_lan = split("/", [for ni in module.vm_tailscale.network_interfaces : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-              
-              ansible_host_internal = split("/", [for ni in module.vm_tailscale.network_interfaces : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
+              ansible_host_lan = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
 
-              ansible_user = module.vm_tailscale.username
-              
-              ansible_ssh_private_key_file : module.vm_tailscale.ssh_private_key_paths[0]
+              ansible_host_internal = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
+
+              ansible_user = var.vm_username
+
+              ansible_ssh_private_key_file : "${var.REPO_ROOT}/${var.vm_tailscale.ssh_private_key_paths[0]}"
             }
           }
         }
