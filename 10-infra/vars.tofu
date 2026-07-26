@@ -17,13 +17,6 @@ variable "REPO_ROOT" {
     type = string
 }
 
-# Tofu state/plan encryption
-variable "state_passphrase" {
-  type      = string
-  sensitive = true
-}
-
-
 variable "proxmox_cluster_name" {
   type      = string
 }
