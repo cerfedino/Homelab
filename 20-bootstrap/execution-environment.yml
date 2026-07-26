@@ -7,9 +7,6 @@ images:
 additional_build_steps:
   prepend_galaxy:
     - RUN dnf install -y git
-  append_final:
-    # needed by the community.sops vars plugin
-    - RUN curl -fsSLo /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v3.13.1/sops-v3.13.1.linux.amd64 && chmod +x /usr/local/bin/sops
 
 dependencies:
   python_interpreter:
@@ -24,8 +21,6 @@ dependencies:
     - sshpass
   galaxy:
     collections:
-      # - name: community.postgresql
-      - name: community.sops
       - name: artis3n.tailscale
       - name: https://github.com/k3s-io/k3s-ansible.git
         type: git
