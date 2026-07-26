@@ -45,7 +45,7 @@ ingressRoute:
     enabled: true
     entryPoints:
       - websecure
-    matchRule: Host(`traefik.{{ .Values.domain_lan }}`)
+    matchRule: Host(`{{ .Values.apps.traefik.internal.dns_hostname }}`)
     middlewares:
       - name: authentik-forward-auth-local@file
 

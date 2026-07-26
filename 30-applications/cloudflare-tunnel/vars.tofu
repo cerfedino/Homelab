@@ -10,11 +10,6 @@ variable "tunnel_secret" {
 
 
 # Cloudflare variables
-variable "cloudflare_zone" {
-  description = "Domain used to expose the GCP VM instance to the Internet"
-  type        = string
-}
-
 variable "cloudflare_zone_id" {
   description = "Zone ID for your domain"
   type        = string

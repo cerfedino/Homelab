@@ -2,6 +2,7 @@ environments:
   default:
     values:
       - ../10-infra/generated/generated.infra.yaml
+      - app-registry/generated/generated.apps-summary.yaml
 ---
 repositories:
   - name: traefik

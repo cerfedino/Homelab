@@ -1,5 +1,6 @@
 locals {
-  proxies = yamldecode(file("../authentik/generated/generated.exposed-apps.yaml"))
+  apps    = yamldecode(file("../app-registry/generated/generated.apps-summary.yaml")).apps
+  exposed = {for k, app in local.apps : k => app.external.dns_hostname if can(app.external.dns_hostname)}
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "homelab" {
@@ -14,11 +15,11 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homelab" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.homelab.id
   config = {
     ingress = concat(
-      [for k, ep in local.proxies.endpoints : {
-        hostname = ep
+      [for k, hostname in local.exposed : {
+        hostname = hostname
         service  = "https://traefik.traefik.svc.cluster.local:443"
         origin_request = {
-          origin_server_name = ep
+          origin_server_name = hostname
         }
       }],
       [{ service = "http_status:404" }] # mandatory catch-all, must be last
@@ -32,7 +33,7 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "homelab" {
 }
 
 resource "cloudflare_dns_record" "apps" {
-  for_each = toset(local.proxies.endpoints)
+  for_each = local.exposed
   zone_id  = var.cloudflare_zone_id
   name     = each.value
   type     = "CNAME"
