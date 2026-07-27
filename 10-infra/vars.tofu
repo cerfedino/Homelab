@@ -106,6 +106,46 @@ variable "domain_lan" {
   type = string # e.g. "lan.example.com"
 }
 
+variable "dnsmasq_upstream_servers" {
+  type = list(string)
+
+  validation {
+    condition     = length(var.dnsmasq_upstream_servers) > 0
+    error_message = "dnsmasq_upstream_servers must contain at least one DNS server."
+  }
+
+  validation {
+    condition = alltrue([
+      for server in var.dnsmasq_upstream_servers :
+      can(cidrhost("${server}/32", 0)) || can(cidrhost("${server}/128", 0))
+    ])
+    error_message = "dnsmasq_upstream_servers entries must be IP addresses."
+  }
+}
+
+variable "dnsmasq_address_entries" {
+  type = list(object({
+    domain  = string
+    address = string
+  }))
+
+  validation {
+    condition = alltrue([
+      for entry in var.dnsmasq_address_entries :
+      length(trimspace(entry.domain)) > 0 && !strcontains(entry.domain, "/")
+    ])
+    error_message = "dnsmasq_address_entries domains must be non-empty and cannot contain '/'."
+  }
+
+  validation {
+    condition = alltrue([
+      for entry in var.dnsmasq_address_entries :
+      can(cidrhost("${entry.address}/32", 0)) || can(cidrhost("${entry.address}/128", 0))
+    ])
+    error_message = "dnsmasq_address_entries addresses must be IP addresses."
+  }
+}
+
 # kube-vip control-plane VIP. The VIP floats between k3s servers for HA
 variable "kube_vip_cp_address" {
   type = string
@@ -141,7 +181,6 @@ variable "vm_k3s" {
     memory      = number
     ballooning  = optional(bool, false)
     disk_size   = number
-    dns_servers = list(string)
     # Paths relative to REPO_ROOT
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)
@@ -177,7 +216,6 @@ variable "vm_tailscale" {
     memory      = number
     ballooning  = optional(bool, false)
     disk_size   = number
-    dns_servers = list(string)
     # Paths relative to REPO_ROOT
     ssh_public_key_paths = list(string)
     ssh_private_key_paths = list(string)

@@ -1,0 +1,166 @@
+---
+- name: Configure local DNS
+  hosts: "{{ node | default('all') }}"
+  become: true
+  tasks:
+    - name: Validate DNS configuration
+      ansible.builtin.assert:
+        that:
+          - dnsmasq_upstream_servers | length > 0
+          - "'127.0.0.1' not in dnsmasq_upstream_servers"
+          - "'127.0.0.53' not in dnsmasq_upstream_servers"
+          - "'127.0.0.54' not in dnsmasq_upstream_servers"
+          - "'::1' not in dnsmasq_upstream_servers"
+
+    - name: Validate dnsmasq address entries
+      ansible.builtin.assert:
+        that:
+          - item.domain | length > 0
+          - item.address | length > 0
+      loop: "{{ dnsmasq_address_entries }}"
+      loop_control:
+        label: "{{ item.domain }}"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Require systemd-resolved
+      ansible.builtin.assert:
+        that:
+          - ansible_service_mgr == "systemd"
+          - "'systemd-resolved.service' in ansible_facts.services"
+
+    - name: Install dnsmasq without starting it
+      ansible.builtin.apt:
+        name: dnsmasq
+        state: present
+        policy_rc_d: 101
+      when: ansible_pkg_mgr == "apt"
+
+    - name: Install dnsmasq
+      ansible.builtin.package:
+        name: dnsmasq
+        state: present
+      when: ansible_pkg_mgr != "apt"
+
+    - name: Configure dnsmasq
+      ansible.builtin.template:
+        src: templates/dnsmasq/dnsmasq.conf.j2
+        dest: /etc/dnsmasq.conf
+        mode: "0644"
+      notify: Restart dnsmasq
+
+    - name: Validate dnsmasq configuration
+      ansible.builtin.command: dnsmasq --test
+      changed_when: false
+
+    - name: Enable dnsmasq
+      ansible.builtin.systemd_service:
+        name: dnsmasq
+        enabled: true
+        state: started
+
+    - name: Create systemd-resolved configuration directory
+      ansible.builtin.file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: "0755"
+
+    - name: Route DNS through dnsmasq
+      ansible.builtin.copy:
+        dest: /etc/systemd/resolved.conf.d/90-dnsmasq.conf
+        mode: "0644"
+        content: |
+          [Resolve]
+          DNS=
+          DNS=127.0.0.1
+          Domains=
+          Domains=~.
+          DNSStubListener=yes
+      notify: Restart systemd-resolved
+
+    - name: Enable systemd-resolved
+      ansible.builtin.systemd_service:
+        name: systemd-resolved
+        enabled: true
+        state: started
+
+    - name: Use the systemd-resolved stub
+      ansible.builtin.file:
+        src: /run/systemd/resolve/stub-resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+        force: true
+
+    - name: Create K3s configuration directory
+      ansible.builtin.file:
+        path: /etc/rancher/k3s
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: "'k3s_cluster' in group_names"
+
+    - name: Configure the K3s resolver
+      ansible.builtin.copy:
+        dest: /etc/rancher/k3s/resolv.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          nameserver {{ ip_internal }}
+      register: k3s_resolver_file
+      when: "'k3s_cluster' in group_names"
+
+    - name: Apply DNS configuration
+      ansible.builtin.meta: flush_handlers
+
+    - name: Verify dnsmasq address entries
+      ansible.builtin.command:
+        argv:
+          - resolvectl
+          - query
+          - "dns-check.{{ item.domain }}"
+      register: dnsmasq_address_query
+      changed_when: false
+      failed_when: dnsmasq_address_query.rc != 0 or item.address not in dnsmasq_address_query.stdout
+      loop: "{{ dnsmasq_address_entries }}"
+      loop_control:
+        label: "{{ item.domain }}"
+
+    - name: Verify upstream DNS
+      ansible.builtin.command: resolvectl query example.com
+      changed_when: false
+
+  handlers:
+    - name: Restart dnsmasq
+      ansible.builtin.systemd_service:
+        name: dnsmasq
+        state: restarted
+
+    - name: Restart systemd-resolved
+      ansible.builtin.systemd_service:
+        name: systemd-resolved
+        state: restarted
+
+- name: Configure cluster DNS
+  hosts: server
+  become: true
+  tasks:
+    - name: Ensure the k3s auto-deploy manifests directory exists
+      ansible.builtin.file:
+        path: /var/lib/rancher/k3s/server/manifests
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Render DNS manifests into the k3s auto-deploy directory
+      ansible.builtin.template:
+        src: "templates/dns/{{ item }}"
+        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | regex_replace('\\.j2$', '') }}"
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - coredns-replicas.yaml.j2

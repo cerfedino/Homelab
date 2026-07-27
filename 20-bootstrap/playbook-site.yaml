@@ -1,6 +1,9 @@
 # Disable the router-advertised DNS IPs
 - import_playbook: playbook-disable-ra-dns.yaml
 
+# Set up dnsmasq on every VM
+- import_playbook: playbook-dns.yaml
+
 # Configure kube-VIP before the cluster exists
 - import_playbook: playbook-kube-vip.yaml
 

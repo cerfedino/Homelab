@@ -1,0 +1,10 @@
+listen-address=127.0.0.1,{{ ip_internal }}
+bind-interfaces
+no-resolv
+{% for entry in dnsmasq_address_entries %}
+local=/{{ entry.domain }}/
+address=/{{ entry.domain }}/{{ entry.address }}
+{% endfor %}
+{% for server in dnsmasq_upstream_servers %}
+server={{ server }}
+{% endfor %}

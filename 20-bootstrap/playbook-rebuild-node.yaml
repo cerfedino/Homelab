@@ -31,6 +31,9 @@
 - name: OS prep
   ansible.builtin.import_playbook: playbook-disable-ra-dns.yaml
 
+- name: Setup DNS
+  ansible.builtin.import_playbook: playbook-dns.yaml
+
 - name: Kube-vip manifests
   ansible.builtin.import_playbook: playbook-kube-vip.yaml
 

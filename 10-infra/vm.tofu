@@ -88,11 +88,8 @@ resource "proxmox_virtual_environment_vm" "this" {
       }
     }
 
-    dynamic "dns" {
-      for_each = length(each.value.dns_servers) > 0 ? [1] : []
-      content {
-        servers = each.value.dns_servers
-      }
+    dns {
+      servers = ["1.1.1.1"]
     }
   }
 
@@ -109,5 +106,8 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   lifecycle {
     prevent_destroy = true
+    ignore_changes = [
+      initialization[0].dns,
+    ]
   }
 }

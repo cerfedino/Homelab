@@ -41,6 +41,8 @@ output "ansible_yaml_inventory" {
 
               ansible_host_internal = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
 
+              ip_internal = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
+
               ansible_user = var.vm_username
 
               ansible_ssh_private_key_file : "${var.REPO_ROOT}/${var.vm_tailscale.ssh_private_key_paths[0]}"
@@ -49,6 +51,8 @@ output "ansible_yaml_inventory" {
         }
       }
       vars: {
+        dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
+        dnsmasq_address_entries  = var.dnsmasq_address_entries
         network_lan = {
             cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
             bridge  = var.network_lan.bridge
