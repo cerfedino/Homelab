@@ -29,8 +29,8 @@ variable "applications" {
     }))
 
     validation {
-      condition     = alltrue([for app in var.applications : contains(["forward-auth", "redirect"], app.type)])
-      error_message = "applications[*].type must be either \"forward-auth\" or \"redirect\"."
+      condition     = alltrue([for app in var.applications : contains(["forward-auth", "bookmark"], app.type)])
+      error_message = "applications[*].type must be either \"forward-auth\" or \"bookmark\"."
     }
 
     validation {
