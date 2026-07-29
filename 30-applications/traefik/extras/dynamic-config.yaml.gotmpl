@@ -22,6 +22,7 @@ data:
 
         authentik-forward-auth-local:
           forwardAuth:
+            # Forward to the Authentik outpost specifically responsible for applications exposed to the local network
             address: http://authentik-server.authentik.svc.cluster.local/outpost.goauthentik.io/auth/traefik
             trustForwardHeader: true
             authResponseHeaders: &authentikResponseHeaders
@@ -39,8 +40,7 @@ data:
               - X-authentik-meta-version
         authentik-forward-auth-external:
           forwardAuth:
-            # Outpost deployed by authentik via the local service connection;
-            # exposed apps' IngressRoutes must use this one, not -local.
+            # Forward to the Authentik outpost specifically responsible for applications exposed to the open internet
             address: http://ak-outpost-external.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik
             trustForwardHeader: true
             authResponseHeaders: *authentikResponseHeaders
