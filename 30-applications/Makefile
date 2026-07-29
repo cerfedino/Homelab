@@ -1,12 +1,13 @@
 
-APPS := app-registry authentik cert-manager cloudflare-tunnel csi-proxmox kuma traefik
+APPS := app-registry authentik cert-manager cloudflare-tunnel csi-proxmox kuma pihole traefik
 
 apps: $(APPS)
 
-csi-proxmox cert-manager traefik authentik kuma cloudflare-tunnel: app-registry repos
+csi-proxmox cert-manager traefik authentik kuma pihole cloudflare-tunnel: app-registry repos
 traefik: csi-proxmox cert-manager
 authentik: csi-proxmox traefik
 kuma: csi-proxmox traefik authentik
+pihole: csi-proxmox traefik authentik
 cloudflare-tunnel: csi-proxmox authentik
 
 repos:

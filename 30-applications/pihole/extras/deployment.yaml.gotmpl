@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:2026.07.2
+          env:
+            - name: TZ
+              value: "Europe/Zurich"
+            - name: FTLCONF_webserver_api_password
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-admin
+                  key: password
+            - name: FTLCONF_dns_upstreams
+              value: {{ .Values.dnsmasq_upstream_servers | join ";" | quote }}
+            - name: FTLCONF_dns_listeningMode
+              value: "all"
+            - name: FTLCONF_misc_etc_dnsmasq_d
+              value: "true"
+          ports:
+            - name: dns-udp
+              containerPort: 53
+              protocol: UDP
+            - name: dns-tcp
+              containerPort: 53
+              protocol: TCP
+            - name: web
+              containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /etc/pihole
+            - name: dnsmasq
+              mountPath: /etc/dnsmasq.d
+              readOnly: true
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pihole-data
+        - name: dnsmasq
+          configMap:
+            name: pihole-dnsmasq

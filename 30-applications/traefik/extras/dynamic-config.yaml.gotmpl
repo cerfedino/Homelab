@@ -70,13 +70,6 @@ data:
           middlewares:
             - authentik-forward-auth-local
           service: pbs1
-        pihole:
-          rule: Host(`{{ .Values.apps.pihole.internal.dns_hostname }}`)
-          entryPoints:
-            - websecure
-          middlewares:
-            - authentik-forward-auth-local
-          service: pihole
 
       services:
         pve1:
@@ -89,8 +82,3 @@ data:
             serversTransport: insecure-backends
             servers:
               - url: "https://sylvester-pbs1.proxmox-internal.{{ .Values.domain }}:8007"
-        pihole:
-          loadBalancer:
-            serversTransport: insecure-backends
-            servers:
-              - url: "https://yosemite-dns.proxmox-internal.{{ .Values.domain }}"

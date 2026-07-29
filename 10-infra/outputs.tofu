@@ -89,11 +89,24 @@ output "ansible_yaml_inventory" {
     condition     = !contains(local.vm_lan_ips, var.kube_vip_svc_address)
     error_message = "kube_vip_svc_address ${var.kube_vip_svc_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
   }
+
+  precondition {
+    condition     = cidrhost("${var.pihole_svc_address}/${local.lan_prefix}", 0) == cidrhost(var.network_lan.cidr, 0)
+    error_message = "pihole_svc_address ${var.pihole_svc_address} is not inside network_lan (${var.network_lan.cidr})."
+  }
+
+  precondition {
+    condition     = !contains(local.vm_lan_ips, var.pihole_svc_address)
+    error_message = "pihole_svc_address ${var.pihole_svc_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
+  }
 }
 
 output "helmfile_values" {
   value = yamlencode({
     kube_vip_svc_address = var.kube_vip_svc_address
+    pihole_svc_address   = var.pihole_svc_address
+    dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
+    dnsmasq_address_entries  = var.dnsmasq_address_entries
     domain               = var.domain
     domain_lan           = var.domain_lan
     proxmox_endpoint_internal = trimsuffix(var.proxmox.endpoint_internal, "/")

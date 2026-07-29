@@ -1,0 +1,5 @@
+{{- $vals := merge (readFile "../values.enc.yaml" | fromYaml) .Values }}
+resources:
+{{- range tuple "pvc.yaml" "secret.yaml.gotmpl" "configmap-dnsmasq.yaml.gotmpl" "deployment.yaml.gotmpl" "service-dns.yaml.gotmpl" "service-web.yaml" "ingressroute.yaml.gotmpl" }}
+  - {{ tpl (readFile .) (dict "Values" $vals) | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}

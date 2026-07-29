@@ -171,6 +171,21 @@ variable "kube_vip_svc_address" {
   }
 }
 
+# kube-vip LoadBalancer-service VIP for the user-facing DNS server (Pi-hole)
+variable "pihole_svc_address" {
+  type = string
+
+  validation {
+    condition     = can(cidrhost("${var.pihole_svc_address}/32", 0))
+    error_message = "pihole_svc_address must be a valid IPv4 address."
+  }
+
+  validation {
+    condition     = var.pihole_svc_address != var.kube_vip_cp_address && var.pihole_svc_address != var.kube_vip_svc_address
+    error_message = "pihole_svc_address must differ from kube_vip_cp_address and kube_vip_svc_address"
+  }
+}
+
 # VMs to create
 variable "vm_k3s" {
   type = map(object({

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-dnsmasq
+data:
+  02-lan-addresses.conf: |
+{{- range .Values.dnsmasq_address_entries }}
+    local=/{{ .domain }}/
+    address=/{{ .domain }}/{{ .address }}
+{{- end }}
