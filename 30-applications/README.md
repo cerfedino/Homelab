@@ -4,7 +4,7 @@
 
 In this stage we deploy everything that runs on the cluster. Each app is a [helmfile](https://helmfile.readthedocs.io) release, optionally paired with a [tofu](https://opentofu.org) root for the configuration that lives inside other systems (Authentik objects, DNS records, tunnel routes, uptime monitors).
 
-- [csi-proxmox](https://github.com/sergelogvinov/proxmox-csi-plugin) for having PVs as Proxmox disks that can move across nodes.
+- [csi-proxmox](https://github.com/sergelogvinov/proxmox-csi-plugin) for having PVs as Proxmox disks that can move across nodes
 - [cert-manager](https://cert-manager.io) with a wildcard certificate
 - [Traefik](https://traefik.io) as ingress
 - [Authentik](https://goauthentik.io) for SSO and access control
@@ -15,7 +15,7 @@ In this stage we deploy everything that runs on the cluster. Each app is a [helm
 
 ## The app registry
 
-I declare applications in a single global "registry" file. One entry declares an app's hostnames, auth mode, dashboard appearance, ACLs and uptime probe.
+I declare applications in a single global "registry" file. One entry defines an app's hostnames, auth mode, dashboard appearance, ACLs and uptime probe.
 
 ```mermaid
 flowchart LR
@@ -40,13 +40,13 @@ flowchart LR
 
 [Backrest](https://github.com/garethgeorge/backrest) serves a web UI over the same repositories, so I can browse snapshots and pull single files back out without touching the restic CLI.
 
-The backup setup for now its a bit icky in my opinion, but it works. Once I'll have distributed storage through Ceph backups will be easier to manage.
+For now the backup setup is a bit icky in my opinion, but it works. Once I have distributed storage through Ceph, backups will be easier to manage.
 
 ## Ordering
 
-Some applications depend on other applications. I could have expressed dependencies in the helmfile, but deploying an application is often more than its helm release: some also run a tofu apply, and helmfile can't order those. So the dependency graph lives in the [Makefile](./Makefile) instead, which orchestrates the order of deployment. Its definetely a smell, so if I find a better way this goes immediately.
+Some applications depend on other applications. I could have expressed dependencies in the helmfile, but deploying an application is often more than its helm release: some also run a tofu apply, and helmfile can't order those. So the dependency graph lives in the [Makefile](./Makefile) instead, which orchestrates the order of deployment. It's definitely a smell, so if I find a better way this goes immediately.
 
-# Screenshots
+## Screenshots
 
 ### _Authentik dashboard_
 
