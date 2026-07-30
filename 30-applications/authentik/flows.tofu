@@ -42,7 +42,7 @@ resource "authentik_stage_email" "recovery" {
   activate_user_on_success = false
   subject                  = "Set your password"
   template                 = "email/password_reset.html"
-  token_expiry             = "minutes=30"
+  token_expiry             = "minutes=14"
 }
 
 resource "authentik_stage_prompt_field" "name" {
@@ -147,6 +147,7 @@ resource "authentik_stage_authenticator_validate" "login" {
 
 resource "authentik_stage_user_login" "login" {
   name = "login-user-login"
+  session_duration = "days=30"
 }
 
 resource "authentik_flow_stage_binding" "login_identification" {
