@@ -6,8 +6,8 @@ resource "authentik_brand" "homelab_lan" {
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
   domain              = "authentik.${local.generated.domain_lan}"
   default             = false
-  flow_authentication = authentik_flow.login.uuid
-  flow_recovery       = authentik_flow.recovery.uuid
+  flow_authentication = authentik_flow.homelab_login.uuid
+  flow_recovery       = authentik_flow.homelab-recovery.uuid
 }
 
 resource "authentik_brand" "homelab_external" {
@@ -15,15 +15,15 @@ resource "authentik_brand" "homelab_external" {
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
   domain              = "authentik.${local.generated.domain}"
   default             = false
-  flow_authentication = authentik_flow.login.uuid
-  flow_recovery       = authentik_flow.recovery.uuid
+  flow_authentication = authentik_flow.homelab_login.uuid
+  flow_recovery       = authentik_flow.homelab-recovery.uuid
 }
 
 # TODO: FInd a way to undefault the default one in favour of one branding
 
 # RECOVERY FLOW
 
-resource "authentik_flow" "recovery" {
+resource "authentik_flow" "homelab-recovery" {
   name           = "homelab-recovery"
   title          = "Set your password"
   slug           = "homelab-recovery"
@@ -87,25 +87,25 @@ resource "authentik_stage_user_write" "recovery" {
 }
 
 resource "authentik_flow_stage_binding" "recovery_identification" {
-  target = authentik_flow.recovery.uuid
+  target = authentik_flow.homelab-recovery.uuid
   stage  = authentik_stage_identification.recovery.id
   order  = 10
 }
 
 resource "authentik_flow_stage_binding" "recovery_email" {
-  target = authentik_flow.recovery.uuid
+  target = authentik_flow.homelab-recovery.uuid
   stage  = authentik_stage_email.recovery.id
   order  = 20
 }
 
 resource "authentik_flow_stage_binding" "recovery_prompt" {
-  target = authentik_flow.recovery.uuid
+  target = authentik_flow.homelab-recovery.uuid
   stage  = authentik_stage_prompt.recovery.id
   order  = 30
 }
 
 resource "authentik_flow_stage_binding" "recovery_write" {
-  target = authentik_flow.recovery.uuid
+  target = authentik_flow.homelab-recovery.uuid
   stage  = authentik_stage_user_write.recovery.id
   order  = 40
 }
@@ -113,10 +113,10 @@ resource "authentik_flow_stage_binding" "recovery_write" {
 
 # LOGIN FLOW
 
-resource "authentik_flow" "login" {
-  name           = "homelab-login"
+resource "authentik_flow" "homelab_login" {
+  name           = "homelab_login"
   title          = "Sign in"
-  slug           = "homelab-login"
+  slug           = "homelab_login"
   designation    = "authentication"
   authentication = "require_unauthenticated"
 }
@@ -124,7 +124,7 @@ resource "authentik_flow" "login" {
 resource "authentik_stage_identification" "login" {
   name          = "login-identification"
   user_fields   = ["username"]
-  recovery_flow = authentik_flow.recovery.uuid
+  recovery_flow = authentik_flow.homelab-recovery.uuid
   password_stage = authentik_stage_password.login.id
   enable_remember_me = true
 }
@@ -151,19 +151,19 @@ resource "authentik_stage_user_login" "login" {
 }
 
 resource "authentik_flow_stage_binding" "login_identification" {
-  target = authentik_flow.login.uuid
+  target = authentik_flow.homelab_login.uuid
   stage  = authentik_stage_identification.login.id
   order  = 10
 }
 
 resource "authentik_flow_stage_binding" "login_2fa" {
-  target = authentik_flow.login.uuid
+  target = authentik_flow.homelab_login.uuid
   stage  = authentik_stage_authenticator_validate.login.id
   order  = 20
 }
 
 resource "authentik_flow_stage_binding" "login_user_login" {
-  target = authentik_flow.login.uuid
+  target = authentik_flow.homelab_login.uuid
   stage  = authentik_stage_user_login.login.id
   order  = 30
 }
