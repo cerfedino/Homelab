@@ -186,6 +186,41 @@ variable "pihole_svc_address" {
   }
 }
 
+# Hetzner Object Storage S3 credentials (created with GUI)
+variable "hetzner_s3" {
+  type = object({
+    endpoint   = string # e.g. "fsn1.your-objectstorage.com"
+    region     = string # e.g. "fsn1"
+    access_key = string
+    secret_key = string
+  })
+  sensitive = true
+
+  validation {
+    condition     = !strcontains(var.hetzner_s3.endpoint, "://")
+    error_message = "hetzner_s3.endpoint must be a bare hostname without scheme."
+  }
+}
+
+variable "backup_bucket" {
+  type = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.backup_bucket))
+    error_message = "backup_bucket must be a valid S3 bucket name."
+  }
+}
+
+variable "backup_restic_password" {
+  type      = string
+  sensitive = true
+
+  validation {
+    condition     = length(var.backup_restic_password) >= 16
+    error_message = "backup_restic_password must be at least 16 characters."
+  }
+}
+
 # VMs to create
 variable "vm_k3s" {
   type = map(object({

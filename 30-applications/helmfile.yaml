@@ -13,6 +13,8 @@ repositories:
     url: https://bedag.github.io/helm-charts
   - name: authentik
     url: https://charts.goauthentik.io
+  - name: k8up-io
+    url: https://k8up-io.github.io/k8up
 
 releases:
   - name: csi-proxmox
@@ -62,6 +64,36 @@ releases:
     wait: true
     values:
       - kuma/extras/extras.yaml.gotmpl
+
+    # BACKUPS
+  - name: k8up-globals
+    namespace: k8up
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - k8up/extras/extras.yaml.gotmpl
+
+  - name: k8up
+    namespace: k8up
+    createNamespace: true
+    chart: k8up-io/k8up
+    version: "~4.10"
+    wait: true
+    values:
+      - k8up/values.yaml
+
+  - name: backrest
+    namespace: backrest
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - backrest/extras/extras.yaml.gotmpl
+
+  ####
 
   - name: pihole
     namespace: pihole

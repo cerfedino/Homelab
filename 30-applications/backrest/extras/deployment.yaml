@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backrest
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: backrest
+  template:
+    metadata:
+      labels:
+        app: backrest
+    spec:
+      # this shit is insanely hacky (thank you Claude for coming up with it). We seed the config file only when absent and at migration version 3, because when processing migrations backrest generated keypairs and GUIDs in later migrations, so we need to make sure we create this config file only when there is none otherwise we regenerate everything and break it completely.
+      initContainers:
+        - name: seed-config
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - "[ -f /data/config/config.json ] || (mkdir -p /data/config && cp /seed/config.json /data/config/config.json)"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config-seed
+              mountPath: /seed
+      containers:
+        - name: backrest
+          image: ghcr.io/garethgeorge/backrest:v1.14.1
+          env:
+            - name: TZ
+              value: "Europe/Zurich"
+            - name: BACKREST_PORT
+              value: "0.0.0.0:9898"
+            - name: BACKREST_DATA
+              value: "/data/data"
+            - name: BACKREST_CONFIG
+              value: "/data/config/config.json"
+            - name: XDG_CACHE_HOME
+              value: "/data/cache"
+          ports:
+            - containerPort: 9898
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9898
+            initialDelaySeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: backrest-data
+        - name: config-seed
+          secret:
+            secretName: backrest-config-seed

@@ -11,3 +11,7 @@ server:
 
 postgresql:
   enabled: true
+  primary:
+    podAnnotations:
+      k8up.io/backupcommand: sh -c 'PGPASSWORD="$(cat "$POSTGRES_PASSWORD_FILE")" pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"'
+      k8up.io/file-extension: .sql

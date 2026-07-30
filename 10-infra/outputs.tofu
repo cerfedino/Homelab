@@ -107,6 +107,13 @@ output "helmfile_values" {
     pihole_svc_address   = var.pihole_svc_address
     dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
     dnsmasq_address_entries  = var.dnsmasq_address_entries
+    backup = {
+      s3_endpoint     = "https://${var.hetzner_s3.endpoint}"
+      s3_bucket       = minio_s3_bucket.backups.bucket
+      s3_access_key   = var.hetzner_s3.access_key
+      s3_secret_key   = var.hetzner_s3.secret_key
+      restic_password = var.backup_restic_password
+    }
     domain               = var.domain
     domain_lan           = var.domain_lan
     proxmox_endpoint_internal = trimsuffix(var.proxmox.endpoint_internal, "/")

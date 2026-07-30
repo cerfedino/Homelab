@@ -1,4 +1,4 @@
 additionalObjects:
-{{- range tuple "ingressroute.yaml.gotmpl" }}
+{{- range tuple "ingressroute.yaml.gotmpl" "backup-schedule.yaml.gotmpl" }}
   - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
 {{- end }}

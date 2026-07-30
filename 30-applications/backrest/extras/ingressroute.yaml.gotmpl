@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: backrest
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := .Values.apps.backrest }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      services:
+        - name: backrest
+          port: 9898
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
+{{- end }}

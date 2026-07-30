@@ -1,0 +1,20 @@
+k8up:
+  envVars:
+    # cron schedules evaluate in the operator's timezone
+    - name: TZ
+      value: "Europe/Zurich"
+    - name: BACKUP_GLOBALACCESSKEYID
+      valueFrom:
+        secretKeyRef:
+          name: global-backup-credentials
+          key: access-key
+    - name: BACKUP_GLOBALSECRETACCESSKEY
+      valueFrom:
+        secretKeyRef:
+          name: global-backup-credentials
+          key: secret-key
+    - name: BACKUP_GLOBALREPOPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: global-backup-credentials
+          key: repo-password

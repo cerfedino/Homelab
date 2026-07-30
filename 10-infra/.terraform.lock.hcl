@@ -1,6 +1,39 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+provider "registry.opentofu.org/aminueza/minio" {
+  version     = "3.38.5"
+  constraints = "~> 3.3"
+  hashes = [
+    "h1:4QS7b5vFlpJeh9NRh8QMQ8yvXY/VUwSzvqTz8jIvc4c=",
+    "h1:6krJO42it9Vbl3gAvV9c9aXcA6r60qmBtJqtBGkFYOE=",
+    "h1:6w3UlKjIq6vT2Rm97I54ZoNecBZhL/KeavDrZRgptYM=",
+    "h1:DHJ9qBNEvh7ekJhMY0LtmNsX1G/YvGLyFOxabCVr20k=",
+    "h1:R+EL1Vdfw5xyLor3t48h7uQ/VtQ0vg4c1/r/oWVHHwo=",
+    "h1:UStSH2ej9WUVeXTL8WfZfpOs8JbwdpxjZhqsjlUeOrw=",
+    "h1:VPDteWArprsKdsZKUKv6ej6iquzwH1Oz0p97/N6nVHY=",
+    "h1:YemLzJ07Es2OUkOQu/pVvfoWAgn9o7urLO9oo0rCO/E=",
+    "h1:a7Zrru/kVgXKVfGYIexRo1hfwSz5GIq4dWRGDlnZc5w=",
+    "h1:aSANtpnVxTCLiyusj1+2FqLK7HaswOflwlsS6fQ8HVo=",
+    "h1:iLVcrNEMOIe9HhNCXv11mncmPWU2yH/X0RqtVM8Vlw0=",
+    "h1:kUX1y3X7rzPJvrfAFxPDDrB+SVHuvAG6ndgYxwNIYRg=",
+    "h1:wi1Ssb3IoFA42NVW9hDY/uOVJufZMuNwrz/+IEU1/wE=",
+    "zh:025df9c1b590d988ab94c458fc26fbd1b29583d779a1242e9c41f6fb399abaa2",
+    "zh:21fbd38a32dc7b5940bb7a67efc67ba9cdc431ec8031a8aefb225e4059c56dfa",
+    "zh:549e71d7dbe018791c9b32ef4b1dc518e8e506f0a5b123d7cf181eb3b22f540a",
+    "zh:601c9c97f0478d1f752fc254f5affd8a65a6de3d3508750c9922c86028b9f253",
+    "zh:69c5805a685ed724f76f48419825b708bf3493ebd7b77f4edcc09c1a9e38773a",
+    "zh:69d5beb6e30b3492a7865716af5d2eb11143fbe8dc0390a92e5215b803e4d5a7",
+    "zh:7d24684173479670daf1ebc84da2798db935890188920a15abbc650f63f3e005",
+    "zh:a2eb798db18dded1cec3542c107eea2864ec0f56f7a0f2d9fc4d150c9918de35",
+    "zh:a92f867af4ca9c0824c88fe51d2b591828c491df7c567a6e24250388ecb6297f",
+    "zh:b58ce971d5fc7c0ceebfe869b855b23d7500c0400fc35a30ff4aab7ca5dc572f",
+    "zh:c06ac54e1f77bcad775c0c7ee5380e2c94e0de1413a416018e529c6d9c0b6826",
+    "zh:d67402813a99aaf327abd0e642c8eb183733835c399171d4910edee5222b1b5b",
+    "zh:f5c8de71ae59c33a12db1d1156c74a7cfbd51cbca4fb53ad15a56617b01946f5",
+  ]
+}
+
 provider "registry.opentofu.org/bpg/proxmox" {
   version     = "0.111.1"
   constraints = "~> 0.110"
@@ -37,7 +70,7 @@ provider "registry.opentofu.org/bpg/proxmox" {
 
 provider "registry.opentofu.org/hashicorp/http" {
   version     = "3.6.0"
-  constraints = "3.6.0"
+  constraints = "~> 3.6"
   hashes = [
     "h1:0n4RBz9zNw6TTddh5+x7E8L2+qzPXNwKhK4uoZ/DUwE=",
     "h1:22Ob7lpzMBSqdrCvoFN5EgmhGPHPBovV/9qo0c/Cd+A=",

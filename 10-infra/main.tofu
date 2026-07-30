@@ -11,6 +11,10 @@ terraform {
       source = "hashicorp/http"
       version = "~> 3.6"
     }
+    minio = {
+      source  = "aminueza/minio"
+      version = "~> 3.3"
+    }
   }
 
   encryption {
