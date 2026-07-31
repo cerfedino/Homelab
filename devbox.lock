@@ -651,51 +651,51 @@
         }
       }
     },
-    "sops@3.13.1": {
-      "last_modified": "2026-06-27T07:37:20Z",
-      "resolved": "github:NixOS/nixpkgs/3d46470bb3030020f7e1361f33514854f5bfa86d#sops",
+    "sops@3.13.2": {
+      "last_modified": "2026-07-23T05:10:05Z",
+      "resolved": "github:NixOS/nixpkgs/7525d999cd850b9a488817abc89c75dc733acf17#sops",
       "source": "devbox-search",
-      "version": "3.13.1",
+      "version": "3.13.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/0hh101gd57gyfn9hhxskrl2q268mw5cs-sops-3.13.1",
+              "path": "/nix/store/2anffn5d1cj8gqd9rc0yf80kkfshiwqh-sops-3.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/0hh101gd57gyfn9hhxskrl2q268mw5cs-sops-3.13.1"
+          "store_path": "/nix/store/2anffn5d1cj8gqd9rc0yf80kkfshiwqh-sops-3.13.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/yrzj7k24jf5v2qh91483ippl9m6d3jli-sops-3.13.1",
+              "path": "/nix/store/03j93gmxvsadwja0sh136pzzzz1g5ykp-sops-3.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/yrzj7k24jf5v2qh91483ippl9m6d3jli-sops-3.13.1"
+          "store_path": "/nix/store/03j93gmxvsadwja0sh136pzzzz1g5ykp-sops-3.13.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/y1jzss33zg8al7crp93apzpm6frqfs2s-sops-3.13.1",
+              "path": "/nix/store/s2j2wq7cyw6bgvip0s18nvmpjwhx6b67-sops-3.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/y1jzss33zg8al7crp93apzpm6frqfs2s-sops-3.13.1"
+          "store_path": "/nix/store/s2j2wq7cyw6bgvip0s18nvmpjwhx6b67-sops-3.13.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/55y1ql5mp3jg6zzz00nmilkrp4phsk1z-sops-3.13.1",
+              "path": "/nix/store/66dqji43vzq0yi71hxlx5gc59fmfgzsr-sops-3.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/55y1ql5mp3jg6zzz00nmilkrp4phsk1z-sops-3.13.1"
+          "store_path": "/nix/store/66dqji43vzq0yi71hxlx5gc59fmfgzsr-sops-3.13.2"
         }
       }
     }
