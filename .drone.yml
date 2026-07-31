@@ -39,4 +39,6 @@ steps:
       GITHUB_COM_TOKEN:
         from_secret: renovate_github_token
     commands:
+      - 'curl -s -H "Authorization: token $RENOVATE_TOKEN" https://api.github.com/user | grep -E "login|message"'
+      - 'curl -s -o /dev/null -w "pulls: %{http_code}\n" -H "Authorization: token $RENOVATE_TOKEN" https://api.github.com/repos/cerfedino/Homelab/pulls'
       - renovate
