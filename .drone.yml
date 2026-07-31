@@ -19,6 +19,7 @@ name: renovate
 trigger:
   event:
     - cron
+    - custom
   cron:
     - renovate
 
