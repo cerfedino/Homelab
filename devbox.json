@@ -3,7 +3,7 @@
     "packages": {
         "ansible": "2.21.1",
         "opentofu": "1.12.4",
-        "ansible-navigator": "26.4.0",
+        "ansible-navigator": "26.6.0",
         "kubectl": "1.36.2",
         "podman": {
             "version": "5.8.4",
