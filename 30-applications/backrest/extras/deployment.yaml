@@ -17,7 +17,7 @@ spec:
       # this shit is insanely hacky (thank you Claude for coming up with it). We seed the config file only when absent and at migration version 3, because when processing migrations backrest generated keypairs and GUIDs in later migrations, so we need to make sure we create this config file only when there is none otherwise we regenerate everything and break it completely.
       initContainers:
         - name: seed-config
-          image: busybox:1.37
+          image: busybox:1.38
           command:
             - sh
             - -c
