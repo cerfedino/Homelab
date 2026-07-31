@@ -30,7 +30,7 @@ releases:
     namespace: cert-manager
     createNamespace: true
     chart: jetstack/cert-manager
-    version: "~1.20"
+    version: "~1.21"
     wait: true
     values:
       - cert-manager/values.yaml.gotmpl
@@ -49,7 +49,7 @@ releases:
     namespace: traefik
     createNamespace: true
     chart: traefik/traefik
-    version: "~41.0"
+    version: "~41.1"
     wait: true
     disableValidation: true
     values:

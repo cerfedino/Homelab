@@ -42,4 +42,4 @@ A pre-commit hook (installed automatically by the devbox shell) checks that no u
 
 ### Deploying
 
-I use Makefiles for deploying stuff. This will probably come back to bite me. The numbered directories are the pipeline, and `make stages` goes through them in order. Each stage, and each app under `30-applications`, has its own Makefile; running `make` there deploys just that piece independently.
+I use Makefiles for deploying stuff. This will probably come back to bite me. I will eventually move to GitOps sometime in the future. The numbered directories are the pipeline, and `make stages` goes through them in order. Each stage, and each app under `30-applications`, has its own Makefile; running `make` there deploys just that piece independently.
