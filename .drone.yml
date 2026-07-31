@@ -2,6 +2,11 @@ kind: pipeline
 type: docker
 name: default
 
+trigger:
+  event:
+    - push
+    - pull_request
+
 clone:
   depth: 0
 
@@ -19,7 +24,6 @@ name: renovate
 trigger:
   event:
     - cron
-    - custom
   cron:
     - renovate
 
