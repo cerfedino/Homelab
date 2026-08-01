@@ -1,0 +1,16 @@
+immich_postgres_password: ENC[AES256_GCM,data:QPqo13yNaxo54gOa1LmJv145H1m5Dk+oDtBS74YokQA=,iv:HFe7gdPDCZ1Kh/dpaENvfSDSPL7DiG4BtsOkMG1pHXs=,tag:26B4CaBqpkwe3sdeoVq1LQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTcW9KbWpVdUl4N1RUbnYx
+            eHVoZmpCbUhheGFjVjRzWFVid1NWSXZsZVFVCmZHN3ZxUUp4MXJ1bHU2TFR3WG0x
+            L1V6d1J1VWxNTnRrMW0wQkpZeG5GQUUKLS0tIEsyOGxWMU8rZk80aHMwY2N6LzQ2
+            N2ZhekI0VGZRMU92YXFlaENwYlMzVXcKzTWo7sal8BmkUBnMadTNBkh0o/9tg5o8
+            f3UnRioKnFT8ufjU5UhUBGLowPC7RyftCTgqGjYNzf0WT99DnDXRGA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-08-01T12:19:00Z"
+    mac: ENC[AES256_GCM,data:8BRvamC1G4dPGPlJVe4ppsCFcP9m2dSngXQjKk2Q/s56fiZos0KLULebpK9wEGMgzpC+7lwvQx4QrAgBmI4EhEVGIyA1Zi09m4FL1tsdCA0Fwve4Fbl2dtUnY4hUkzn+M3gYFxa2JIw3ewBGKpo978lQrUzXKybfxOMFe0XmLJ4=,iv:A7T7jlPBNEYe0Wen7jVU9awYqp+RA6aWf9iK+dD5zQM=,tag:OpxmXKNOF2NDjtra2iMJzg==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.1
