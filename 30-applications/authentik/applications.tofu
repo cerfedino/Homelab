@@ -54,6 +54,8 @@ locals {
     }
     proxy_apps_local    = {for k, v in local.fwauth_variants : k => v if v.variant == "internal"}
     proxy_apps_external = {for k, v in local.fwauth_variants : k => v if v.variant == "external"}
+
+    oidc_apps = {for k, app in local.applications : k => app if app.type == "oidc"}
 }
 
 data "authentik_flow" "default-authorization-flow" {
@@ -69,7 +71,54 @@ resource "authentik_provider_proxy" "proxies" {
   name               = each.key
   external_host      = "https://${each.value.dns_hostname}"
   authorization_flow = data.authentik_flow.default-authorization-flow.id
+  authentication_flow = authentik_flow.homelab_login.uuid
   invalidation_flow = data.authentik_flow.default-invalidation-flow.id
+}
+
+
+data "authentik_flow" "default-provider-invalidation-flow" {
+  slug = "default-provider-invalidation-flow"
+}
+
+data "authentik_property_mapping_provider_scope" "oidc_scopes" {
+  for_each   = toset(flatten([for k, app in local.oidc_apps : app.oidc.scopes]))
+  scope_name = each.value
+}
+
+data "authentik_certificate_key_pair" "generated" {
+  name = "authentik Self-signed Certificate"
+}
+
+resource "authentik_provider_oauth2" "oidc" {
+  for_each = local.oidc_apps
+  name     = each.key
+
+  client_id     = each.value.oidc.client_id
+  client_secret = each.value.oidc.client_secret
+  client_type   = each.value.oidc.client_type
+  grant_types   = each.value.oidc.grant_types
+
+  authorization_flow = data.authentik_flow.default-authorization-flow.id
+  authentication_flow = authentik_flow.homelab_login.uuid
+  invalidation_flow  = data.authentik_flow.default-provider-invalidation-flow.id
+
+  allowed_redirect_uris = [
+    for r in each.value.oidc.redirect_uris : {
+      matching_mode = r.matching_mode
+      url           = r.url
+    }
+  ]
+  property_mappings = [
+    for s in each.value.oidc.scopes : data.authentik_property_mapping_provider_scope.oidc_scopes[s].id
+  ]
+  signing_key = each.value.oidc.signing ? data.authentik_certificate_key_pair.generated.id : null
+
+  sub_mode                   = each.value.oidc.sub_mode
+  issuer_mode                = each.value.oidc.issuer_mode
+  include_claims_in_id_token = each.value.oidc.include_claims_in_id_token
+  access_code_validity       = each.value.oidc.access_code_validity
+  access_token_validity      = each.value.oidc.access_token_validity
+  refresh_token_validity     = each.value.oidc.refresh_token_validity
 }
 
 
@@ -84,7 +133,11 @@ resource "authentik_application" "apps" {
   for_each = local.applications
   name              = each.value.display_name
   slug              = each.key
-  protocol_provider = each.value.type == "forward-auth" && each.value.dns_hostname != null ? tonumber(authentik_provider_proxy.proxies[each.key].id) : null
+  protocol_provider = (
+    each.value.type == "forward-auth" && each.value.dns_hostname != null ? tonumber(authentik_provider_proxy.proxies[each.key].id) :
+    each.value.type == "oidc" ? tonumber(authentik_provider_oauth2.oidc[each.key].id) :
+    null
+  )
 
   group = each.value.group
   policy_engine_mode= each.value.policy_engine_mode

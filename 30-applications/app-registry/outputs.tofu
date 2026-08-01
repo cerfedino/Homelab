@@ -24,6 +24,19 @@ output "helm_apps_summary" {
   })
 }
 
+# OIDC client credentials per application key
+output "helm_oidc" {
+  sensitive = true
+  value = yamlencode({
+    oidc = {
+      for k, app in var.applications : k => {
+        client_id     = app.oidc.client_id
+        client_secret = app.oidc.client_secret
+      } if app.oidc != null
+    }
+  })
+}
+
 # for authentik to consume once again
 output "applications" {
   sensitive = true
