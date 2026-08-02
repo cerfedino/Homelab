@@ -1,0 +1,16 @@
+paperless_secret_key: ENC[AES256_GCM,data:Ef2gdU1v5CFemgD2jO2R+GgLeU/j1JtTWm9rDZg8jnW57ZmzSJFeAw==,iv:MSPI2lZRFWBE7HqH/mDrymQi6E4c97mFRUFnU0RrXjg=,tag:uyl9whcIw3aYkqMooNoL5Q==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSArZElDY2pEVnZFSUhRdnFZ
+            WWdrWDNxblU2SDNEcVFFaTBoN1dYcURkdlRFClg3YldZYm5jNkZzRHBuN3VqZ2k4
+            OFIwNGVaWHVjanhiNEhVOTFxWisxMncKLS0tIGk0Mm91S09ldUliUUg1aE90N09w
+            akNLNU8vSTh1ZzdZVGtJM3ZSM1pmNU0KbgvN0XGDJ0iA6Ud2LaL2uf7ZFrZo8iDw
+            Emenk9kh5DYqYjp3132xnLM+tVUMMx+k8WomMMy/ooJpcfHie0ShgQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-08-02T12:38:22Z"
+    mac: ENC[AES256_GCM,data:qHhTTJ9QN0CN+8Ov8A4fxqzUB1WTXvxYZ8zVRtDxydDUbXMqg016gbQs0hJcFS4IoZx6bdkBE7pUQl4DOUUvY2YR2QjgaMGaPfuPR1aPFp1oJMswdOzaasNnHVj6roXeYhlLd5WbkWIkLBInAFv78xSjr1VpvdaGkoHE4tBNMOg=,iv:E+xXjvZPa4spAqRZk4y5/IsIXqA3Ide502SURiA80wY=,tag:j78Oj9062iLUETrYrNcY9w==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.2
