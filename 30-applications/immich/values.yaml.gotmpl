@@ -1,0 +1,72 @@
+controllers:
+  main:
+    containers:
+      main:
+        env:
+          DB_HOSTNAME: immich-postgres
+          DB_USERNAME: immich
+          DB_DATABASE_NAME: immich
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-postgres
+                key: password
+
+# top-level key fixed by the chart, unrelated to the app's registry name
+immich:
+  persistence:
+    library:
+      existingClaim: immich-library
+  configurationKind: Secret
+  configuration:
+    server:
+      externalDomain: https://{{ .Values.apps.immich.external.dns_hostname }}
+    oauth:
+      enabled: true
+      issuerUrl: https://authentik.{{ .Values.domain }}/application/o/immich_external/
+      clientId: {{ .Values.oidc.immich_external.client_id | quote }}
+      clientSecret: {{ .Values.oidc.immich_external.client_secret | quote }}
+      scope: openid email profile
+      buttonText: Login with Authentik
+      autoRegister: true
+      autoLaunch: false
+    passwordLogin:
+      # re-enable in an emergency with: immich-admin enable-password-login (in the server container)
+      enabled: false
+
+valkey:
+  enabled: true
+
+machine-learning:
+  controllers:
+    main:
+      containers:
+        main:
+          # image CMD minus --log-config-json: the rich logging handler deadlocks
+          # the freshly forked gunicorn worker on the inherited console lock
+          command:
+            - python
+            - -m
+            - gunicorn
+            - immich_ml.main:app
+            - -k
+            - immich_ml.config.CustomUvicornWorker
+            - -c
+            - /usr/src/immich_ml/gunicorn_conf.py
+            - -b
+            - "[::]:3003"
+            - -w
+            - "1"
+            - -t
+            - "300"
+            - --keep-alive
+            - "2"
+            - --graceful-timeout
+            - "10"
+  persistence:
+    cache:
+      enabled: true
+      type: persistentVolumeClaim
+      accessMode: ReadWriteOnce
+      storageClass: proxmox-data-zfs
+      size: 10Gi

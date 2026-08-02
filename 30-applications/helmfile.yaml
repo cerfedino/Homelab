@@ -3,6 +3,8 @@ environments:
     values:
       - ../10-infra/generated/generated.infra.yaml
       - app-registry/generated/generated.apps-summary.yaml
+      - app-registry/generated/generated.oidc.yaml
+      - immich/values.enc.yaml
 ---
 repositories:
   - name: traefik
@@ -13,6 +15,8 @@ repositories:
     url: https://bedag.github.io/helm-charts
   - name: authentik
     url: https://charts.goauthentik.io
+  - name: immich
+    url: https://immich-app.github.io/immich-charts
   - name: k8up-io
     url: https://k8up-io.github.io/k8up
 
@@ -123,3 +127,21 @@ releases:
     wait: true
     values:
       - cloudflare-tunnel/extras/extras.yaml.gotmpl
+
+  - name: immich-extras
+    namespace: immich
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: false
+    values:
+      - immich/extras/extras.yaml.gotmpl
+
+  - name: immich
+    namespace: immich
+    createNamespace: true
+    chart: immich/immich
+    version: "~0.12"
+    wait: true
+    values:
+      - immich/values.yaml.gotmpl
