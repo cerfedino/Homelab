@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: syncthing
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: syncthing
+  template:
+    metadata:
+      labels:
+        app: syncthing
+    spec:
+      containers:
+        - name: syncthing
+          image: syncthing/syncthing:2.1.2
+          ports:
+            - name: gui
+              containerPort: 8384
+            - name: sync-tcp
+              containerPort: 22000
+              protocol: TCP
+            - name: sync-udp
+              containerPort: 22000
+              protocol: UDP
+          volumeMounts:
+            - name: data
+              mountPath: /var/syncthing
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /rest/noauth/health
+              port: 8384
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: syncthing-data

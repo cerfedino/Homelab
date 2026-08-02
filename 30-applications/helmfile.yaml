@@ -163,3 +163,12 @@ releases:
     wait: true
     values:
       - paperless/extras/extras.yaml.gotmpl
+
+  - name: syncthing
+    namespace: syncthing
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - syncthing/extras/extras.yaml.gotmpl

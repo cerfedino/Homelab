@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: syncthing-web
+spec:
+  selector:
+    app: syncthing
+  ports:
+    - port: 8384
+      targetPort: 8384
