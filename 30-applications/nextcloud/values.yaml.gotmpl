@@ -1,0 +1,139 @@
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+
+image:
+  tag: 32.0.8-apache
+
+nextcloud:
+  host: {{ .Values.apps.filecloud.external.dns_hostname }}
+  username: admin
+  password: {{ $secrets.nextcloud_admin_password | quote }}
+
+  mail:
+    enabled: true
+    # the chart wants the from-address split into local part and domain
+    fromAddress: {{ (split "@" .Values.smtp.from)._0 | quote }}
+    domain: {{ (split "@" .Values.smtp.from)._1 | quote }}
+    smtp:
+      host: {{ .Values.smtp.host }}
+      port: {{ .Values.smtp.port }}
+      secure: starttls
+      name: {{ .Values.smtp.username }}
+      password: {{ .Values.smtp.password | quote }}
+
+  configs:
+    custom.config.php: |-
+      <?php
+      $CONFIG = array(
+        'overwriteprotocol' => 'https',
+        'default_phone_region' => 'CH',
+        'maintenance_window_start' => 1,
+        // traefik: trust the pod network so brute-force protection and
+        // logging see real client IPs from X-Forwarded-For
+        'trusted_proxies' => array('10.42.0.0/16'),
+        // imaginary offloads image preview generation (chart service, port 80)
+        'preview_imaginary_url' => 'http://nextcloud-imaginary/',
+        'enabledPreviewProviders' => array(
+          'OC\Preview\MP3',
+          'OC\Preview\TXT',
+          'OC\Preview\MarkDown',
+          'OC\Preview\OpenDocument',
+          'OC\Preview\Imaginary',
+        ),
+      );
+
+  phpConfigs:
+    uploadLimit.ini: |
+      upload_max_filesize = 16G
+      post_max_size = 16G
+      max_input_time = 3600
+      max_execution_time = 3600
+      memory_limit = 1G
+
+  extraEnv:
+    - name: WHITEBOARD_URL
+      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}/whiteboard
+    - name: WHITEBOARD_JWT_SECRET
+      value: {{ $secrets.whiteboard_jwt_secret | quote }}
+    - name: COLLABORA_WOPI_URL
+      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}
+    - name: OIDC_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc
+          key: client_id
+    - name: OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc
+          key: client_secret
+    - name: OIDC_DISCOVERY_URI
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-oidc
+          key: discovery_uri
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: postgresql
+  host: nextcloud-postgres
+  database: nextcloud_database
+  user: oc_nextcloud
+  password: {{ $secrets.nextcloud_postgres_password | quote }}
+
+postgresql:
+  enabled: false
+mariadb:
+  enabled: false
+redis:
+  enabled: false
+
+externalRedis:
+  enabled: true
+  host: nextcloud-redis
+
+cronjob:
+  enabled: true
+
+collabora:
+  enabled: true
+  collabora:
+    # Collabora is under the same hostname
+    server_name: {{ .Values.apps.filecloud.external.dns_hostname }}
+    aliasgroups:
+      - host: "https://{{ .Values.apps.filecloud.external.dns_hostname }}:443"
+    username: admin
+    password: {{ $secrets.collabora_admin_password | quote }}
+    # TLS terminates at traefik
+    extra_params: --o:ssl.enable=false --o:ssl.termination=true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: "2Gi"
+      cpu: "2"
+
+imaginary:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: "512Mi"
+      cpu: "1"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: "3Gi"
+    cpu: "2"
+
+persistence:
+  enabled: true
+  existingClaim: nextcloud-data

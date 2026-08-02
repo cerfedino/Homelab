@@ -1,0 +1,52 @@
+{{- $secrets := fromYaml (readFile "../values.enc.yaml") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud-postgres
+  template:
+    metadata:
+      labels:
+        app: nextcloud-postgres
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"'
+        k8up.io/file-extension: .sql
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17.10
+          env:
+            # subdirectory: initdb refuses the mount point itself (lost+found)
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_USER
+              value: oc_nextcloud
+            - name: POSTGRES_DB
+              value: nextcloud_database
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+            - name: POSTGRES_PASSWORD
+              value: {{ $secrets.nextcloud_postgres_password | quote }}
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "oc_nextcloud", "-d", "nextcloud_database"]
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nextcloud-postgres-data

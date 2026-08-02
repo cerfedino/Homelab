@@ -1,0 +1,40 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := .Values.apps.filecloud }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      priority: 10
+      middlewares:
+        - name: nextcloud-hsts
+      services:
+        - name: nextcloud
+          port: 8080
+{{- end }}
+{{- end }}
+{{- range $variant, $v := .Values.apps.filecloud }}
+{{- if $v.dns_hostname }}
+    # Collabora is under the same hostname
+    - match: Host(`{{ $v.dns_hostname }}`) && (PathPrefix(`/browser`) || PathPrefix(`/hosting/discovery`) || PathPrefix(`/hosting/capabilities`) || PathPrefix(`/cool`))
+      kind: Rule
+      priority: 20
+      services:
+        - name: nextcloud-collabora
+          port: 9980
+    # Also whiteboard
+    - match: Host(`{{ $v.dns_hostname }}`) && PathPrefix(`/whiteboard`)
+      kind: Rule
+      priority: 20
+      services:
+        - name: nextcloud-whiteboard
+          port: 3002
+      middlewares:
+        - name: whiteboard-stripprefix
+{{- end }}
+{{- end }}

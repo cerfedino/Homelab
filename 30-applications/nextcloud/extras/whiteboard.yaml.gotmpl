@@ -1,0 +1,32 @@
+{{- $secrets := fromYaml (readFile "../values.enc.yaml") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-whiteboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextcloud-whiteboard
+  template:
+    metadata:
+      labels:
+        app: nextcloud-whiteboard
+    spec:
+      containers:
+        - name: whiteboard
+          image: ghcr.io/nextcloud-releases/whiteboard:release
+          env:
+            - name: NEXTCLOUD_URL
+              value: https://{{ .Values.apps.filecloud.external.dns_hostname }}
+            - name: JWT_SECRET_KEY
+              value: {{ $secrets.whiteboard_jwt_secret | quote }}
+          ports:
+            - containerPort: 3002
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
