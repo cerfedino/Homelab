@@ -32,6 +32,7 @@ output "helm_oidc" {
       for k, app in var.applications : k => {
         client_id     = app.oidc.client_id
         client_secret = app.oidc.client_secret
+        issuer = "https://${var.applications["authentik_${endswith(k, "_external") ? "external" : "internal"}"].dns_hostname}/application/o/${k}/"
       } if app.oidc != null
     }
   })

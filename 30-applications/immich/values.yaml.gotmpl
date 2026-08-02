@@ -23,7 +23,7 @@ immich:
       externalDomain: https://{{ .Values.apps.immich.external.dns_hostname }}
     oauth:
       enabled: true
-      issuerUrl: https://authentik.{{ .Values.domain }}/application/o/immich_external/
+      issuerUrl: {{ .Values.oidc.immich_external.issuer | quote }}
       clientId: {{ .Values.oidc.immich_external.client_id | quote }}
       clientSecret: {{ .Values.oidc.immich_external.client_secret | quote }}
       scope: openid email profile
