@@ -1,9 +1,9 @@
 
-APPS := app-registry authentik backrest cert-manager cloudflare-tunnel csi-proxmox immich k8up kuma pihole traefik
+APPS := app-registry authentik backrest cert-manager cloudflare-tunnel csi-proxmox immich k8up kuma pihole traefik vaultwarden
 
 apps: $(APPS)
 
-csi-proxmox cert-manager traefik authentik kuma pihole cloudflare-tunnel k8up backrest immich: app-registry repos
+csi-proxmox cert-manager traefik authentik kuma pihole cloudflare-tunnel k8up backrest immich vaultwarden: app-registry repos
 traefik: csi-proxmox cert-manager
 authentik: csi-proxmox traefik k8up
 kuma: csi-proxmox traefik authentik k8up
@@ -11,6 +11,7 @@ pihole: csi-proxmox traefik authentik k8up
 backrest: csi-proxmox traefik authentik
 cloudflare-tunnel: csi-proxmox authentik
 immich: csi-proxmox traefik authentik k8up
+vaultwarden: csi-proxmox traefik authentik k8up
 
 repos:
 	helmfile repos

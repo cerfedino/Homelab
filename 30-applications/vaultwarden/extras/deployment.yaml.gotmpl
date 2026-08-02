@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+spec:
+  replicas: 1
+  # RWO volume: the old pod must release it before the new one starts
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/db.sqlite3 .dump'
+        k8up.io/file-extension: .sql
+    spec:
+      containers:
+        - name: sqlite
+          image: keinos/sqlite3:3.53.4
+          command: ["sleep", "infinity"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+        - name: vaultwarden
+          image: vaultwarden/server:1.37.1
+          env:
+            - name: DOMAIN
+              value: https://{{ .Values.apps.vaultwarden.external.dns_hostname }}
+            - name: SIGNUPS_ALLOWED
+              value: "false"
+            # SSO logins from this domain create accounts
+            - name: SIGNUPS_DOMAINS_WHITELIST
+              value: {{ .Values.domain | quote }}
+            - name: SIGNUPS_VERIFY
+              value: "true"
+            - name: SMTP_HOST
+              value: {{ .Values.smtp.host | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.smtp.port | quote }}
+            - name: SMTP_SECURITY
+              value: {{ .Values.smtp.security | quote }}
+            - name: SMTP_USERNAME
+              value: {{ .Values.smtp.username | quote }}
+            - name: SMTP_FROM
+              value: {{ .Values.smtp.from | quote }}
+            - name: SMTP_FROM_NAME
+              value: Vaultwarden
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-smtp
+                  key: password
+            - name: INVITATIONS_ALLOWED
+              value: "false"
+            # no ADMIN_TOKEN: the /admin panel stays disabled entirely
+            - name: SSO_ENABLED
+              value: "true"
+            - name: SSO_ONLY
+              value: "true"
+            - name: SSO_AUTHORITY
+              value: {{ .Values.oidc.vaultwarden_external.issuer | quote }}
+            - name: SSO_CLIENT_ID
+              value: {{ .Values.oidc.vaultwarden_external.client_id | quote }}
+            - name: SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-sso
+                  key: client_secret
+            - name: SSO_SCOPES
+              value: "email profile offline_access"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: 80
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultwarden-data

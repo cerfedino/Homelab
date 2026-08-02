@@ -5,6 +5,7 @@ environments:
       - app-registry/generated/generated.apps-summary.yaml
       - app-registry/generated/generated.oidc.yaml
       - immich/values.enc.yaml
+      - smtp.enc.yaml
 ---
 repositories:
   - name: traefik
@@ -145,3 +146,12 @@ releases:
     wait: true
     values:
       - immich/values.yaml.gotmpl
+
+  - name: vaultwarden
+    namespace: vaultwarden
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - vaultwarden/extras/extras.yaml.gotmpl
