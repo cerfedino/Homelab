@@ -1,0 +1,4 @@
+resources:
+{{- range tuple "pvc.yaml" "secret.yaml.gotmpl" "redis.yaml" "service-redis.yaml" "deployment.yaml.gotmpl" "service.yaml" "ingressroute.yaml.gotmpl" "backup-schedule.yaml.gotmpl" }}
+  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}

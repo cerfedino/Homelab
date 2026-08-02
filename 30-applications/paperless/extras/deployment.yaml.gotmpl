@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paperless
+  template:
+    metadata:
+      labels:
+        app: paperless
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/data/db.sqlite3 .dump'
+        k8up.io/file-extension: .sql
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: sqlite
+          image: keinos/sqlite3:3.53.4
+          command: ["sleep", "infinity"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5
+          env:
+            - name: PAPERLESS_URL
+              value: https://{{ .Values.apps.paperless.external.dns_hostname }}
+            - name: PAPERLESS_REDIS
+              value: redis://paperless-redis:6379
+            - name: PAPERLESS_TIME_ZONE
+              value: Europe/Zurich
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: secret_key
+            - name: PAPERLESS_APPS
+              value: allauth.socialaccount.providers.openid_connect
+            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: socialaccount_providers
+            - name: PAPERLESS_SOCIALACCOUNT_AUTO_SIGNUP
+              value: "true"
+            # SSO-only: hide the local login form and go straight to authentik
+            - name: PAPERLESS_DISABLE_REGULAR_LOGIN
+              value: "true"
+            - name: PAPERLESS_REDIRECT_LOGIN_TO_SSO
+              value: "true"
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+              subPath: data
+            - name: data
+              mountPath: /usr/src/paperless/media
+              subPath: media
+            - name: data
+              mountPath: /usr/src/paperless/export
+              subPath: export
+            - name: data
+              mountPath: /usr/src/paperless/consume
+              subPath: consume
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 20
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data

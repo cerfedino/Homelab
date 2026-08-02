@@ -4,7 +4,6 @@ environments:
       - ../10-infra/generated/generated.infra.yaml
       - app-registry/generated/generated.apps-summary.yaml
       - app-registry/generated/generated.oidc.yaml
-      - immich/values.enc.yaml
       - smtp.enc.yaml
 ---
 repositories:
@@ -155,3 +154,12 @@ releases:
     wait: true
     values:
       - vaultwarden/extras/extras.yaml.gotmpl
+
+  - name: paperless
+    namespace: paperless
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - paperless/extras/extras.yaml.gotmpl
