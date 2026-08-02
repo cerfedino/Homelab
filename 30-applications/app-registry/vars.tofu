@@ -37,6 +37,8 @@ variable "applications" {
           matching_mode = optional(string, "strict")
         }))
         scopes                     = optional(list(string), ["openid", "email", "profile"])
+        # groups claim rewrite. replace groups named <key> with <value>
+        group_map                  = optional(map(string))
         grant_types                = optional(list(string), ["authorization_code", "refresh_token"])
         signing                    = optional(bool, true)
         sub_mode                   = optional(string)

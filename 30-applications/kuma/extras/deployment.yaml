@@ -4,7 +4,6 @@ metadata:
   name: uptime-kuma
 spec:
   replicas: 1
-  # RWO volume: the old pod must release it before the new one starts
   strategy:
     type: Recreate
   selector:

@@ -81,8 +81,23 @@ data "authentik_flow" "default-provider-invalidation-flow" {
 }
 
 data "authentik_property_mapping_provider_scope" "oidc_scopes" {
-  for_each   = toset([for s in flatten([for k, app in local.oidc_apps : app.oidc.scopes]) : s if s != "email"])
+  for_each   = toset([for s in flatten([for k, app in local.oidc_apps : app.oidc.scopes]) : s if s != "email" && s != "groups"])
   scope_name = each.value
+}
+
+# process oidc group claim mapping
+resource "authentik_property_mapping_provider_scope" "app_group_map" {
+  for_each   = {for k, app in local.oidc_apps : k => app.oidc.group_map if app.oidc.group_map != null}
+  name       = "groups mapping (${each.key})"
+  scope_name = "groups"
+  expression = <<-EOT
+    mapping = ${jsonencode(each.value)}
+    groups = []
+    for src, dst in mapping.items():
+        if request.user.ak_groups.filter(name=src).exists():
+            groups.append(dst)
+    return {"groups": groups}
+  EOT
 }
 
 # map this property to true because vaultwarden SSO expects it. authentik as far as i know doesnt track email verification status
@@ -123,7 +138,9 @@ resource "authentik_provider_oauth2" "oidc" {
   ]
   property_mappings = [
     for s in each.value.oidc.scopes : (
-      s == "email" ? authentik_property_mapping_provider_scope.email_verified.id : data.authentik_property_mapping_provider_scope.oidc_scopes[s].id
+      s == "email" ? authentik_property_mapping_provider_scope.email_verified.id :
+      s == "groups" ? authentik_property_mapping_provider_scope.app_group_map[each.key].id :
+      data.authentik_property_mapping_provider_scope.oidc_scopes[s].id
     )
   ]
   signing_key = each.value.oidc.signing ? data.authentik_certificate_key_pair.generated.id : null
