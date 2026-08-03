@@ -48,16 +48,42 @@ variable "applications" {
         access_token_validity      = optional(string)
         refresh_token_validity     = optional(string)
       }))
+
+      # for type = "ldap"
+      ldap = optional(object({
+        base_dn          = string
+        bind_mode        = optional(string, "direct")
+        search_mode      = optional(string, "direct")
+        mfa_support      = optional(bool, true)
+        certificate      = optional(bool, false)
+        tls_server_name  = optional(string)
+        uid_start_number = optional(number)
+        gid_start_number = optional(number)
+      }))
     }))
 
     validation {
-      condition     = alltrue([for app in var.applications : contains(["forward-auth", "bookmark", "oidc"], app.type)])
-      error_message = "applications[*].type must be \"forward-auth\", \"bookmark\" or \"oidc\"."
+      condition     = alltrue([for app in var.applications : contains(["forward-auth", "bookmark", "oidc", "ldap"], app.type)])
+      error_message = "applications[*].type must be \"forward-auth\", \"bookmark\", \"oidc\" or \"ldap\"."
     }
 
     validation {
       condition     = alltrue([for app in var.applications : (app.type == "oidc") == (app.oidc != null)])
       error_message = "the oidc attribute must be set on applications of type \"oidc\"."
+    }
+
+    validation {
+      condition     = alltrue([for app in var.applications : (app.type == "ldap") == (app.ldap != null)])
+      error_message = "the ldap attribute must be set on applications of type \"ldap\"."
+    }
+
+    validation {
+      condition = alltrue([
+        for app in var.applications : app.ldap == null || try(
+          contains(["direct", "cached"], app.ldap.bind_mode) && contains(["direct", "cached"], app.ldap.search_mode),
+        false)
+      ])
+      error_message = "ldap.bind_mode and ldap.search_mode must be \"direct\" or \"cached\"."
     }
 
     validation {

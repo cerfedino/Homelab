@@ -19,7 +19,7 @@ resource "authentik_outpost" "embedded" {
   config = jsonencode({
     log_level                        = "info"
     docker_labels                    = null
-    authentik_host                   = "https://authentik.${local.generated.domain_lan}"
+    authentik_host                   = "https://${local.applications["authentik_internal"].dns_hostname}"
     docker_network                   = null
     container_image                  = null
     docker_map_ports                 = true
@@ -56,6 +56,7 @@ locals {
     proxy_apps_external = {for k, v in local.fwauth_variants : k => v if v.variant == "external"}
 
     oidc_apps = {for k, app in local.applications : k => app if app.type == "oidc"}
+    ldap_apps = {for k, app in local.applications : k => app if app.type == "ldap"}
 }
 
 data "authentik_flow" "default-authorization-flow" {
@@ -153,6 +154,26 @@ resource "authentik_provider_oauth2" "oidc" {
   refresh_token_validity     = each.value.oidc.refresh_token_validity
 }
 
+resource "authentik_provider_ldap" "ldap" {
+  for_each = local.ldap_apps
+  name     = each.key
+
+  base_dn = each.value.ldap.base_dn
+
+  bind_flow   = authentik_flow.homelab_login.uuid
+  unbind_flow = data.authentik_flow.default-invalidation-flow.id
+
+  bind_mode   = each.value.ldap.bind_mode
+  search_mode = each.value.ldap.search_mode
+  mfa_support = each.value.ldap.mfa_support
+
+  certificate     = each.value.ldap.certificate ? data.authentik_certificate_key_pair.generated.id : null
+  tls_server_name = each.value.ldap.tls_server_name
+
+  uid_start_number = each.value.ldap.uid_start_number
+  gid_start_number = each.value.ldap.gid_start_number
+}
+
 
 
 # Recreate each application instead of editing it in place
@@ -168,6 +189,7 @@ resource "authentik_application" "apps" {
   protocol_provider = (
     each.value.type == "forward-auth" && each.value.dns_hostname != null ? tonumber(authentik_provider_proxy.proxies[each.key].id) :
     each.value.type == "oidc" ? tonumber(authentik_provider_oauth2.oidc[each.key].id) :
+    each.value.type == "ldap" ? tonumber(authentik_provider_ldap.ldap[each.key].id) :
     null
   )
 
@@ -203,13 +225,36 @@ resource "authentik_outpost" "external" {
     log_level               = "info"
     refresh_interval        = "minutes=5"
     authentik_host          = "http://authentik-server.authentik.svc.cluster.local"
-    authentik_host_browser  = "https://authentik.${local.generated.domain}"
+    authentik_host_browser  = "https://${local.applications["authentik_external"].dns_hostname}"
     authentik_host_insecure = false
     object_naming_template  = "ak-outpost-%(name)s"
     kubernetes_namespace    = "authentik"
     kubernetes_replicas     = 1
     kubernetes_service_type = "ClusterIP"
     kubernetes_disabled_components = ["ingress", "traefik middleware"]
+  })
+}
+
+
+# Outpost serving LDAP
+resource "authentik_outpost" "ldap" {
+  count              = length(local.ldap_apps) > 0 ? 1 : 0
+  name               = "ldap"
+  type               = "ldap"
+  service_connection = data.authentik_service_connection_kubernetes.local.id
+  protocol_providers = [
+    for k in sort(keys(local.ldap_apps)) : tonumber(authentik_provider_ldap.ldap[k].id)
+  ]
+  config = jsonencode({
+    log_level               = "info"
+    refresh_interval        = "minutes=5"
+    authentik_host          = "http://authentik-server.authentik.svc.cluster.local"
+    authentik_host_browser  = ""
+    authentik_host_insecure = false
+    object_naming_template  = "ak-outpost-%(name)s"
+    kubernetes_namespace    = "authentik"
+    kubernetes_replicas     = 1
+    kubernetes_service_type = "ClusterIP"
   })
 }
 
