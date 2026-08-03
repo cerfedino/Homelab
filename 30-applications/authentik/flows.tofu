@@ -266,3 +266,27 @@ resource "authentik_flow_stage_binding" "login_user_login" {
   stage  = authentik_stage_user_login.login.id
   order  = 30
 }
+
+
+# LDAP BIND FLOW
+# we disable 2FA for LDAP
+
+resource "authentik_flow" "ldap_login" {
+  name           = "ldap_login"
+  title          = "Sign in"
+  slug           = "ldap_login"
+  designation    = "authentication"
+  authentication = "require_unauthenticated"
+}
+
+resource "authentik_stage_identification" "ldap" {
+  name           = "ldap-identification"
+  user_fields    = ["username"]
+  password_stage = authentik_stage_password.login.id
+}
+
+resource "authentik_flow_stage_binding" "ldap_identification" {
+  target = authentik_flow.ldap_login.uuid
+  stage  = authentik_stage_identification.ldap.id
+  order  = 10
+}

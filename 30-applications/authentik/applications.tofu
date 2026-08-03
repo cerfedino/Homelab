@@ -160,7 +160,7 @@ resource "authentik_provider_ldap" "ldap" {
 
   base_dn = each.value.ldap.base_dn
 
-  bind_flow   = authentik_flow.homelab_login.uuid
+  bind_flow   = authentik_flow.ldap_login.uuid
   unbind_flow = data.authentik_flow.default-invalidation-flow.id
 
   bind_mode   = each.value.ldap.bind_mode
