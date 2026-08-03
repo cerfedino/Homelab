@@ -1,0 +1,16 @@
+when:
+  - event: [cron, manual]
+
+steps:
+  renovate:
+    image: renovate/renovate:44
+    environment:
+      RENOVATE_PLATFORM: github
+      RENOVATE_REPOSITORIES: cerfedino/Homelab
+      RENOVATE_ONBOARDING: "false"
+      RENOVATE_TOKEN:
+        from_secret: renovate_github_token
+      GITHUB_COM_TOKEN:
+        from_secret: renovate_github_token
+    commands:
+      - renovate

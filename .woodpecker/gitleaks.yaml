@@ -1,0 +1,15 @@
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 0
+
+when:
+  - event: push
+
+steps:
+  gitleaks:
+    image: zricethezav/gitleaks:latest
+    commands:
+      - gitleaks detect --source . -v
