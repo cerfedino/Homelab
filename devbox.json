@@ -2,7 +2,7 @@
     "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.17.5/.schema/devbox.schema.json",
     "packages": {
         "ansible": "2.21.1",
-        "opentofu": "1.12.4",
+        "opentofu": "1.12.5",
         "ansible-navigator": "26.6.0",
         "kubectl": "1.36.3",
         "podman": {
