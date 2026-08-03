@@ -110,8 +110,8 @@ output "helmfile_values" {
     backup = {
       s3_endpoint     = "https://${var.hetzner_s3.endpoint}"
       s3_bucket       = minio_s3_bucket.backups.bucket
-      s3_access_key   = var.hetzner_s3.access_key
-      s3_secret_key   = var.hetzner_s3.secret_key
+      s3_access_key   = var.hetzner_s3.access_key # gitleaks:allow
+      s3_secret_key   = var.hetzner_s3.secret_key # gitleaks:allow
       restic_password = var.backup_restic_password
     }
     domain               = var.domain

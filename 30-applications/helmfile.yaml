@@ -175,6 +175,16 @@ releases:
     values:
       - syncthing/extras/extras.yaml.gotmpl
 
+  - name: woodpecker
+    namespace: woodpecker
+    createNamespace: true
+    chart: oci://ghcr.io/woodpecker-ci/helm/woodpecker
+    version: "~3.7"
+    wait: true
+    values:
+      - woodpecker/values.yaml.gotmpl
+      - woodpecker/extras/extras.yaml.gotmpl
+
   - name: nextcloud
     namespace: nextcloud
     createNamespace: true
