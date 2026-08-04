@@ -1,0 +1,18 @@
+fullnameOverride: seerr
+
+extraEnv:
+  - name: TZ
+    value: Europe/Zurich
+  - name: LOG_LEVEL
+    value: warn
+
+config:
+  persistence:
+    existingClaim: seerr-config
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    memory: 1Gi

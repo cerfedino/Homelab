@@ -21,6 +21,8 @@ repositories:
     url: https://nextcloud.github.io/helm/
   - name: k8up-io
     url: https://k8up-io.github.io/k8up
+  - name: jellyfin
+    url: https://jellyfin.github.io/jellyfin-helm
 
 releases:
   - name: csi-proxmox
@@ -195,3 +197,30 @@ releases:
     values:
       - nextcloud/values.yaml.gotmpl
       - nextcloud/extras/extras.yaml.gotmpl
+
+  - name: media-extras
+    namespace: media
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: false
+    values:
+      - media/extras/extras.yaml.gotmpl
+
+  - name: jellyfin
+    namespace: media
+    createNamespace: true
+    chart: jellyfin/jellyfin
+    version: "~3.2"
+    wait: true
+    values:
+      - media/values-jellyfin.yaml
+
+  - name: seerr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/seerr-team/seerr/seerr-chart
+    version: "~3.9"
+    wait: true
+    values:
+      - media/values-seerr.yaml

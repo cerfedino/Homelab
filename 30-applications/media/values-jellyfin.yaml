@@ -1,0 +1,28 @@
+deploymentStrategy:
+  type: Recreate
+
+jellyfin:
+  env:
+    - name: TZ
+      value: Europe/Zurich
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+persistence:
+  config:
+    existingClaim: jellyfin-config
+  media:
+    existingClaim: media-data
+  cache:
+    enabled: true
+    existingClaim: jellyfin-cache
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    memory: 4Gi

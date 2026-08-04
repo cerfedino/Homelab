@@ -258,6 +258,12 @@ resource "authentik_outpost" "ldap" {
   })
 }
 
+resource "authentik_policy_binding" "ldap_search_access" {
+  for_each = local.ldap_apps
+  target   = authentik_application.apps[each.key].uuid
+  group    = authentik_group.ldapsearch.id
+  order    = 200
+}
 
 resource "authentik_policy_binding" "app_allowed_groups" {
   for_each = merge([

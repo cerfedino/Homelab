@@ -1,0 +1,4 @@
+resources:
+{{- range tuple "pvc-data.yaml" "pvc-jellyfin-config.yaml" "pvc-jellyfin-cache.yaml" "pvc-seerr-config.yaml" "ingressroute-jellyfin.yaml.gotmpl" "ingressroute-seerr.yaml.gotmpl" "backup-schedule.yaml.gotmpl" }}
+  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}

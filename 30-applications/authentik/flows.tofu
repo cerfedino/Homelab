@@ -290,3 +290,9 @@ resource "authentik_flow_stage_binding" "ldap_identification" {
   stage  = authentik_stage_identification.ldap.id
   order  = 10
 }
+
+resource "authentik_flow_stage_binding" "ldap_user_login" {
+  target = authentik_flow.ldap_login.uuid
+  stage  = authentik_stage_user_login.login.id
+  order  = 20
+}
