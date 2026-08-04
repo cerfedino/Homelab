@@ -3,7 +3,7 @@ locals {
     for base, variants in local.apps : {
       for variant, v in variants :
       "${base}_${variant}" => {
-        name    = "${base}${variant == "external" ?"":" (internal)"}"
+        name    = v.display_name
         url     = v.uptime_url
         variant = variant
       } if try(v.uptime_url, null) != null
