@@ -27,5 +27,14 @@ storageClass:
     reclaimPolicy: Retain
     fstype: ext4
     ssd: true
+    allowVolumeExpansion: true
     annotations:
       storageclass.kubernetes.io/is-default-class: "true"
+
+  # for volumes that are recreated constantly, like in the case of WoodpeckerCI
+  - name: proxmox-data-zfs-ephemeral
+    storage: "{{.Values.proxmox_storage_name}}"
+    reclaimPolicy: Delete
+    fstype: ext4
+    ssd: true
+    allowVolumeExpansion: true
