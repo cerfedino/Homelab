@@ -42,7 +42,6 @@ releases:
     wait: true
     values:
       - cert-manager/values.yaml.gotmpl
-      - cert-manager/extras/extras.yaml.gotmpl
 
   - name: cert-manager-issuers
     namespace: cert-manager
@@ -51,7 +50,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - cert-manager-issuers/extras/extras.yaml.gotmpl
+      - cert-manager-issuers/values.yaml.gotmpl
 
   - name: traefik
     namespace: traefik
@@ -62,7 +61,6 @@ releases:
     disableValidation: true
     values:
       - traefik/values.yaml.gotmpl
-      - traefik/extras/extras.yaml.gotmpl
 
   - name: kuma
     namespace: kuma
@@ -71,7 +69,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - kuma/extras/extras.yaml.gotmpl
+      - kuma/values.yaml.gotmpl
 
     # BACKUPS
   - name: k8up-globals
@@ -81,7 +79,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - k8up/extras/extras.yaml.gotmpl
+      - k8up/extras.yaml.gotmpl
 
   - name: k8up
     namespace: k8up
@@ -99,7 +97,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - backrest/extras/extras.yaml.gotmpl
+      - backrest/values.yaml.gotmpl
 
   ####
 
@@ -110,7 +108,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - pihole/extras/extras.yaml.gotmpl
+      - pihole/values.yaml.gotmpl
 
   - name: authentik
     namespace: authentik
@@ -119,9 +117,8 @@ releases:
     version: "~2026.5"
     wait: true
     values:
-      - authentik/values.yaml
+      - authentik/values.yaml.gotmpl
       - authentik/values.enc.yaml
-      - authentik/extras/extras.yaml.gotmpl
 
   - name: cloudflare-tunnel
     namespace: cloudflare-tunnel
@@ -130,7 +127,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - cloudflare-tunnel/extras/extras.yaml.gotmpl
+      - cloudflare-tunnel/values.yaml.gotmpl
 
   - name: immich-extras
     namespace: immich
@@ -139,7 +136,7 @@ releases:
     version: "~2.0"
     wait: false
     values:
-      - immich/extras/extras.yaml.gotmpl
+      - immich/extras.yaml.gotmpl
 
   - name: immich
     namespace: immich
@@ -157,7 +154,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - vaultwarden/extras/extras.yaml.gotmpl
+      - vaultwarden/values.yaml.gotmpl
 
   - name: paperless
     namespace: paperless
@@ -166,7 +163,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - paperless/extras/extras.yaml.gotmpl
+      - paperless/values.yaml.gotmpl
 
   - name: syncthing
     namespace: syncthing
@@ -175,7 +172,7 @@ releases:
     version: "~2.0"
     wait: true
     values:
-      - syncthing/extras/extras.yaml.gotmpl
+      - syncthing/values.yaml.gotmpl
 
   - name: woodpecker
     namespace: woodpecker
@@ -185,7 +182,6 @@ releases:
     wait: true
     values:
       - woodpecker/values.yaml.gotmpl
-      - woodpecker/extras/extras.yaml.gotmpl
 
   - name: nextcloud
     namespace: nextcloud
@@ -196,7 +192,6 @@ releases:
     timeout: 600
     values:
       - nextcloud/values.yaml.gotmpl
-      - nextcloud/extras/extras.yaml.gotmpl
 
   - name: media-extras
     namespace: media
@@ -205,7 +200,7 @@ releases:
     version: "~2.0"
     wait: false
     values:
-      - media/extras/extras.yaml.gotmpl
+      - media/values.yaml.gotmpl
 
   - name: jellyfin
     namespace: media

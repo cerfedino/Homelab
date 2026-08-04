@@ -1,0 +1,7 @@
+{{- $vals := merge (readFile "generated/generated.cloudflare-tunnel-token.yaml" | fromYaml) .Values }}
+resources:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) (dict "Values" $vals) | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}

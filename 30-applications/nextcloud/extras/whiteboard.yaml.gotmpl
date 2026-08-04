@@ -1,4 +1,4 @@
-{{- $secrets := fromYaml (readFile "../values.enc.yaml") }}
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

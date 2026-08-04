@@ -1,4 +1,0 @@
-extraObjects:
-{{- range tuple "certificate.yaml.gotmpl" "dynamic-config.yaml.gotmpl" }}
-  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}

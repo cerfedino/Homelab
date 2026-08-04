@@ -39,3 +39,10 @@ agent:
     limits:
       memory: "256Mi"
       cpu: "500m"
+
+additionalObjects:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}

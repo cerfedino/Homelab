@@ -137,3 +137,10 @@ resources:
 persistence:
   enabled: true
   existingClaim: nextcloud-data
+
+extraManifests:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}

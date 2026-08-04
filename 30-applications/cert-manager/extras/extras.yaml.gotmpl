@@ -1,5 +1,0 @@
-extraObjects:
-{{- range tuple "cloudflare-dns-token.yaml.k3ssecret.enc" }}
-  - |
-{{ tpl (readFile .) $ | nindent 4 }}
-{{- end }}

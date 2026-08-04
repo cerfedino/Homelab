@@ -1,4 +1,0 @@
-resources:
-{{- range tuple "cluster-issuer.enc.yaml" }}
-  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}

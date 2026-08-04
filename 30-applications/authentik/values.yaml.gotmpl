@@ -15,3 +15,10 @@ postgresql:
     podAnnotations:
       k8up.io/backupcommand: sh -c 'PGPASSWORD="$(cat "$POSTGRES_PASSWORD_FILE")" pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"'
       k8up.io/file-extension: .sql
+
+additionalObjects:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}

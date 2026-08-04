@@ -1,5 +1,0 @@
-{{- $vals := merge (readFile "../../cloudflare-tunnel/generated/generated.cloudflare-tunnel-token.yaml" | fromYaml) .Values }}
-resources:
-{{- range tuple "deployment.yaml.gotmpl" }}
-  - {{ tpl (readFile .) (dict "Values" $vals) | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}

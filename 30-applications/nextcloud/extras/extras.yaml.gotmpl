@@ -1,4 +1,0 @@
-extraManifests:
-{{- range tuple "pvc.yaml" "postgres.yaml.gotmpl" "pvc-postgres.yaml" "service-postgres.yaml" "redis.yaml" "service-redis.yaml" "secret-oidc.yaml.gotmpl" "whiteboard.yaml.gotmpl" "service-whiteboard.yaml" "middleware-whiteboard.yaml" "middleware-hsts.yaml" "ingressroute.yaml.gotmpl" "backup-schedule.yaml.gotmpl" }}
-  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}

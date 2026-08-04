@@ -1,0 +1,6 @@
+resources:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}

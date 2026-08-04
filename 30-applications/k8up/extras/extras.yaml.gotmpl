@@ -1,4 +1,0 @@
-resources:
-{{- range tuple "secret.yaml.gotmpl" }}
-  - {{ tpl (readFile .) $ | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}

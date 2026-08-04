@@ -70,3 +70,10 @@ additionalArguments:
   - "--entrypoints.websecure.http.tls=true"
   - "--log.level=WARN"
   - "--accesslog=true"
+
+extraObjects:
+{{- range $f := readDirEntries "extras" }}
+{{- if not (hasPrefix "." $f.Name) }}
+  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
+{{- end }}
