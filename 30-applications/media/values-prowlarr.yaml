@@ -1,0 +1,50 @@
+controllers:
+  prowlarr:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: lscr.io/linuxserver/prowlarr
+          tag: "2.5.2"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Zurich
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 9696
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 9696
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  app:
+    controller: prowlarr
+    ports:
+      http:
+        port: 9696
+
+persistence:
+  config:
+    existingClaim: prowlarr-config
+    globalMounts:
+      - path: /config

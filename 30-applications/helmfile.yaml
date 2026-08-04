@@ -219,3 +219,30 @@ releases:
     wait: true
     values:
       - media/values-seerr.yaml
+
+  - name: sonarr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-sonarr.yaml
+
+  - name: radarr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-radarr.yaml
+
+  - name: prowlarr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-prowlarr.yaml

@@ -1,0 +1,114 @@
+# must land on the node holding the media-data RWO attachment
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+
+controllers:
+  sonarr:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: lscr.io/linuxserver/sonarr
+          tag: "4.0.19"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Zurich
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 8989
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 8989
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+      seedbox-mount:
+        image:
+          repository: rclone/rclone
+          tag: "1.75.0"
+        command:
+          - sh
+          - -c
+          - |
+            mkdir -p /mnt/seedbox
+            while umount -l /mnt/seedbox 2>/dev/null; do :; done
+            exec rclone mount seedbox:downloads/qbittorrent/complete /mnt/seedbox --read-only --allow-other --dir-cache-time=30s
+        env:
+          RCLONE_CONFIG_SEEDBOX_TYPE: sftp
+          RCLONE_CONFIG_SEEDBOX_HOST: aero.usbx.me
+          RCLONE_CONFIG_SEEDBOX_USER: usb354
+          RCLONE_CONFIG_SEEDBOX_PASS:
+            valueFrom:
+              secretKeyRef:
+                name: seedbox-rclone
+                key: pass_obscured
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    controller: sonarr
+    ports:
+      http:
+        port: 8989
+
+persistence:
+  config:
+    existingClaim: sonarr-config
+    advancedMounts:
+      sonarr:
+        app:
+          - path: /config
+  media:
+    existingClaim: media-data
+    advancedMounts:
+      sonarr:
+        app:
+          - path: /media
+  seedbox:
+    type: emptyDir
+    advancedMounts:
+      sonarr:
+        app:
+          - path: /mnt
+            readOnly: true
+            mountPropagation: HostToContainer
+        seedbox-mount:
+          - path: /mnt
+            mountPropagation: Bidirectional
+  fuse:
+    type: hostPath
+    hostPath: /dev/fuse
+    advancedMounts:
+      sonarr:
+        seedbox-mount:
+          - path: /dev/fuse
