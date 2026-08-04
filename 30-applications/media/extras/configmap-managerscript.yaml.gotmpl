@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: managerscript
+data:
+  filterscript.py: |
+{{ readFile "managerscript/filterscript.py" | indent 4 }}
+  known_hosts: |
+{{ readFile "managerscript/known_hosts.enc" | indent 4 }}

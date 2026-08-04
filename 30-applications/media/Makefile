@@ -18,3 +18,5 @@ helmfile-apply:
 	cd ..; helmfile apply --skip-refresh -l name=unpackerr
 	cd ..; helmfile apply --skip-refresh -l name=grimmory-db
 	cd ..; helmfile apply --skip-refresh -l name=grimmory
+	cd ..; helmfile apply --skip-refresh -l name=autobrr
+	cd ..; helmfile apply --skip-refresh -l name=managerscript

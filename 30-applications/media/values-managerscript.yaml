@@ -1,0 +1,44 @@
+controllers:
+  managerscript:
+    strategy: Recreate
+    replicas: 1
+    containers:
+      app:
+        image:
+          repository: python
+          tag: "3.13-alpine"
+        command:
+          - sh
+          - -c
+          - |
+            pip install --no-cache-dir --quiet \
+              discord_webhook==1.4.1 paramiko==4.0.0 qbittorrent_api==2025.7.0
+            exec python /app/filterscript.py
+        env:
+          TZ: Europe/Zurich
+          PYTHONUNBUFFERED: "1"
+        envFrom:
+          - secretRef:
+              name: managerscript
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+
+service:
+  app:
+    enabled: false
+
+persistence:
+  script:
+    type: configMap
+    name: managerscript
+    globalMounts:
+      - path: /app/filterscript.py
+        subPath: filterscript.py
+        readOnly: true
+      - path: /app/known_hosts
+        subPath: known_hosts
+        readOnly: true

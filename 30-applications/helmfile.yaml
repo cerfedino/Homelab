@@ -301,4 +301,22 @@ releases:
     wait: true
     values:
       - media/values-grimmory.yaml
+
+  - name: autobrr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: false
+    values:
+      - media/values-autobrr.yaml
+
+  - name: managerscript
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: false
+    values:
+      - media/values-managerscript.yaml
   ###

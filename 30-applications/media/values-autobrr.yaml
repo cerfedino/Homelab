@@ -1,0 +1,52 @@
+controllers:
+  autobrr:
+    strategy: Recreate
+    replicas: 1
+    containers:
+      app:
+        image:
+          repository: ghcr.io/autobrr/autobrr
+          tag: "v1.83.0"
+        env:
+          TZ: Europe/Zurich
+          AUTOBRR__LOG_LEVEL: WARN
+          AUTOBRR__HOST: 0.0.0.0
+          AUTOBRR__PORT: "7474"
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/healthz/liveness
+                port: 7474
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/healthz/liveness
+                port: 7474
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    controller: autobrr
+    ports:
+      http:
+        port: 7474
+
+persistence:
+  config:
+    existingClaim: autobrr-config
+    globalMounts:
+      - path: /config
