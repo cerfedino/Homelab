@@ -51,3 +51,4 @@ Amongst other things add Sonarr and Radarr
 Go to settings:
 
 - Disable Local sign in and leave Jellyfin Sign in as the only option
+- grant admin access to the personal user
