@@ -14,3 +14,5 @@ helmfile-apply:
 	cd ..; helmfile apply --skip-refresh -l name=prowlarr
 	cd ..; helmfile apply --skip-refresh -l name=flaresolverr
 	cd ..; helmfile apply --skip-refresh -l name=qbittorrent
+	cd ..; helmfile apply --skip-refresh -l name=bazarr
+	cd ..; helmfile apply --skip-refresh -l name=unpackerr

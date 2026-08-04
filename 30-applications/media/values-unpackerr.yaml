@@ -1,0 +1,44 @@
+# must land on the node holding the media-data RWO attachment
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+
+controllers:
+  unpackerr:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: golift/unpackerr
+          tag: "0.15.2"
+        env:
+          TZ: Europe/Zurich
+          UN_LOG_FILE: ""
+          UN_SONARR_0_URL: http://sonarr.media.svc.cluster.local:8989
+          UN_SONARR_0_PATHS_0: /media/downloads
+          UN_RADARR_0_URL: http://radarr.media.svc.cluster.local:7878
+          UN_RADARR_0_PATHS_0: /media/downloads
+        envFrom:
+          - secretRef:
+              name: unpackerr-arr
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+
+service:
+  app:
+    enabled: false
+
+persistence:
+  media:
+    existingClaim: media-data
+    globalMounts:
+      - path: /media

@@ -1,0 +1,64 @@
+# must land on the node holding the media-data RWO attachment
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+
+controllers:
+  bazarr:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: lscr.io/linuxserver/bazarr
+          tag: "1.6.0"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Zurich
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 6767
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 6767
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  app:
+    controller: bazarr
+    ports:
+      http:
+        port: 6767
+
+persistence:
+  config:
+    existingClaim: bazarr-config
+    globalMounts:
+      - path: /config
+  media:
+    existingClaim: media-data
+    globalMounts:
+      - path: /media

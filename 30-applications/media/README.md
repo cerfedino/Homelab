@@ -2,11 +2,11 @@
 
 Manual steps for configuring a new instance. DOnt wanna automate it because its way too much work
 
-## 1. Jellyfin
+## Jellyfin
 
 Setup wizard:
 
-1. Create break-glass user `admin`
+1. Create service user `admin`
 2. Add the libraries:
 
 - Movies at `/media/movies`
@@ -27,16 +27,31 @@ Configure
 - Enable creating users on first login
 - Library access: All
 
-## 2. Sonarr / Radarr / Prowlarr / qBittorrent
+## AirVpn
 
-Set the AirVPN client key and cert under in [values.enc.yaml](./values.enc.yaml) (remove headers)
+- Set the AirVPN client key and cert under in [values.enc.yaml](./values.enc.yaml) (remove headers)
 
-Sonarr/Radarr/Prowlarr
+## Sonarr/Radarr/Prowlarr
 
 - set Authentication to Forms with Authentication Required: Disabled for Local Addresses (authentik fwauth protects it), copy the API key into the tfvars
 - Add indexers in Prowlarr's GUI
 
-qBittorrent
+## Bazarr
+
+- Settings > Sonarr at `http://sonarr.media.svc.cluster.local:8989`
+- Settings > Radarr at `http://radarr.media.svc.cluster.local:7878` with their API keys
+- Settings > Languages
+- Settings > Providers > OpenSubtitles.com provider with personal account
+- Settings > Providers > Embedded Subtitles
+- Disable Settings > Subtitles > Treat Embedded Subtitles as Downloaded
+- Settings > Subtitles > Audio Synchronization
+
+## Unpackarr
+
+- Set the Sonarr and Radarr API keys in [values.enc.yaml](values.enc.yaml)
+
+## qBittorrent
+
 In the settings:
 
 - temporary WebUI password is in the pod log. Set a real one and put it in the tfvars
@@ -47,7 +62,7 @@ In the settings:
 - Disable torrent queueing
 - Bind interface to gluetun's `tun0` under Advanced
 
-## 3. Seerr
+## Seerr
 
 Setup wizard:
 
