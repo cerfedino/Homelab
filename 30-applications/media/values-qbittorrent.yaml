@@ -1,0 +1,101 @@
+# must land on the node holding the media-data RWO attachment
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+
+controllers:
+  qbittorrent:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: lscr.io/linuxserver/qbittorrent
+          tag: "5.2.3"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Zurich
+          WEBUI_PORT: "8080"
+          TORRENTING_PORT: "56269"
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8080
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8080
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+      gluetun:
+        image:
+          repository: qmcgaw/gluetun
+          tag: "v3.41.3"
+        env:
+          VPN_SERVICE_PROVIDER: airvpn
+          VPN_TYPE: wireguard
+          SERVER_COUNTRIES: Switzerland
+          FIREWALL_VPN_INPUT_PORTS: "56269"
+          FIREWALL_INPUT_PORTS: "8080"
+          FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/16,10.43.0.0/16"
+          TZ: Europe/Zurich
+          LOG_LEVEL: info
+        envFrom:
+          - secretRef:
+              name: gluetun-vpn
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    controller: qbittorrent
+    ports:
+      http:
+        port: 8080
+
+persistence:
+  config:
+    existingClaim: qbittorrent-config
+    advancedMounts:
+      qbittorrent:
+        app:
+          - path: /config
+  media:
+    existingClaim: media-data
+    advancedMounts:
+      qbittorrent:
+        app:
+          - path: /media
+  tun:
+    type: hostPath
+    hostPath: /dev/net/tun
+    advancedMounts:
+      qbittorrent:
+        gluetun:
+          - path: /dev/net/tun

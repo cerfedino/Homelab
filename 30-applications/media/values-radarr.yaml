@@ -45,34 +45,6 @@ controllers:
             memory: 256Mi
           limits:
             memory: 1Gi
-      seedbox-mount:
-        image:
-          repository: rclone/rclone
-          tag: "1.75.0"
-        command:
-          - sh
-          - -c
-          - |
-            mkdir -p /mnt/seedbox
-            while umount -l /mnt/seedbox 2>/dev/null; do :; done
-            exec rclone mount seedbox:downloads/qbittorrent/complete /mnt/seedbox --read-only --allow-other --dir-cache-time=30s
-        env:
-          RCLONE_CONFIG_SEEDBOX_TYPE: sftp
-          RCLONE_CONFIG_SEEDBOX_HOST: aero.usbx.me
-          RCLONE_CONFIG_SEEDBOX_USER: usb354
-          RCLONE_CONFIG_SEEDBOX_PASS:
-            valueFrom:
-              secretKeyRef:
-                name: seedbox-rclone
-                key: pass_obscured
-        securityContext:
-          privileged: true
-        resources:
-          requests:
-            cpu: 10m
-            memory: 64Mi
-          limits:
-            memory: 512Mi
 
 service:
   app:
@@ -94,21 +66,3 @@ persistence:
       radarr:
         app:
           - path: /media
-  seedbox:
-    type: emptyDir
-    advancedMounts:
-      radarr:
-        app:
-          - path: /mnt
-            readOnly: true
-            mountPropagation: HostToContainer
-        seedbox-mount:
-          - path: /mnt
-            mountPropagation: Bidirectional
-  fuse:
-    type: hostPath
-    hostPath: /dev/fuse
-    advancedMounts:
-      radarr:
-        seedbox-mount:
-          - path: /dev/fuse

@@ -13,16 +13,10 @@ variable "radarr_api_key" {
   sensitive = true
 }
 
-variable "seedbox" {
+variable "qbittorrent" {
   type = object({
-    host           = string
-    port           = number
-    use_ssl        = bool
-    url_base       = string
-    username       = string
-    password       = string
-    # absolute path of qbittorrent's download dir, with trailing slash
-    downloads_path = string
+    username = string
+    password = string
   })
   sensitive = true
 }

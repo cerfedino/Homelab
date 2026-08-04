@@ -256,4 +256,13 @@ releases:
     wait: true
     values:
       - media/values-flaresolverr.yaml
+
+  - name: qbittorrent
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-qbittorrent.yaml
   ###

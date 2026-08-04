@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qbittorrent
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := .Values.apps.qbittorrent }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      services:
+        - name: qbittorrent
+          port: 8080
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
+{{- end }}

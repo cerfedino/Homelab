@@ -27,14 +27,25 @@ Configure
 - Enable creating users on first login
 - Library access: All
 
-## 2. Sonarr / Radarr / Prowlarr
+## 2. Sonarr / Radarr / Prowlarr / qBittorrent
 
-Set `seedbox.pass_obscured` in [values.enc.yaml](./values.enc.yaml), the output of `rclone obscure <sftp password>`.
+Set the AirVPN client key and cert under in [values.enc.yaml](./values.enc.yaml) (remove headers)
 
-Manual part per app, once:
+Sonarr/Radarr/Prowlarr
 
-- Sonarr/Radarr/Prowlarr: set Authentication to Forms with Authentication Required: Disabled for Local Addresses (authentik fwauth protects it), copy the API key into the tfvars
+- set Authentication to Forms with Authentication Required: Disabled for Local Addresses (authentik fwauth protects it), copy the API key into the tfvars
 - Add indexers in Prowlarr's GUI
+
+qBittorrent
+In the settings:
+
+- temporary WebUI password is in the pod log. Set a real one and put it in the tfvars
+- Default Save Path `/media/downloads`, incomplete torrents in `/media/downloads/incomplete`.
+- Pre-allocate disk space
+- TOrrent management node automatic etc.
+- Seeding limit action: "Remove torrent and its files"
+- Disable torrent queueing
+- Bind interface to gluetun's `tun0` under Advanced
 
 ## 3. Seerr
 
