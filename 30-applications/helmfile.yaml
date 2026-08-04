@@ -193,6 +193,7 @@ releases:
     values:
       - nextcloud/values.yaml.gotmpl
 
+    # *arr MEDIA STACK
   - name: media-extras
     namespace: media
     createNamespace: true
@@ -246,3 +247,13 @@ releases:
     wait: true
     values:
       - media/values-prowlarr.yaml
+
+  - name: flaresolverr
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-flaresolverr.yaml
+  ###

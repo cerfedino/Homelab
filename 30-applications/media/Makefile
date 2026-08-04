@@ -12,3 +12,4 @@ helmfile-apply:
 	cd ..; helmfile apply --skip-refresh -l name=sonarr
 	cd ..; helmfile apply --skip-refresh -l name=radarr
 	cd ..; helmfile apply --skip-refresh -l name=prowlarr
+	cd ..; helmfile apply --skip-refresh -l name=flaresolverr

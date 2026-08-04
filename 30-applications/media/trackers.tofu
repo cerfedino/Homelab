@@ -6,6 +6,17 @@ resource "prowlarr_sync_profile" "standard" {
   minimum_seeders           = 1
 }
 
+resource "prowlarr_tag" "flaresolverr" {
+  label = "flaresolverr"
+}
+
+resource "prowlarr_indexer_proxy_flaresolverr" "flaresolverr" {
+  name            = "flaresolverr"
+  host            = "http://flaresolverr.media.svc.cluster.local:8191/"
+  request_timeout = 60
+  tags            = [prowlarr_tag.flaresolverr.id]
+}
+
 resource "prowlarr_application_sonarr" "sonarr" {
   name         = "Sonarr"
   sync_level   = "fullSync"

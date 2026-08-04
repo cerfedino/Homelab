@@ -1,0 +1,42 @@
+controllers:
+  flaresolverr:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/flaresolverr/flaresolverr
+          tag: "v3.5.0"
+        env:
+          TZ: Europe/Zurich
+          LOG_LEVEL: info
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8191
+              initialDelaySeconds: 30
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8191
+              initialDelaySeconds: 10
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  app:
+    controller: flaresolverr
+    ports:
+      http:
+        port: 8191
