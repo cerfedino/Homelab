@@ -13,5 +13,7 @@ spec:
       services:
         - name: prowlarr
           port: 9696
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
 {{- end }}
 {{- end }}
