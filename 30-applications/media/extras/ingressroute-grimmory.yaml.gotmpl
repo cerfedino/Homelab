@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grimmory
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := .Values.apps.books }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      services:
+        - name: grimmory
+          port: 6060
+{{- end }}
+{{- end }}

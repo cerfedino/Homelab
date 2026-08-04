@@ -26,6 +26,13 @@ Configure
 - LDAP Username Attribute: `cn`
 - Enable creating users on first login
 - Library access: All
+- Hide password reset button on the login form. Add CSS in Dashboard > Branding > Custom CSS:
+
+```css
+.btnForgotPassword {
+  display: none !important;
+}
+```
 
 ## AirVpn
 
@@ -45,6 +52,14 @@ Configure
 - Settings > Providers > Embedded Subtitles
 - Disable Settings > Subtitles > Treat Embedded Subtitles as Downloaded
 - Settings > Subtitles > Audio Synchronization
+
+## Grimmory
+
+- Create admin account in setup wizard (with a different email than any admins account)
+- Point the library at `/media/books`
+- Settings > Metadata 1 > Sidecar JSON Files
+- Settings > Application > File Management
+- Settings > OIDC: Take values from `generated.oidc.yaml`. The local login stays reachable at `/login?local=true`
 
 ## Unpackarr
 

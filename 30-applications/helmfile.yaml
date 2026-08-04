@@ -283,4 +283,22 @@ releases:
     wait: true
     values:
       - media/values-unpackerr.yaml
+
+  - name: grimmory-db
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-grimmory-db.yaml
+
+  - name: grimmory
+    namespace: media
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - media/values-grimmory.yaml
   ###

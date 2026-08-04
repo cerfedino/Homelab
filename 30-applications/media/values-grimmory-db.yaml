@@ -1,0 +1,65 @@
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+  annotations:
+    k8up.io/backupcommand: sh -c 'mariadb-dump --single-transaction -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"'
+    k8up.io/file-extension: .sql
+
+controllers:
+  grimmory-db:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: lscr.io/linuxserver/mariadb
+          tag: "11.4.12"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Zurich
+          MYSQL_DATABASE: grimmory
+          MYSQL_USER: grimmory
+        envFrom:
+          - secretRef:
+              name: grimmory-db
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["mariadb-admin", "ping", "-h", "localhost"]
+              initialDelaySeconds: 60
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["mariadb-admin", "ping", "-h", "localhost"]
+              initialDelaySeconds: 20
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  app:
+    controller: grimmory-db
+    ports:
+      http:
+        port: 3306
+
+persistence:
+  config:
+    existingClaim: grimmory-db-config
+    globalMounts:
+      - path: /config

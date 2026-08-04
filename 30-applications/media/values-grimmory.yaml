@@ -1,0 +1,70 @@
+# must land on the node holding the media-data RWO attachment
+defaultPodOptions:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jellyfin
+          topologyKey: kubernetes.io/hostname
+
+controllers:
+  grimmory:
+    strategy: Recreate
+    containers:
+      app:
+        image:
+          repository: grimmory/grimmory
+          tag: "v3.2.4"
+        env:
+          USER_ID: "1000"
+          GROUP_ID: "1000"
+          TZ: Europe/Zurich
+          DATABASE_URL: jdbc:mariadb://grimmory-db.media.svc.cluster.local:3306/grimmory
+          DATABASE_USERNAME: grimmory
+          DISK_TYPE: LOCAL
+        envFrom:
+          - secretRef:
+              name: grimmory-db
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/healthcheck
+                port: 6060
+              initialDelaySeconds: 90
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/healthcheck
+                port: 6060
+              initialDelaySeconds: 30
+              periodSeconds: 15
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+
+service:
+  app:
+    controller: grimmory
+    ports:
+      http:
+        port: 6060
+
+persistence:
+  data:
+    existingClaim: grimmory-data
+    globalMounts:
+      - path: /app/data
+  media:
+    existingClaim: media-data
+    globalMounts:
+      - path: /media
