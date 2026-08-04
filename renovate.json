@@ -1,31 +1,47 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "kubernetes": {
-    "managerFilePatterns": ["/^30-applications/.+/extras/.+\\.yaml$/"]
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Container images in gotmpl-templated manifests",
-      "managerFilePatterns": ["/^30-applications/.+/extras/.+\\.yaml\\.gotmpl$/"],
-      "matchStrings": ["image: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[a-zA-Z0-9][\\w.\\-]*)"],
-      "datasourceTemplate": "docker"
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended"
+    ],
+    "kubernetes": {
+        "managerFilePatterns": [
+            "/^30-applications/.+/extras/.+\\.yaml$/"
+        ]
     },
-    {
-      "customType": "regex",
-      "description": "k3s version pin",
-      "managerFilePatterns": ["/^20-bootstrap/group_vars/k3s_cluster/vars\\.yaml$/"],
-      "matchStrings": ["k3s_version: (?<currentValue>v[\\d.]+\\+k3s\\d+)"],
-      "depNameTemplate": "k3s-io/k3s",
-      "datasourceTemplate": "github-releases"
-    },
-    {
-      "customType": "regex",
-      "description": "ansible-navigator execution environment base image",
-      "managerFilePatterns": ["/^20-bootstrap/execution-environment\\.yml$/"],
-      "matchStrings": ["name: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[\\w.\\-]+)"],
-      "datasourceTemplate": "docker"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Container images in gotmpl-templated manifests",
+            "managerFilePatterns": [
+                "/^30-applications/.+/extras/.+\\.yaml\\.gotmpl$/"
+            ],
+            "matchStrings": [
+                "image: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[a-zA-Z0-9][\\w.\\-]*)"
+            ],
+            "datasourceTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "description": "k3s version pin",
+            "managerFilePatterns": [
+                "/^20-bootstrap/group_vars/k3s_cluster/vars\\.yaml$/"
+            ],
+            "matchStrings": [
+                "k3s_version: (?<currentValue>v[\\d.]+\\+k3s\\d+)"
+            ],
+            "depNameTemplate": "k3s-io/k3s",
+            "datasourceTemplate": "github-releases"
+        },
+        {
+            "customType": "regex",
+            "description": "ansible-navigator execution environment base image",
+            "managerFilePatterns": [
+                "/^20-bootstrap/execution-environment\\.yml$/"
+            ],
+            "matchStrings": [
+                "name: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[\\w.\\-]+)"
+            ],
+            "datasourceTemplate": "docker"
+        }
+    ]
 }
