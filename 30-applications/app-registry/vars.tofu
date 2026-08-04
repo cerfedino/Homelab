@@ -20,6 +20,9 @@ variable "applications" {
       allowed_users = optional(list(string), [])
       allowed_groups = optional(list(string), [])
 
+      # forward-auth: bypass authentication for paths matching regex
+      skip_path_regex = optional(string)
+
       group = string
       policy_engine_mode = optional(string, "any")
 

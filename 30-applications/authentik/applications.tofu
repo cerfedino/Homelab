@@ -71,6 +71,7 @@ resource "authentik_provider_proxy" "proxies" {
   mode               = "forward_single"
   name               = each.key
   external_host      = "https://${each.value.dns_hostname}"
+  skip_path_regex    = each.value.skip_path_regex
   authorization_flow = data.authentik_flow.default-authorization-flow.id
   authentication_flow = authentik_flow.homelab_login.uuid
   invalidation_flow = data.authentik_flow.default-invalidation-flow.id
