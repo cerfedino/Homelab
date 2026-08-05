@@ -11,6 +11,10 @@ spec:
     schedule: "0 1 * * *"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 2
+    # only the chart's own volumes such that pipelines dont get backed up
+    labelSelectors:
+      - matchLabels:
+          app.kubernetes.io/instance: woodpecker
   check:
     schedule: "0 2 * * 6"
   prune:

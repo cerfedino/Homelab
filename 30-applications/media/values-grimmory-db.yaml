@@ -14,7 +14,7 @@ controllers:
   grimmory-db:
     strategy: Recreate
     containers:
-      app:
+      grimmory-db:
         image:
           repository: lscr.io/linuxserver/mariadb
           tag: "11.4.12"
