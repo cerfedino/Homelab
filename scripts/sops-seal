@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 # Encrypt secrets in place, every .enc file in the repo, or only the given paths
 set -euo pipefail
+self="$(realpath -- "$0")"
+
+if [ "${1:-}" = "--worker" ]; then
+  f="$2"
+  if scripts/sops-check "$f" >/dev/null 2>&1; then
+    echo "already encrypted $f"
+  else
+    scripts/sops-toggle "$f"
+  fi
+  exit 0
+fi
 
 if [ "$#" -gt 0 ]; then
   files=()
@@ -12,10 +23,5 @@ else
       -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*')
 fi
 
-for f in "${files[@]}"; do
-  if scripts/sops-check "$f" >/dev/null 2>&1; then
-    echo "already encrypted $f"
-  else
-    scripts/sops-toggle "$f"
-  fi
-done
+[ "${#files[@]}" -gt 0 ] || exit 0
+printf '%s\0' "${files[@]}" | xargs -0 -P "$(nproc)" -I{} "$self" --worker {}

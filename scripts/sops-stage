@@ -1,12 +1,54 @@
 #!/usr/bin/env bash
 # Encrypt every cleartext .enc secrets file in the repo, then force-stage them all
 set -euo pipefail
+self="$(realpath -- "$0")"
 cd "$(dirname "$0")/.."
+
+# worker: sops + object-db work for one file, no index writes, so nproc run in parallel
+if [ "${1:-}" = "--worker" ]; then
+  f="${2#./}" records="$3"
+  name="${f##*/}"
+  case "$name" in
+    *.yaml | *.yml | *.yaml.* | *.yml.*)      type=yaml   store=yaml ;;
+    *.json | *.json.*)                        type=json   store=json ;;
+    *)                                        type=binary store=binary ;;
+  esac
+  mode=100644; [ -x "$f" ] && mode=100755
+
+  if scripts/sops-check "$f" >/dev/null 2>&1; then
+    blob=$(git hash-object -w -- "$f")
+    line="staged $f"
+  else
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "$tmp_dir"' EXIT
+    tmp="$tmp_dir/$name"
+    blob=""
+    if git show ":$f" > "$tmp" 2>/dev/null; then
+      if ! scripts/sops-check "$tmp" >/dev/null 2>&1; then
+        # never treat an index copy as ciphertext when it isn't
+        echo "WARNING: $f is CLEARTEXT in the index — re-staging encrypted, audit git history" >&2
+      elif sops -d --input-type "$store" --output-type "$type" "$tmp" 2>/dev/null | cmp -s - "$f"; then
+        blob=$(git hash-object -w -- "$tmp")
+        line="unchanged $f (kept existing ciphertext)"
+      fi
+    fi
+    if [ -z "$blob" ]; then
+      sops -e --input-type "$type" --output-type "$store" "$f" > "$tmp.new"
+      blob=$(git hash-object -w -- "$tmp.new")
+      line="staged $f (kept decrypted in worktree)"
+    fi
+  fi
+  # one printf = one atomic append
+  printf '%s %s 0\t%s\n' "$mode" "$blob" "$f" >> "$records"
+  echo "$line"
+  exit 0
+fi
 
 # Drop any previously staged .enc entries
 git diff --cached --name-only -z -- '*.enc' '*.enc.*' |
   while IFS= read -r -d '' f; do
-    git restore --staged -- "$f"
+    git update-index --no-skip-worktree "$f" 2>/dev/null || true
+    git restore --staged -- "$f" 2>/dev/null || git rm --cached --quiet -- "$f"
     echo "unstaged $f"
   done
 
@@ -20,38 +62,13 @@ git ls-files -z -- '*.enc' '*.enc.*' |
     fi
   done
 
-find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
-    -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' |
-  while IFS= read -r f; do
-    # skip-worktree keeps unencrypted secrets out of git status so we can avoid making the tree unnecessarily dirty
-    git ls-files --error-unmatch "$f" >/dev/null 2>&1 && git update-index --no-skip-worktree "$f"
-    # If the file is encrypted already, stage directly
-    if scripts/sops-check "$f" >/dev/null 2>&1; then
-      git add -f "$f"
-      echo "staged $f"
-    else
-      # File is cleartext. Stage only if the cleartext version of the git index file is different
-      tmp_dir="$(mktemp -d)"
-      tmp="$tmp_dir/${f##*/}"
+records="$(mktemp)"
+trap 'rm -f "$records"' EXIT
 
-      unchanged=0
-      if git show ":$f" > "$tmp" 2>/dev/null; then
-        if ! scripts/sops-check "$tmp" >/dev/null 2>&1; then
-          # never treat an index copy as ciphertext when it isn't
-          echo "WARNING: $f is CLEARTEXT in the index — re-staging encrypted, audit git history" >&2
-        elif scripts/sops-toggle "$tmp" >/dev/null 2>&1 && cmp -s "$tmp" "$f"; then
-          unchanged=1
-        fi
-      fi
-      if [ "$unchanged" = 1 ]; then
-        echo "unchanged $f (kept existing ciphertext)"
-      else
-        scripts/sops-toggle "$f"
-        git add -f "$f"
-        scripts/sops-toggle "$f"
-        echo "staged $f (kept decrypted in worktree)"
-      fi
-      rm -rf "$tmp_dir"
-    fi
-    git update-index --skip-worktree "$f"
-  done
+find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
+    -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' -print0 |
+  xargs -0 -P "$(nproc)" -I{} "$self" --worker {} "$records"
+
+# skip-worktree keeps unencrypted secrets out of git status so we can avoid making the tree unnecessarily dirty
+git update-index --add --index-info < "$records"
+cut -f2 "$records" | git update-index --skip-worktree --stdin
