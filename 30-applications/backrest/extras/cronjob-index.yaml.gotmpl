@@ -1,0 +1,37 @@
+{{- $repos := tuple "authentik" "immich" "kuma" "media" "nextcloud" "paperless" "pihole" "syncthing" "vaultwarden" "woodpecker" }}
+
+# Periodically indexes the backrest repos
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: index-snapshots
+spec:
+  schedule: "00 7 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: index
+              image: curlimages/curl:8.11.1
+              command:
+                - sh
+                - -c
+                - |
+                  for repo in {{ range $repos }}{{ . }} {{ end }}; do
+                    curl -sf -X POST -H "Content-Type: application/json" \
+                      -d "{\"repoId\":\"$repo\",\"task\":\"TASK_INDEX_SNAPSHOTS\"}" \
+                      http://backrest.backrest.svc.cluster.local:9898/v1.Backrest/DoRepoTask \
+                      || echo "index failed: $repo"
+                  done
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
