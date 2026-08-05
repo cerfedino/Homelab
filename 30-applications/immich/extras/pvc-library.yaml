@@ -8,4 +8,4 @@ spec:
   storageClassName: proxmox-data-zfs
   resources:
     requests:
-      storage: 100Gi
+      storage: 500Gi
