@@ -156,6 +156,15 @@ releases:
     values:
       - vaultwarden/values.yaml.gotmpl
 
+  - name: psitransfer
+    namespace: psitransfer
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: true
+    values:
+      - psitransfer/values.yaml.gotmpl
+
   - name: paperless
     namespace: paperless
     createNamespace: true

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psitransfer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: psitransfer
+  template:
+    metadata:
+      labels:
+        app: psitransfer
+    spec:
+      # a Service named psitransfer would inject PSITRANSFER_PORT into the app's env namespace
+      enableServiceLinks: false
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: psitransfer
+          image: psitrax/psitransfer:v2.4.4
+          env:
+            - name: PSITRANSFER_ACCESS_LOG
+              value: warn
+            - name: PSITRANSFER_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: psitransfer
+                  key: admin_pass
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              # keep lost+found outside the app's bucket scan
+              subPath: data
+            - name: config
+              mountPath: /app/config.production.js
+              subPath: config.production.js
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: psitransfer-data
+        - name: config
+          configMap:
+            name: psitransfer-config
