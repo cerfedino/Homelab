@@ -24,11 +24,12 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
+        'trusted_domains' => array('localhost', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
+        'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
         'default_phone_region' => 'CH',
         'maintenance_window_start' => 1,
-        // traefik: trust the pod network so brute-force protection and
-        // logging see real client IPs from X-Forwarded-For
+        // trust the pod network such that we can read the X-Forwarded-For IP
         'trusted_proxies' => array('10.42.0.0/16'),
         // imaginary offloads image preview generation (chart service, port 80)
         'preview_imaginary_url' => 'http://nextcloud-imaginary/',
