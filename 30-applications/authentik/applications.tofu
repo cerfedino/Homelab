@@ -102,6 +102,16 @@ resource "authentik_property_mapping_provider_scope" "app_group_map" {
   EOT
 }
 
+# take the profile_claims attribute for each user and merge it into the profile claims
+resource "authentik_property_mapping_provider_scope" "profile_claims" {
+  name       = "profile (user claims)"
+  scope_name = "profile"
+  expression = <<-EOT
+    claims = request.user.attributes.get("profile_claims") or {}
+    return {k: v for k, v in claims.items() if v is not None}
+  EOT
+}
+
 # map this property to true because vaultwarden SSO expects it. authentik as far as i know doesnt track email verification status
 resource "authentik_property_mapping_provider_scope" "email_verified" {
   name       = "email (verified)"
@@ -138,13 +148,16 @@ resource "authentik_provider_oauth2" "oidc" {
       redirect_uri_type = "authorization"
     }
   ]
-  property_mappings = [
-    for s in each.value.oidc.scopes : (
-      s == "email" ? authentik_property_mapping_provider_scope.email_verified.id :
-      s == "groups" ? authentik_property_mapping_provider_scope.app_group_map[each.key].id :
-      data.authentik_property_mapping_provider_scope.oidc_scopes[s].id
-    )
-  ]
+  property_mappings = concat(
+    [
+      for s in each.value.oidc.scopes : (
+        s == "email" ? authentik_property_mapping_provider_scope.email_verified.id :
+        s == "groups" ? authentik_property_mapping_provider_scope.app_group_map[each.key].id :
+        data.authentik_property_mapping_provider_scope.oidc_scopes[s].id
+      )
+    ],
+    [authentik_property_mapping_provider_scope.profile_claims.id],
+  )
   signing_key = each.value.oidc.signing ? data.authentik_certificate_key_pair.generated.id : null
 
   sub_mode                   = each.value.oidc.sub_mode

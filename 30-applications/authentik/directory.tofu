@@ -5,6 +5,7 @@ resource "authentik_user" "users" {
   username = each.key
   email    = each.value.init_email
   is_active = each.value.enabled
+  attributes = jsonencode({ profile_claims = each.value.profile_claims })
 
   lifecycle {
     ignore_changes = [name, email]
