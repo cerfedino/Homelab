@@ -8,7 +8,7 @@ spec:
       endpoint: {{ .Values.backup.s3_endpoint }}
       bucket: {{ .Values.backup.s3_bucket }}/woodpecker
   backup:
-    schedule: "0 1 * * *"
+    schedule: "0 2 * * *"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 2
     # only the chart's own volumes such that pipelines dont get backed up
@@ -16,9 +16,9 @@ spec:
       - matchLabels:
           app.kubernetes.io/instance: woodpecker
   check:
-    schedule: "0 2 * * 6"
+    schedule: "0 3 * * 6"
   prune:
-    schedule: "0 2 * * 0"
+    schedule: "0 3 * * 0"
     retention:
       keepDaily: 14
       keepWeekly: 8

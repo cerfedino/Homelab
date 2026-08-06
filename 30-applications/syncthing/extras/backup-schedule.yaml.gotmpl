@@ -8,13 +8,13 @@ spec:
       endpoint: {{ .Values.backup.s3_endpoint }}
       bucket: {{ .Values.backup.s3_bucket }}/syncthing
   backup:
-    schedule: "0 1 * * *"
+    schedule: "0 2 * * *"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 2
   check:
-    schedule: "0 2 * * 6"
+    schedule: "0 3 * * 6"
   prune:
-    schedule: "0 2 * * 0"
+    schedule: "0 3 * * 0"
     retention:
       keepDaily: 14
       keepWeekly: 8
