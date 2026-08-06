@@ -1,0 +1,58 @@
+postgresql:
+  enabled: false
+
+windmill:
+  databaseUrlSecretName: windmill-database
+  baseDomain: {{ .Values.apps.windmill.external.dns_hostname }}
+  baseProtocol: https
+  appReplicas: 1
+  # LSP/multiplayer sidecar deployment, heavy image
+  extraReplicas: 0
+
+  indexer:
+    enabled: false
+
+  {{- $oidc := .Values.oidc.windmill_external }}
+  {{- $akBase := regexReplaceAll "application/o/.+$" $oidc.issuer "application/o" }}
+  operator:
+    enabled: true
+    instanceSpec:
+      global_settings:
+        base_url: https://{{ .Values.apps.windmill.external.dns_hostname }}
+        oauths:
+          authentik:
+            id: {{ $oidc.client_id | quote }}
+            secret: {{ $oidc.client_secret | quote }}
+            display_name: Authentik
+            login_config:
+              # authentik's endpoints are global; only discovery is per-application
+              auth_url: {{ $akBase }}/authorize/
+              token_url: {{ $akBase }}/token/
+              userinfo_url: {{ $akBase }}/userinfo/
+              scopes: [openid, email, profile]
+      worker_configs: {}
+
+  workerGroups:
+    - name: "default"
+      controller: "Deployment"
+      replicas: 1
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          memory: "2Gi"
+          cpu: "2"
+    - name: "native"
+      controller: "Deployment"
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: "1Gi"
+          cpu: "1"
+
+ingress:
+  enabled: false

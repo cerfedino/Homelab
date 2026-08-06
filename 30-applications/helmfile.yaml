@@ -23,6 +23,8 @@ repositories:
     url: https://k8up-io.github.io/k8up
   - name: jellyfin
     url: https://jellyfin.github.io/jellyfin-helm
+  - name: windmill
+    url: https://windmill-labs.github.io/windmill-helm-charts
 
 releases:
   - name: csi-proxmox
@@ -155,6 +157,24 @@ releases:
     wait: true
     values:
       - vaultwarden/values.yaml.gotmpl
+
+  - name: windmill-extras
+    namespace: windmill
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: false
+    values:
+      - windmill/extras.yaml.gotmpl
+
+  - name: windmill
+    namespace: windmill
+    createNamespace: true
+    chart: windmill/windmill
+    version: "~4.0"
+    wait: true
+    values:
+      - windmill/values.yaml.gotmpl
 
   - name: psitransfer
     namespace: psitransfer
