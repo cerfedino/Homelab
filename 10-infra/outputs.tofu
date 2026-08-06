@@ -1,3 +1,33 @@
+
+locals {
+  machines = merge(
+    { for k, v in local.vms : v.display_name => {
+        fqdn_internal = "${v.display_name}.internal.${var.domain}"
+        fqdn_lan      = "${v.display_name}.lan.${var.domain}"
+        ip_internal   = cidrhost(var.network_internal.cidr, v.vm_id)
+        ip_lan        = cidrhost(var.network_lan.cidr, v.vm_id)
+    } },
+    { (var.vm_haos.display_name) = {
+        fqdn_internal = "${var.vm_haos.display_name}.internal.${var.domain}"
+        fqdn_lan      = "${var.vm_haos.display_name}.lan.${var.domain}"
+        ip_internal   = cidrhost(var.network_internal.cidr, var.vm_haos.vm_id)
+        ip_lan        = cidrhost(var.network_lan.cidr, var.vm_haos.vm_id)
+    } },
+    # the PVE hosts: their addresses are the host parts of the network cidrs
+    { for n in toset([for _, v in local.vms : v.node_name]) : n => {
+        fqdn_internal = "${n}.internal.${var.domain}"
+        fqdn_lan      = "${n}.lan.${var.domain}"
+        ip_internal   = split("/", var.network_internal.cidr)[0]
+        ip_lan        = split("/", var.network_lan.cidr)[0]
+    } },
+  )
+  machine_dns_entries = flatten([for name, m in local.machines : [
+    { domain = m.fqdn_internal, address = m.ip_internal },
+    { domain = m.fqdn_lan,      address = m.ip_lan },
+  ]])
+  dnsmasq_all_entries = concat(local.machine_dns_entries, var.dnsmasq_address_entries)
+}
+
 output "ansible_yaml_inventory" {
   sensitive = true
   value = yamlencode({
@@ -52,7 +82,7 @@ output "ansible_yaml_inventory" {
       }
       vars: {
         dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
-        dnsmasq_address_entries  = var.dnsmasq_address_entries
+        dnsmasq_address_entries  = local.dnsmasq_all_entries
         network_lan = {
             cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
             bridge  = var.network_lan.bridge
@@ -106,7 +136,8 @@ output "helmfile_values" {
     kube_vip_svc_address = var.kube_vip_svc_address
     pihole_svc_address   = var.pihole_svc_address
     dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
-    dnsmasq_address_entries  = var.dnsmasq_address_entries
+    dnsmasq_address_entries  = local.dnsmasq_all_entries
+    machines             = local.machines
     backup = {
       s3_endpoint     = "https://${var.hetzner_s3.endpoint}"
       s3_bucket       = minio_s3_bucket.backups.bucket

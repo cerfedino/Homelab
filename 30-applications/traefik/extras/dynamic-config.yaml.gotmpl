@@ -70,15 +70,24 @@ data:
           middlewares:
             - authentik-forward-auth-local
           service: pbs1
+        haos:
+          rule: Host(`{{ .Values.apps.haos.external.dns_hostname }}`)
+          entryPoints:
+            - websecure
+          service: haos
 
       services:
         pve1:
           loadBalancer:
             serversTransport: insecure-backends
             servers:
-              - url: "https://pve1.proxmox-internal.{{ .Values.domain }}:8006"
+              - url: "https://{{ .Values.machines.pve1.fqdn_internal }}:8006"
         pbs1:
           loadBalancer:
             serversTransport: insecure-backends
             servers:
               - url: "https://sylvester-pbs1.proxmox-internal.{{ .Values.domain }}:8007"
+        haos:
+          loadBalancer:
+            servers:
+              - url: "http://{{ .Values.machines.haos.fqdn_internal }}:8123"

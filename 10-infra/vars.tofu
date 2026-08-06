@@ -291,3 +291,18 @@ variable "vm_tailscale" {
     error_message = "vm_tailscale.vm_id collides with a vm_k3s VM ID"
   }
 }
+
+variable "vm_haos" {
+  type = object({
+    vm_id        = number
+    display_name = string
+    node_name    = string
+    cores        = number
+    memory       = number
+    disk_size    = number
+    datastore    = string
+    mac_lan      = string
+    mac_internal = string
+    usb_host     = string
+  })
+}
