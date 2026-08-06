@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# One-shot: seed chhoto with the links from the old marvin shortener.
+# Reads the API key from values.enc.yaml (must be sops-open). Re-runnable:
+# existing shortlinks are rejected by chhoto and reported, not overwritten.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+HOST="https://s.crfda.com"
+API_KEY=$(awk '/chhoto_api_key/ {print $2}' values.enc.yaml | tr -d '"')
+
+while IFS='|' read -r short long; do
+  [ -z "$short" ] && continue
+  code=$(curl -s -o /tmp/seed-out -w '%{http_code}' -X POST "$HOST/api/new" \
+    -H "X-API-Key: $API_KEY" -H 'Content-Type: application/json' \
+    -d "{\"shortlink\": \"$short\", \"longlink\": \"$long\"}")
+  echo "$short -> $code $(cat /tmp/seed-out | head -c 100)"
+done <<'LINKS'
+fileupload_2025-01-09_IntesaSanPaolo_bank_access_details.pdf|https://c.tenor.com/6DiM1V23hkwAAAAC/tenor.gif
+gh|https://github.com/cerfedino
+github|https://github.com/cerfedino
+signal|https://signal.me/#eu/eNdz6qqtCIzMg2dHNB7VW4MW1VQ58UFGa5I84uOIyiwPtKCXtbRDN7zGuB7SIYct
+telegram|https://t.me/albecerfe
+tg|https://t.me/albecerfe
+LINKS

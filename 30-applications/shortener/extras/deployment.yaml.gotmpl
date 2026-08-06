@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shortener
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: shortener
+  template:
+    metadata:
+      labels:
+        app: shortener
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/urls.sqlite .dump'
+        k8up.io/file-extension: .sql
+    spec:
+      containers:
+        - name: sqlite
+          image: keinos/sqlite3:3.53.4
+          command: ["sleep", "infinity"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+        - name: chhoto
+          image: sintan1729/chhoto-url:7.5.0
+          env:
+            - name: CHHOTO_DB_URL
+              value: /data/urls.sqlite
+            - name: CHHOTO_SQLITE_USE_WAL_MODE
+              value: "True"
+            - name: CHHOTO_SITE_URL
+              value: https://{{ .Values.apps.shortener.external.dns_hostname }}
+            - name: CHHOTO_REDIRECT_METHOD
+              value: TEMPORARY
+            - name: CHHOTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shortener
+                  key: password
+            - name: CHHOTO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: shortener
+                  key: api_key
+          ports:
+            - containerPort: 4567
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4567
+            initialDelaySeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: shortener-data
