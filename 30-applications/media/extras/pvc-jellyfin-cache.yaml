@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: jellyfin-cache
   annotations:
+    helm.sh/resource-policy: keep
     k8up.io/backup: "false"
 spec:
   accessModes:

@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: psitransfer-data
   annotations:
+    helm.sh/resource-policy: keep
     # transfers expire by design
     k8up.io/backup: "false"
 spec:

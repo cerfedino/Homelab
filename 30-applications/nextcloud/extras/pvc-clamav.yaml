@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: nextcloud-clamav-db
   annotations:
+    helm.sh/resource-policy: keep
     # signature database, redownloadable
     k8up.io/backup: "false"
 spec:

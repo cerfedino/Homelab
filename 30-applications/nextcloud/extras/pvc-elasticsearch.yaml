@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: nextcloud-elasticsearch-data
   annotations:
+    helm.sh/resource-policy: keep
     # search index, rebuildable with occ fulltextsearch:index
     k8up.io/backup: "false"
 spec:
