@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         app: pihole
+      annotations:
+        # force a rollout when dnsmasq entries change
+        checksum/dnsmasq: {{ .Values.dnsmasq_address_entries | toYaml | sha256sum }}
     spec:
       containers:
         - name: pihole

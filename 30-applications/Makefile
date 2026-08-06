@@ -1,5 +1,5 @@
 
-APPS := app-registry authentik backrest cert-manager cloudflare-tunnel csi-proxmox immich k8up kuma media nextcloud paperless pihole psitransfer shortener syncthing traefik vaultwarden windmill woodpecker
+APPS := app-registry pihole authentik backrest cert-manager cloudflare-tunnel csi-proxmox immich k8up kuma media nextcloud paperless psitransfer shortener syncthing traefik vaultwarden windmill woodpecker
 
 apps: $(APPS)
 
@@ -7,7 +7,7 @@ csi-proxmox cert-manager traefik authentik kuma pihole cloudflare-tunnel k8up ba
 traefik: csi-proxmox cert-manager
 authentik: csi-proxmox traefik k8up
 kuma: csi-proxmox traefik authentik k8up
-pihole: csi-proxmox traefik authentik k8up
+pihole: csi-proxmox traefik k8up
 backrest: csi-proxmox traefik authentik
 cloudflare-tunnel: csi-proxmox authentik
 immich: csi-proxmox traefik authentik k8up
