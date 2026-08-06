@@ -101,7 +101,7 @@ resource "authentik_flow_stage_binding" "user_settings_write" {
 resource "authentik_brand" "homelab_lan" {
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
-  domain              = "authentik.${local.generated.domain_lan}"
+  domain              = local.applications["authentik_internal"].dns_hostname
   default             = false
   flow_authentication = authentik_flow.homelab_login.uuid
   flow_recovery       = authentik_flow.homelab-recovery.uuid
@@ -111,7 +111,7 @@ resource "authentik_brand" "homelab_lan" {
 resource "authentik_brand" "homelab_external" {
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
-  domain              = "authentik.${local.generated.domain}"
+  domain              = local.applications["authentik_external"].dns_hostname
   default             = false
   flow_authentication = authentik_flow.homelab_login.uuid
   flow_recovery       = authentik_flow.homelab-recovery.uuid

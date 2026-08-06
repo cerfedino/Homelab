@@ -16,6 +16,6 @@ locals {
 }
 
 provider "authentik" {
-  url   = "https://authentik.${local.generated.domain_lan}"
+  url   = "https://${local.applications["authentik_internal"].dns_hostname}"
   token = local.values.authentik.bootstrap_token
 }

@@ -36,6 +36,9 @@ windmill:
     - name: "default"
       controller: "Deployment"
       replicas: 1
+      extraEnv:
+        - name: WORKER_TAGS
+          value: "deno,python3,go,bash,powershell,bun,php,rust,ansible,csharp,nu,java,ruby,rlang,duckdb,dbt,dependency,flow,other"
       resources:
         requests:
           cpu: 250m
@@ -46,6 +49,9 @@ windmill:
     - name: "native"
       controller: "Deployment"
       replicas: 1
+      extraEnv:
+        - name: WORKER_TAGS
+          value: "nativets,postgresql,mysql,mssql,graphql,snowflake,bigquery,oracledb"
       resources:
         requests:
           cpu: 100m
