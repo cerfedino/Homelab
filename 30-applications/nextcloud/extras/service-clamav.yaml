@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-clamav
+spec:
+  selector:
+    app: nextcloud-clamav
+  ports:
+    - port: 3310
+      targetPort: 3310

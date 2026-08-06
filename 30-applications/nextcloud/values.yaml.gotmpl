@@ -24,7 +24,8 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
-        'trusted_domains' => array('localhost', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
+        // 'nextcloud' such that notify_push can reach
+        'trusted_domains' => array('localhost', 'nextcloud', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
         'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
         'default_phone_region' => 'CH',
@@ -72,6 +73,38 @@ nextcloud:
         secretKeyRef:
           name: nextcloud-oidc
           key: discovery_uri
+
+  # the push binary ships inside the notify_push app on the shared PVC
+  extraSidecarContainers:
+    - name: notify-push
+      # keep in sync with image.tag above
+      image: nextcloud:33.0.6-apache
+      command:
+        - /var/www/html/custom_apps/notify_push/bin/x86_64/notify_push
+        - --database-url
+        - postgres://oc_nextcloud:{{ $secrets.nextcloud_postgres_password }}@nextcloud-postgres/nextcloud_database
+        - --redis-url
+        - redis://nextcloud-redis
+        - --nextcloud-url
+        - http://nextcloud:8080
+        - --bind
+        - 0.0.0.0
+      ports:
+        - containerPort: 7867
+      volumeMounts:
+        - name: nextcloud-main
+          mountPath: /var/www/html
+          subPath: html
+        - name: nextcloud-main
+          mountPath: /var/www/html/custom_apps
+          subPath: custom_apps
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          memory: "128Mi"
+          cpu: "250m"
 
 internalDatabase:
   enabled: false

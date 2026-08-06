@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-clamav
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud-clamav
+  template:
+    metadata:
+      labels:
+        app: nextcloud-clamav
+    spec:
+      containers:
+        - name: clamav
+          image: clamav/clamav:1.4.5-debian13-slim
+          ports:
+            - containerPort: 3310
+          volumeMounts:
+            # signature database survives restarts, ~300MB redownload otherwise
+            - name: db
+              mountPath: /var/lib/clamav
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1Gi
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          startupProbe:
+            # first start downloads signatures before clamd listens
+            tcpSocket:
+              port: 3310
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: 3310
+            periodSeconds: 15
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: nextcloud-clamav-db

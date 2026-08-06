@@ -27,6 +27,15 @@ spec:
       services:
         - name: nextcloud-collabora
           port: 9980
+    # notify_push sidecar
+    - match: Host(`{{ $v.dns_hostname }}`) && PathPrefix(`/push`)
+      kind: Rule
+      priority: 20
+      services:
+        - name: nextcloud-push
+          port: 7867
+      middlewares:
+        - name: push-stripprefix
     # Also whiteboard
     - match: Host(`{{ $v.dns_hostname }}`) && PathPrefix(`/whiteboard`)
       kind: Rule

@@ -25,7 +25,15 @@ apps-config:
 		 php occ config:app:set whiteboard jwt_secret_key --value "$$WHITEBOARD_JWT_SECRET"; \
 		 php occ config:app:set files default_quota --value "5 GB"; \
 		 php occ db:add-missing-indices; \
-		 php occ app:disable app_api || true'
+		 php occ app:disable app_api || true; \
+		 php occ app:disable spreed || true; \
+		 php occ app:enable files_antivirus; \
+		 php occ config:app:set files_antivirus av_mode --value daemon; \
+		 php occ config:app:set files_antivirus av_host --value nextcloud-clamav; \
+		 php occ config:app:set files_antivirus av_port --value 3310; \
+		 php occ config:app:set fulltextsearch_elasticsearch elastic_host --value http://nextcloud-elasticsearch:9200; \
+		 php occ config:app:set fulltextsearch_elasticsearch elastic_index --value nextcloud; \
+		 php occ config:app:set notify_push base_endpoint --value "$$COLLABORA_WOPI_URL/push"'
 
 maintenance-repair:
 	kubectl -n nextcloud exec deploy/nextcloud -- su -s /bin/sh www-data -c \
