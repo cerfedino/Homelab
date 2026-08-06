@@ -27,7 +27,9 @@ if [ "${1:-}" = "--worker" ]; then
       if ! scripts/sops-check "$tmp" >/dev/null 2>&1; then
         # never treat an index copy as ciphertext when it isn't
         echo "WARNING: $f is CLEARTEXT in the index — re-staging encrypted, audit git history" >&2
-      elif sops -d --input-type "$store" --output-type "$type" "$tmp" 2>/dev/null | cmp -s - "$f"; then
+      elif sops -d --input-type "$store" --output-type "$type" "$tmp" 2>/dev/null |
+           cmp -s - <(sops -e --input-type "$type" --output-type "$store" "$f" 2>/dev/null |
+                      sops -d --input-type "$store" --output-type "$type" /dev/stdin 2>/dev/null); then
         blob=$(git hash-object -w -- "$tmp")
         line="unchanged $f (kept existing ciphertext)"
       fi
