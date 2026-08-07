@@ -231,41 +231,41 @@
       "last_modified": "2026-07-01T15:14:03Z",
       "resolved": "github:NixOS/nixpkgs/e8273b29fe1390ec8d4603f2477357555291432e?lastModified=1782918843&narHash=sha256-ETYnV9U7Sr%2BA45dohzZdfCZKOss4qrTkO%2BwgNZNvEc0%3D"
     },
-    "helmfile@1.7.1": {
-      "last_modified": "2026-08-01T16:34:20Z",
-      "resolved": "github:NixOS/nixpkgs/a5cbcfe954791221bfffe2307f7d1a1bf61a871e#helmfile",
+    "helmfile@1.7.2": {
+      "last_modified": "2026-08-03T00:04:07Z",
+      "resolved": "github:NixOS/nixpkgs/243895692ae2a2fbd08a05141462c0cc0d3ca10f#helmfile",
       "source": "devbox-search",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/79lyrmjdjbrw0l8sn0qcrimdn779307b-helmfile-1.7.1",
+              "path": "/nix/store/wq52jwh78l14aiqi4jsf9pp7yhybllgg-helmfile-1.7.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/79lyrmjdjbrw0l8sn0qcrimdn779307b-helmfile-1.7.1"
+          "store_path": "/nix/store/wq52jwh78l14aiqi4jsf9pp7yhybllgg-helmfile-1.7.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cnm97mala72xrdb70b6snsbh77cyf6q6-helmfile-1.7.1",
+              "path": "/nix/store/4kaif4zjmv5js0hyjdrsr9w3n7lgzah1-helmfile-1.7.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cnm97mala72xrdb70b6snsbh77cyf6q6-helmfile-1.7.1"
+          "store_path": "/nix/store/4kaif4zjmv5js0hyjdrsr9w3n7lgzah1-helmfile-1.7.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3cq0vn25hlpair370cgdkvgms4zv0y15-helmfile-1.7.1",
+              "path": "/nix/store/r99k5ipxfmv83ng5f77hbinvyjwxmz4w-helmfile-1.7.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3cq0vn25hlpair370cgdkvgms4zv0y15-helmfile-1.7.1"
+          "store_path": "/nix/store/r99k5ipxfmv83ng5f77hbinvyjwxmz4w-helmfile-1.7.2"
         }
       }
     },
