@@ -1,0 +1,96 @@
+version: "3"
+
+output: prefixed
+
+# Each app's Taskfile declares its own deps via ':' (sibling-include) refs;
+# this file only mounts them and provides the shared helmfile-repos task.
+includes:
+  app-registry:
+    taskfile: app-registry
+    dir: app-registry
+  csi-proxmox:
+    taskfile: csi-proxmox
+    dir: csi-proxmox
+  cert-manager:
+    taskfile: cert-manager
+    dir: cert-manager
+  traefik:
+    taskfile: traefik
+    dir: traefik
+  k8up:
+    taskfile: k8up
+    dir: k8up
+  authentik:
+    taskfile: authentik
+    dir: authentik
+  pihole:
+    taskfile: pihole
+    dir: pihole
+  backrest:
+    taskfile: backrest
+    dir: backrest
+  cloudflare-tunnel:
+    taskfile: cloudflare-tunnel
+    dir: cloudflare-tunnel
+  immich:
+    taskfile: immich
+    dir: immich
+  kuma:
+    taskfile: kuma
+    dir: kuma
+  media:
+    taskfile: media
+    dir: media
+  nextcloud:
+    taskfile: nextcloud
+    dir: nextcloud
+  paperless:
+    taskfile: paperless
+    dir: paperless
+  psitransfer:
+    taskfile: psitransfer
+    dir: psitransfer
+  shortener:
+    taskfile: shortener
+    dir: shortener
+  syncthing:
+    taskfile: syncthing
+    dir: syncthing
+  vaultwarden:
+    taskfile: vaultwarden
+    dir: vaultwarden
+  windmill:
+    taskfile: windmill
+    dir: windmill
+  woodpecker:
+    taskfile: woodpecker
+    dir: woodpecker
+
+tasks:
+  apps:
+    desc: apply every app
+    deps:
+      - csi-proxmox:apply
+      - cert-manager:apply
+      - traefik:apply
+      - k8up:apply
+      - authentik:apply
+      - pihole:apply
+      - backrest:apply
+      - cloudflare-tunnel:apply
+      - immich:apply
+      - kuma:apply
+      - media:apply
+      - nextcloud:apply
+      - paperless:apply
+      - psitransfer:apply
+      - shortener:apply
+      - syncthing:apply
+      - vaultwarden:apply
+      - windmill:apply
+      - woodpecker:apply
+
+  setup-helmfile-repos:
+    run: once
+    cmds:
+      - helmfile repos

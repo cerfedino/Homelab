@@ -1,0 +1,10 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    cmds:
+      - ansible-navigator run playbook-site.yaml

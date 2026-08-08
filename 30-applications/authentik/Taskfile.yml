@@ -1,0 +1,23 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [":traefik:apply", ":k8up:apply"]
+    cmds:
+      - task: helmfile-apply
+      - task: tofu-apply
+
+  helmfile-apply:
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=authentik
+
+  tofu-apply:
+    interactive: true
+    cmds:
+      - tofu init
+      - tofu apply

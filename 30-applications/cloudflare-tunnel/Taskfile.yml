@@ -1,0 +1,33 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [':authentik:apply']
+    cmds:
+      - task: tofu-apply
+      - task: artifacts
+      - task: helmfile-apply
+
+  tofu-apply:
+    interactive: true
+    cmds:
+      - tofu init
+      - tofu apply
+
+  artifacts:
+    sources:
+      - terraform.enc.tfstate
+    generates:
+      - generated/generated.cloudflare-tunnel-token.yaml
+    cmds:
+      - mkdir -p generated
+      - tofu output -show-sensitive -raw helm_cloudflare_tunnel_token > generated/generated.cloudflare-tunnel-token.yaml
+
+  helmfile-apply:
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=cloudflare-tunnel
