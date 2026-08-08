@@ -17,3 +17,5 @@ kubeconfig.yaml
 .DS_Store
 
 generated.*
+
+.task/

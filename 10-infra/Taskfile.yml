@@ -1,0 +1,28 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    cmds:
+      - task: tofu-apply
+      - task: artifacts
+
+  tofu-apply:
+    interactive: true
+    cmds:
+      - tofu init
+      - tofu apply
+
+  artifacts:
+    sources:
+      - terraform.enc.tfstate
+    generates:
+      - generated/generated.inventory.yaml
+      - generated/generated.infra.yaml
+    cmds:
+      - mkdir -p generated
+      - tofu output -show-sensitive -raw ansible_yaml_inventory > generated/generated.inventory.yaml
+      - tofu output -show-sensitive -raw helmfile_values > generated/generated.infra.yaml

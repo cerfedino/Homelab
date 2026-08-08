@@ -1,0 +1,13 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [":app-registry:apply", ":setup-helmfile-repos"]
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=k8up-globals
+      - cd .. && helmfile apply --skip-refresh -l name=k8up

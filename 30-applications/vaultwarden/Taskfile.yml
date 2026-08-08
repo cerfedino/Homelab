@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [':authentik:apply', ':k8up:apply']
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=vaultwarden

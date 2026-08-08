@@ -1,0 +1,30 @@
+version: "3"
+
+includes:
+  infra:
+    taskfile: 10-infra
+    dir: 10-infra
+  bootstrap:
+    taskfile: 20-bootstrap
+    dir: 20-bootstrap
+  apps:
+    taskfile: 30-applications
+    dir: 30-applications
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - task --list-all
+
+  decrypt:
+    cmds:
+      - devbox run sops-open
+
+  stages:
+    desc: decrypt, then apply all stages in order
+    cmds:
+      - task: decrypt
+      - task: infra:apply
+      - task: bootstrap:apply
+      - task: apps:apps

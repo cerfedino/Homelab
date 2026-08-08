@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    desc: tofu apply + regenerate the yaml interfaces
+    run: once
+    interactive: true
+    sources:
+      - "*.tofu"
+      - terraform.enc.auto.tfvars
+      - .terraform.lock.hcl
+      - ../../10-infra/generated/generated.infra.yaml
+    generates:
+      - generated/generated.apps-summary.yaml
+      - generated/generated.oidc.yaml
+      - generated/generated.applications.yaml
+    cmds:
+      - tofu init
+      - tofu apply
+      - mkdir -p generated
+      - tofu output -show-sensitive -raw helm_apps_summary > generated/generated.apps-summary.yaml
+      - tofu output -show-sensitive -raw helm_oidc > generated/generated.oidc.yaml
+      - tofu output -show-sensitive -raw applications > generated/generated.applications.yaml

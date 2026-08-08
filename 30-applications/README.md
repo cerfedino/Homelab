@@ -44,7 +44,7 @@ For now the backup setup is a bit icky in my opinion, but it works. Once I have 
 
 ## Ordering
 
-Some applications depend on other applications. I could have expressed dependencies in the helmfile, but deploying an application is often more than its helm release: some also run a tofu apply, and helmfile can't order those. So the dependency graph lives in the [Makefile](./Makefile) instead, which orchestrates the order of deployment. It's definitely a smell, so if I find a better way this goes immediately.
+Some applications depend on other applications. I could have expressed dependencies in the helmfile, but deploying an application is often more than its helm release: some also run a tofu apply, and helmfile can't order those. So I built the dependecy graph using [Taskfile](https://taskfile.dev) and let it handle the ordering. The `task` command will deploy all apps in the right order, and I can also deploy a single app with its dependencies.
 
 ## Screenshots
 
