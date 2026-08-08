@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17.10
+          image: postgres:18.4
           env:
             # subdirectory: initdb refuses the mount point itself (lost+found)
             - name: PGDATA
