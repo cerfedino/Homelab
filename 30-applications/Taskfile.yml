@@ -2,8 +2,6 @@ version: "3"
 
 output: prefixed
 
-# Each app's Taskfile declares its own deps via ':' (sibling-include) refs;
-# this file only mounts them and provides the shared helmfile-repos task.
 includes:
   app-registry:
     taskfile: app-registry

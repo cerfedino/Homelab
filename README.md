@@ -1,12 +1,12 @@
 # Homelab
 
-This repository holds my Homelab setup. It's mostly composed of [OpenTofu](https://opentofu.org), [Ansible](https://docs.ansible.com), [Helm](https://helm.sh) amongst other things. I probably went a bit overboard with automation as I made sure I can go from nothing to VMs, networking, DNS, a [k3s](https://k3s.io) cluster, and the applications on it with a single `make` command. My homelab mostly serves as a playground for me to learn and experiment with new toys. This is my first experience with kubernetes so you might find a lot of things that are not best practice.
+This repository holds my Homelab setup. It's mostly composed of [OpenTofu](https://opentofu.org), [Ansible](https://docs.ansible.com), [Helm](https://helm.sh) amongst other things. I probably went a bit overboard with automation as I made sure I can go from nothing to VMs, networking, DNS, a [k3s](https://k3s.io) cluster, and the applications on it with a single `task` command. My homelab mostly serves as a playground for me to learn and experiment with new toys. This is my first experience with kubernetes so you might find a lot of things that are not best practice.
 
 There are three rules I try to stick to. The lab must be rebuildable from scratch: a fresh clone plus one [age](https://github.com/FiloSottile/age) key is enough, since inputs, secrets and tofu state(s) are committed encrypted. Wiring has a single source of truth: every hostname, address and credential lives in one encrypted tfvars set, and stages talk to each other only through files generated from it. And high availability is done on the cheap: three k3s servers and floating VIPs mean any single VM can fail without taking the cluster with it.
 
 ## The pipeline
 
-The numbered directories are the deploy order and `make` walks them; each stage produces values that the next stage consumes. The stages are:
+The numbered directories are the deploy order and `task stages` walks them; each stage produces values that the next stage consumes. The stages are:
 
 ```mermaid
 flowchart LR
@@ -34,12 +34,12 @@ The workflow:
 
 1. Supply the SOPS key in [`.sops/keys.txt`](.sops/keys.txt)
 1. `devbox shell`
-1. `devbox run sops-open` to decrypt secrets in place
+1. `task sops-open` to decrypt secrets in place
 1. do dev/deploy/whatever
-1. `devbox run sops-stage` to stage the encrypted secrets for commit
+1. `task sops-stage` to stage the encrypted secrets for commit
 
 A pre-commit hook (installed automatically by the devbox shell) checks that no unencrypted secrets are staged for commit.
 
 ### Deploying
 
-I use [Taskfile](https://taskfile.dev) for deploying stuff. I will probably move to GitOps sometime in the future. The numbered directories are the pipeline, and `task stages` goes through them in order. Each stage, and each app under `30-applications`, has its own Taskfile, such that each piece can be deployed independently along with its dependencies.
+I use [Taskfile](https://taskfile.dev) for deploying stuff. I will probably move to GitOps sometime in the future. The numbered directories are the pipeline, and `task stages` goes through them in order. Each stage, and each app under `30-applications` has its own Taskfile, such that each component can be deployed independently along with its dependencies.

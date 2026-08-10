@@ -17,14 +17,34 @@ tasks:
     cmds:
       - task --list-all
 
-  decrypt:
-    cmds:
-      - devbox run sops-open
-
   stages:
     desc: decrypt, then apply all stages in order
     cmds:
-      - task: decrypt
+      - task: sops-open
       - task: infra:apply
       - task: bootstrap:apply
       - task: apps:apps
+
+  sops-open:
+    desc: decrypt sops files in the worktree in place
+    cmds:
+      - scripts/sops-open {{.CLI_ARGS}}
+
+  sops-seal:
+    desc: encrypt sops files in the worktree in place
+    cmds:
+      - scripts/sops-seal {{.CLI_ARGS}}
+
+  sops-stage:
+    desc: stage encrypted versions of changed sops files
+    cmds:
+      - scripts/sops-stage
+
+  sops-check:
+    cmds:
+      - scripts/sops-check {{.CLI_ARGS}}
+
+  sops-toggle:
+    desc: toggle sops files between encrypted and decrypted states in place
+    cmds:
+      - scripts/sops-toggle {{.CLI_ARGS}}
