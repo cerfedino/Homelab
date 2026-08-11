@@ -18,7 +18,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: elasticsearch
-          image: elasticsearch:8.19.19
+          image: elasticsearch:9.4.4
           env:
             - name: discovery.type
               value: single-node
