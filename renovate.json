@@ -3,9 +3,16 @@
     "extends": [
         "config:recommended"
     ],
+    "minimumReleaseAge": "14 days",
+    "minimumReleaseAgeBehaviour": "timestamp-optional",
     "kubernetes": {
         "managerFilePatterns": [
             "/^30-applications/.+/extras/.+\\.yaml$/"
+        ]
+    },
+    "helm-values": {
+        "managerFilePatterns": [
+            "/^30-applications/.+/values.*\\.yaml$/"
         ]
     },
     "customManagers": [
@@ -19,6 +26,16 @@
                 "image: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[a-zA-Z0-9][\\w.\\-]*)"
             ],
             "datasourceTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "description": "Anything carrying a `# renovate:` annotation",
+            "managerFilePatterns": [
+                "/^(10-infra|20-bootstrap|30-applications)/.+\\.(yaml|yml|gotmpl|tofu)$/"
+            ],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[^\\n]*?[:=]\\s*\"?(?<currentValue>[\\w.+\\-]+)\"?"
+            ]
         },
         {
             "customType": "regex",
@@ -42,6 +59,39 @@
                 "name: (?<depName>[a-z0-9.\\-/]+):(?<currentValue>[\\w.\\-]+)"
             ],
             "datasourceTemplate": "docker"
+        }
+    ],
+    "packageRules": [
+        {
+            "description": "Majors wait on the dashboard instead of opening a PR",
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "dependencyDashboardApproval": true
+        },
+        {
+            "description": "A k3s minor is a rolling node upgrade",
+            "matchDepNames": [
+                "k3s-io/k3s"
+            ],
+            "matchUpdateTypes": [
+                "minor"
+            ],
+            "dependencyDashboardApproval": true
+        },
+        {
+            "description": "Patches merge themselves",
+            "matchUpdateTypes": [
+                "patch"
+            ],
+            "automerge": true
+        },
+        {
+            "description": "The media stack is redeployed as one unit",
+            "matchFileNames": [
+                "30-applications/media/values-*.yaml"
+            ],
+            "groupName": "media stack"
         }
     ]
 }
