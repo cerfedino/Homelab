@@ -58,7 +58,7 @@ releases:
     namespace: traefik
     createNamespace: true
     chart: traefik/traefik
-    version: "~41.1"
+    version: "~41.2.0"
     wait: true
     disableValidation: true
     values:
