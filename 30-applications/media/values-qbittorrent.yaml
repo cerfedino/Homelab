@@ -15,7 +15,7 @@ controllers:
       app:
         image:
           repository: lscr.io/linuxserver/qbittorrent
-          tag: "5.2.3"
+          tag: "20.04.1"
         env:
           PUID: "1000"
           PGID: "1000"
