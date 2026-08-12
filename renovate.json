@@ -92,6 +92,13 @@
                 "30-applications/media/values-*.yaml"
             ],
             "groupName": "media stack"
+        },
+        {
+            "description": "linuxserver repos have shit legacy tags",
+            "matchPackageNames": [
+                "lscr.io/linuxserver/**"
+            ],
+            "allowedVersions": "!/^(\\d{2}\\.(04|10)(\\.|$)|14\\.3\\.)/"
         }
     ]
 }
