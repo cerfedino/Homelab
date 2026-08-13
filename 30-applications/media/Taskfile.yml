@@ -7,9 +7,10 @@ tasks:
 
   apply:
     run: once
-    deps: [':authentik:apply', ':k8up:apply']
+    deps: [":authentik:apply", ":k8up:apply"]
     cmds:
       - task: helmfile-apply
+      - task: grimmory-config
       - task: tofu-apply
 
   helmfile-apply:
@@ -28,6 +29,15 @@ tasks:
       - cd .. && helmfile apply --skip-refresh -l name=grimmory
       - cd .. && helmfile apply --skip-refresh -l name=autobrr
       - cd .. && helmfile apply --skip-refresh -l name=managerscript
+
+  grimmory-config:
+    cmds:
+      # I cant read comics that are larger than 500MB because the UI slider in grimmory doesnt go past 500. SO I set it through the DB
+      - >-
+        kubectl -n media exec deploy/grimmory-db -- sh -c
+        'mariadb -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e
+        "UPDATE app_settings SET val = JSON_SET(val, \"$.conversionLimitInMbForCbx\", 1000) WHERE name = \"kobo_settings\";"'
+      - kubectl -n media rollout restart deploy/grimmory
 
   tofu-apply:
     interactive: true

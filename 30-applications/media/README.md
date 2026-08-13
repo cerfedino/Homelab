@@ -60,6 +60,7 @@ Configure
 - Settings > Metadata 1 > Sidecar JSON Files
 - Settings > Application > File Management
 - Settings > OIDC: Take values from `generated.oidc.yaml`. The local login stays reachable at `/login?local=true`
+- Settings > Devices > Kobo: enable CBX to EPUB conversion, then run `task grimmory-config` to raise the conversion size limit past the UI slider's 500MB cap.
 
 ## Unpackarr
 
