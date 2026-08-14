@@ -39,8 +39,8 @@ class OutputBuffer:
         self._lines = []  # list of (message, send_to_discord)
         self.webhook_url = webhook_url
 
-    def log(self, msg, discord=True):
-        """Append a message to the buffer. If discord=False, it will only go to stdout on commit."""
+    def log(self, msg, discord=False):
+        """Append a message to the buffer. If discord=True, it also goes to the webhook on commit."""
         for line in msg.split("\n"):
             self._lines.append((line, discord))
 
@@ -205,8 +205,9 @@ def main():
         qb.auth_log_in()
         ts = time.strftime("%Y-%m-%d %H:%M:%S")
         print(f"{ts} INFO     Successfully connected to qBittorrent API")
-    except Exception as e:
-        print(e)
+    except Exception:
+        buf.log(f"ERROR: qBittorrent login failed:\n{traceback.format_exc()}", discord=True)
+        buf.commit()
         sys.exit(1)
 
     while True:
@@ -328,8 +329,8 @@ def main():
                 f"\nUsed now: {round(actual_used / (10**9), 2)} GB, Quota: {quota_space / (10**9)} GB, Free now: {round((quota_space - actual_used) / (10**9), 2)} GB (50 GB buffer reserved)\n"
             )
 
-        except Exception as e:
-            buf.log(f"ERROR: {traceback.format_exc()}")
+        except Exception:
+            buf.log(f"ERROR: {traceback.format_exc()}", discord=True)
             buf.commit()
         else:
             if torrents_started:
