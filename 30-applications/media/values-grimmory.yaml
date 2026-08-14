@@ -68,3 +68,5 @@ persistence:
     existingClaim: media-data
     globalMounts:
       - path: /media
+      - path: /bookdrop
+        subPath: bookdrop
