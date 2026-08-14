@@ -50,3 +50,8 @@ flowchart LR
     style vm2 stroke:#999,color:#999,stroke-dasharray:5
     style kubevip2 stroke:#999,color:#999,stroke-dasharray:5
 ```
+
+## Networking
+
+I wanted nice observability of the internal cluster traffic, so I decided to disable the built in flannel CNI and run [Cilium](https://cilium.io) instead. This allows me to then run [Hubble](https://github.com/cilium/hubble) to visualize a live map of the traffic flow between pods.
+![Hubble](..//docs/hubble.png)

@@ -15,7 +15,10 @@ api_endpoint: "{{ hostvars[groups['server'][0]]['ip_internal'] }}"
 server_config_yaml: |
   tls-san: {{ ([kube_vip_cp_address] + k3s_server_lan_ips) | to_json }}
   node-ip: "{{ ip_internal }}"        # pin etcd/kubelet to the stable internal net
-  flannel-iface: eth1                  # internal NIC
+
+  # We actually use Cilium
+  flannel-backend: none
+  disable-network-policy: true
   resolv-conf: /etc/rancher/k3s/resolv.conf
   kubelet-arg:
     - provider-id=proxmox://{{ proxmox_cluster_name }}/{{ vm_id }}

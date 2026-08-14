@@ -27,6 +27,9 @@ includes:
   backrest:
     taskfile: backrest
     dir: backrest
+  cilium:
+    taskfile: cilium
+    dir: cilium
   cloudflare-tunnel:
     taskfile: cloudflare-tunnel
     dir: cloudflare-tunnel
@@ -68,6 +71,7 @@ tasks:
   apps:
     desc: apply every app
     deps:
+      - cilium:apply
       - csi-proxmox:apply
       - cert-manager:apply
       - traefik:apply

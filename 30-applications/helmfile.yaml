@@ -7,6 +7,8 @@ environments:
       - smtp.enc.yaml
 ---
 repositories:
+  - name: cilium
+    url: https://helm.cilium.io
   - name: traefik
     url: https://traefik.github.io/charts
   - name: jetstack
@@ -27,6 +29,24 @@ repositories:
     url: https://windmill-labs.github.io/windmill-helm-charts
 
 releases:
+  - name: cilium
+    namespace: kube-system
+    chart: cilium/cilium
+    version: "~1.20"
+    installed: true
+    wait: true
+    values:
+      - cilium/values.yaml
+
+  - name: cilium-extras
+    namespace: kube-system
+    chart: bedag/raw
+    version: "~2.0"
+    installed: true
+    wait: false
+    values:
+      - cilium/extras.yaml.gotmpl
+
   - name: csi-proxmox
     namespace: csi-proxmox
     createNamespace: true
