@@ -59,6 +59,18 @@ output "ansible_yaml_inventory" {
                 proxmox_cluster_name = var.proxmox_cluster_name
             }
         }
+        pve = {
+          hosts = {
+            for n in toset([for _, v in local.vms : v.node_name]) : n => {
+              ansible_host                 = split("/", var.network_lan.cidr)[0]
+              ansible_user                 = "root"
+              ansible_ssh_private_key_file = "${var.REPO_ROOT}/${var.proxmox.root_privkey_path}"
+              ansible_ssh_common_args      = "-o IdentitiesOnly=yes"
+              ip_lan                       = split("/", var.network_lan.cidr)[0]
+              ip_internal                  = split("/", var.network_internal.cidr)[0]
+            }
+          }
+        }
         tailscale_gw = {
           hosts = {
             (proxmox_virtual_environment_vm.this["tailscale"].name) = {

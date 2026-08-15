@@ -1,7 +1,7 @@
 ---
 # Make sure the router's advertised DNS servers are not picked up.
 - name: Node base configuration
-  hosts: all
+  hosts: k3s_cluster:tailscale_gw
   become: true
   tasks:
     - name: Ignore router advertisements on eth0

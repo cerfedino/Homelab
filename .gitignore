@@ -19,3 +19,5 @@ kubeconfig.yaml
 generated.*
 
 .task/
+
+__pycache__

@@ -1,6 +1,6 @@
 ---
 - name: Configure local DNS
-  hosts: "{{ node | default('all') }}"
+  hosts: "{{ node | default('k3s_cluster:tailscale_gw:pve') }}"
   become: true
   tasks:
     - name: Validate DNS configuration
@@ -24,11 +24,15 @@
     - name: Gather service facts
       ansible.builtin.service_facts:
 
-    - name: Require systemd-resolved
+    - name: Require systemd
       ansible.builtin.assert:
         that:
           - ansible_service_mgr == "systemd"
-          - "'systemd-resolved.service' in ansible_facts.services"
+
+    # Since PVE doesnt have resolved, we distinguish the case
+    - name: Detect systemd-resolved
+      ansible.builtin.set_fact:
+        has_resolved: "{{ (ansible_facts.services['systemd-resolved.service'] | default({})).status | default('not-found') not in ['not-found', 'masked'] }}"
 
     - name: Install dnsmasq without starting it
       ansible.builtin.apt:
@@ -65,6 +69,7 @@
         path: /etc/systemd/resolved.conf.d
         state: directory
         mode: "0755"
+      when: has_resolved
 
     - name: Route DNS through dnsmasq
       ansible.builtin.copy:
@@ -78,12 +83,14 @@
           Domains=~.
           DNSStubListener=yes
       notify: Restart systemd-resolved
+      when: has_resolved
 
     - name: Enable systemd-resolved
       ansible.builtin.systemd_service:
         name: systemd-resolved
         enabled: true
         state: started
+      when: has_resolved
 
     - name: Use the systemd-resolved stub
       ansible.builtin.file:
@@ -91,6 +98,15 @@
         dest: /etc/resolv.conf
         state: link
         force: true
+      when: has_resolved
+
+    - name: Point resolv.conf at dnsmasq
+      ansible.builtin.copy:
+        dest: /etc/resolv.conf
+        mode: "0644"
+        content: |
+          nameserver 127.0.0.1
+      when: not has_resolved
 
     - name: Create K3s configuration directory
       ansible.builtin.file:
@@ -118,8 +134,8 @@
     - name: Verify dnsmasq address entries
       ansible.builtin.command:
         argv:
-          - resolvectl
-          - query
+          - "{{ has_resolved | ternary('resolvectl', 'getent') }}"
+          - "{{ has_resolved | ternary('query', 'hosts') }}"
           - "dns-check.{{ item.domain }}"
       register: dnsmasq_address_query
       changed_when: false
@@ -129,7 +145,7 @@
         label: "{{ item.domain }}"
 
     - name: Verify upstream DNS
-      ansible.builtin.command: resolvectl query example.com
+      ansible.builtin.command: "{{ has_resolved | ternary('resolvectl query', 'getent hosts') }} example.com"
       changed_when: false
 
   handlers:
