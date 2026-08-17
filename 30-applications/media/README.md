@@ -15,6 +15,7 @@ Setup wizard:
 Install plugins:
 
 - "LDAP Authentication"
+- "Intro skipper"
 
 Configure
 
@@ -29,6 +30,8 @@ Configure
 - Hide password reset button on the login form. Add CSS in Dashboard > Branding > Custom CSS:
 
 ```css
+@import url("https://cdn.jsdelivr.net/gh/AumGupta/abyss-jellyfin@main/abyss.css");
+
 .btnForgotPassword {
   display: none !important;
 }
