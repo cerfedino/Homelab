@@ -1,0 +1,60 @@
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ai-postgres
+  template:
+    metadata:
+      labels:
+        app: ai-postgres
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18.4
+          env:
+            # subdirectory: initdb refuses the mount point itself (lost+found)
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_USER
+              value: ai
+            - name: POSTGRES_DB
+              value: litellm
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+            - name: POSTGRES_PASSWORD
+              value: {{ $secrets.ai_postgres_password | quote }}
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "ai", "-d", "litellm"]
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ai-postgres-data
+        - name: initdb
+          configMap:
+            name: ai-postgres-init

@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: litellm
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := .Values.apps.litellm }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      services:
+        - name: litellm
+          port: 4000
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
+{{- end }}

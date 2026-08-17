@@ -27,6 +27,10 @@ repositories:
     url: https://jellyfin.github.io/jellyfin-helm
   - name: windmill
     url: https://windmill-labs.github.io/windmill-helm-charts
+  - name: open-webui
+    url: https://helm.openwebui.com
+  - name: ollama
+    url: https://otwld.github.io/ollama-helm/
 
 releases:
   - name: cilium
@@ -250,6 +254,43 @@ releases:
     timeout: 600
     values:
       - nextcloud/values.yaml.gotmpl
+
+    # AI
+  - name: ai-extras
+    namespace: ai
+    createNamespace: true
+    chart: bedag/raw
+    version: "~2.0"
+    wait: false
+    values:
+      - ai/extras.yaml.gotmpl
+
+  - name: ollama
+    namespace: ai
+    createNamespace: true
+    chart: ollama/ollama
+    version: "~1.75"
+    wait: true
+    values:
+      - ai/values-ollama.yaml
+
+  - name: litellm
+    namespace: ai
+    createNamespace: true
+    chart: oci://ghcr.io/berriai/litellm-helm
+    version: "~1.97"
+    wait: true
+    values:
+      - ai/values-litellm.yaml.gotmpl
+
+  - name: open-webui
+    namespace: ai
+    createNamespace: true
+    chart: open-webui/open-webui
+    version: "~16.0"
+    wait: true
+    values:
+      - ai/values-openwebui.yaml.gotmpl
 
     # *arr MEDIA STACK
   - name: media-extras

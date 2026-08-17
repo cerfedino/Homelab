@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-postgres
+spec:
+  selector:
+    app: ai-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

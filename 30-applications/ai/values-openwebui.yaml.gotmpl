@@ -1,0 +1,48 @@
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+{{- $oidc := .Values.oidc.openwebui_external }}
+ollama:
+  enabled: false
+pipelines:
+  enabled: false
+
+# single replica: in-memory websocket manager, no bundled redis
+websocket:
+  enabled: true
+  manager: ""
+  redis:
+    enabled: false
+
+# uploads + vector db; chat history lives in postgres
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: proxmox-data-zfs
+
+databaseUrl: postgresql://ai:{{ $secrets.ai_postgres_password }}@ai-postgres:5432/openwebui
+
+openaiBaseApiUrl: http://litellm:4000/v1
+openaiApiKey: {{ $secrets.litellm_master_key | quote }}
+
+sso:
+  enabled: true
+  enableSignup: true
+  oidc:
+    enabled: true
+    clientId: {{ $oidc.client_id | quote }}
+    clientSecret: {{ $oidc.client_secret | quote }}
+    providerUrl: {{ trimSuffix "/" $oidc.issuer }}/.well-known/openid-configuration
+    providerName: Authentik
+
+extraEnvVars:
+  - name: WEBUI_URL
+    value: https://{{ .Values.apps.openwebui.external.dns_hostname }}
+  - name: WEBUI_SECRET_KEY
+    value: {{ $secrets.webui_secret_key | quote }}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: "2Gi"
+    cpu: "2"

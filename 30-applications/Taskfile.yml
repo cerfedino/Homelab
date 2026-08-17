@@ -3,6 +3,9 @@ version: "3"
 output: prefixed
 
 includes:
+  ai:
+    taskfile: ai
+    dir: ai
   app-registry:
     taskfile: app-registry
     dir: app-registry
@@ -71,6 +74,7 @@ tasks:
   apps:
     desc: apply every app
     deps:
+      - ai:apply
       - cilium:apply
       - csi-proxmox:apply
       - cert-manager:apply

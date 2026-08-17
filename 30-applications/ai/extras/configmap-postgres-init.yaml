@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-postgres-init
+data:
+  # runs only on first init of an empty PGDATA
+  create-openwebui-db.sql: |
+    CREATE DATABASE openwebui OWNER ai;

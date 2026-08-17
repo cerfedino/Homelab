@@ -1,0 +1,45 @@
+masterkeySecretName: litellm-secrets
+masterkeySecretKey: LITELLM_MASTER_KEY
+
+environmentSecrets:
+  - litellm-secrets
+
+db:
+  deployStandalone: false
+  useExisting: true
+  endpoint: ai-postgres
+  database: litellm
+  secret:
+    name: ai-postgres
+    usernameKey: username
+    passwordKey: password
+
+proxy_config:
+  model_list:
+    - model_name: claude-opus-5
+      litellm_params:
+        model: anthropic/claude-opus-5
+        api_key: os.environ/ANTHROPIC_API_KEY
+    - model_name: claude-sonnet-5
+      litellm_params:
+        model: anthropic/claude-sonnet-5
+        api_key: os.environ/ANTHROPIC_API_KEY
+    - model_name: claude-haiku-4-5
+      litellm_params:
+        model: anthropic/claude-haiku-4-5
+        api_key: os.environ/ANTHROPIC_API_KEY
+    # in values-ollama.yaml
+    - model_name: llama3.2:3b
+      litellm_params:
+        model: ollama_chat/llama3.2:3b
+        api_base: http://ollama:11434
+  general_settings:
+    master_key: os.environ/LITELLM_MASTER_KEY
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: "2Gi"
+    cpu: "2"

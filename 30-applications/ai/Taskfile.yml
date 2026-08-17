@@ -1,0 +1,15 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [':authentik:apply', ':k8up:apply']
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=ai-extras
+      - cd .. && helmfile apply --skip-refresh -l name=ollama
+      - cd .. && helmfile apply --skip-refresh -l name=litellm
+      - cd .. && helmfile apply --skip-refresh -l name=open-webui
