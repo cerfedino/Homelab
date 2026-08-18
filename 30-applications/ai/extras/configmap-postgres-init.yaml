@@ -6,3 +6,5 @@ data:
   # runs only on first init of an empty PGDATA
   create-openwebui-db.sql: |
     CREATE DATABASE openwebui OWNER ai;
+  create-obot-db.sql: |
+    CREATE DATABASE obot OWNER ai;

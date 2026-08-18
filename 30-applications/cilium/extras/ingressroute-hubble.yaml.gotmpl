@@ -13,7 +13,9 @@ spec:
       services:
         - name: hubble-ui
           port: 80
+{{- if eq $v.type "forward-auth" }}
       middlewares:
         - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
 {{- end }}
 {{- end }}

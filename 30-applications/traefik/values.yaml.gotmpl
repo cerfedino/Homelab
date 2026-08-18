@@ -47,7 +47,9 @@ ingressRoute:
       - websecure
     matchRule: Host(`{{ .Values.apps.traefik.internal.dns_hostname }}`)
     middlewares:
+{{- if eq .Values.apps.traefik.internal.type "forward-auth" }}
       - name: authentik-forward-auth-local@file
+{{- end }}
 
 tlsStore:
   default:

@@ -13,3 +13,4 @@ tasks:
       - cd .. && helmfile apply --skip-refresh -l name=ollama
       - cd .. && helmfile apply --skip-refresh -l name=litellm
       - cd .. && helmfile apply --skip-refresh -l name=open-webui
+      - cd .. && helmfile apply --skip-refresh -l name=obot

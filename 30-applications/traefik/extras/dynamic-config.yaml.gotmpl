@@ -60,20 +60,28 @@ data:
           rule: Host(`{{ .Values.apps.pve1.internal.dns_hostname }}`)
           entryPoints:
             - websecure
+{{- if eq .Values.apps.pve1.internal.type "forward-auth" }}
           middlewares:
             - authentik-forward-auth-local
+{{- end }}
           service: pve1
         pbs1:
           rule: Host(`{{ .Values.apps.pbs1.internal.dns_hostname }}`)
           entryPoints:
             - websecure
+{{- if eq .Values.apps.pbs1.internal.type "forward-auth" }}
           middlewares:
             - authentik-forward-auth-local
+{{- end }}
           service: pbs1
         haos:
           rule: Host(`{{ .Values.apps.haos.external.dns_hostname }}`)
           entryPoints:
             - websecure
+{{- if eq .Values.apps.haos.external.type "forward-auth" }}
+          middlewares:
+            - authentik-forward-auth-local
+{{- end }}
           service: haos
 
       services:

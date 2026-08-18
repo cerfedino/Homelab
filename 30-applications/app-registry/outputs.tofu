@@ -15,7 +15,7 @@ output "helm_apps_summary" {
     apps = {
       for base in distinct(values(local.app_bases)) : base => {
         for vk, v in local.app_variants : v.variant => merge(
-          { display_name = v.display_name },
+          { display_name = v.display_name, type = v.type },
           v.dns_hostname != null ? { dns_hostname = v.dns_hostname } : {},
           v.href_url != null ? { href_url = v.href_url } : {},
           v.uptime_url != null ? { uptime_url = v.uptime_url } : {}

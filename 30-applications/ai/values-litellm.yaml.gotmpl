@@ -35,6 +35,13 @@ proxy_config:
         api_base: http://ollama:11434
   general_settings:
     master_key: os.environ/LITELLM_MASTER_KEY
+  mcp_servers: []
+    # hevy:
+    #   url: http://hevy-mcp:3000/mcp
+    #   transport: http
+    #   auth_type: bearer_token
+    #   auth_value: {{ (fromYaml (readFile "values.enc.yaml")).hevy_mcp_bearer_token | quote }}
+    #   access_groups: ["gym"]
 
 resources:
   requests:

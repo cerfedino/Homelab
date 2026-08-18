@@ -13,7 +13,9 @@ spec:
       services:
         - name: syncthing-web
           port: 8384
+{{- if eq $v.type "forward-auth" }}
       middlewares:
         - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
 {{- end }}
 {{- end }}
