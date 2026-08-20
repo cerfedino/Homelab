@@ -33,15 +33,50 @@ proxy_config:
       litellm_params:
         model: ollama_chat/llama3.2:3b
         api_base: http://ollama:11434
+
+    - model_name: claude-code-fable
+      litellm_params:
+        model: openai/claude-fable-5
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-opus
+      litellm_params:
+        model: openai/claude-opus-5
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-opus-4-8
+      litellm_params:
+        model: openai/claude-opus-4-8
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-opus-4-7
+      litellm_params:
+        model: openai/claude-opus-4-7
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-opus-4-6
+      litellm_params:
+        model: openai/claude-opus-4-6
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-sonnet
+      litellm_params:
+        model: openai/claude-sonnet-5
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-sonnet-4-6
+      litellm_params:
+        model: openai/claude-sonnet-4-6
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
+    - model_name: claude-code-haiku
+      litellm_params:
+        model: openai/claude-haiku-4-5
+        api_base: http://claudecode:8000/v1
+        api_key: dummy
   general_settings:
     master_key: os.environ/LITELLM_MASTER_KEY
   mcp_servers: []
-    # hevy:
-    #   url: http://hevy-mcp:3000/mcp
-    #   transport: http
-    #   auth_type: bearer_token
-    #   auth_value: {{ (fromYaml (readFile "values.enc.yaml")).hevy_mcp_bearer_token | quote }}
-    #   access_groups: ["gym"]
 
 resources:
   requests:

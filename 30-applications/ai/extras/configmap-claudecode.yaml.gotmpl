@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: claudecode
+data:
+  server.py: |
+{{ readFile "claudecode/server.enc.py" | indent 4 }}

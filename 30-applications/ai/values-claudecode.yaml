@@ -1,0 +1,66 @@
+controllers:
+  claudecode:
+    strategy: Recreate
+    replicas: 1
+    containers:
+      app:
+        image:
+          repository: node
+          tag: "22-slim"
+        command:
+          - sh
+          - -c
+          - |
+            set -e
+            apt-get update -qq
+            apt-get install -y -qq --no-install-recommends python3 python3-pip ca-certificates git procps
+            npm install -g --silent @anthropic-ai/claude-code
+            pip3 install --quiet --break-system-packages fastapi 'uvicorn[standard]' claude-agent-sdk
+            exec python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --app-dir /app
+        env:
+          TZ: Europe/Zurich
+          PYTHONUNBUFFERED: "1"
+          CLAUDE_MODEL: claude-haiku-4-5
+          AUTH_SKIP: "1"
+        envFrom:
+          - secretRef:
+              name: claudecode
+        probes:
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8000
+              periodSeconds: 10
+              failureThreshold: 60
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8000
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+
+service:
+  app:
+    controller: claudecode
+    ports:
+      http:
+        port: 8000
+
+persistence:
+  script:
+    type: configMap
+    name: claudecode
+    globalMounts:
+      - path: /app/server.py
+        subPath: server.py
+        readOnly: true

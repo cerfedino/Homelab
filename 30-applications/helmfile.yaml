@@ -292,6 +292,15 @@ releases:
     values:
       - ai/values-openwebui.yaml.gotmpl
 
+  - name: claudecode
+    namespace: ai
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "~4.6"
+    wait: true
+    values:
+      - ai/values-claudecode.yaml
+
     # *arr MEDIA STACK
   - name: media-extras
     namespace: media
