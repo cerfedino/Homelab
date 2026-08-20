@@ -1,0 +1,21 @@
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: backup
+spec:
+  backend:
+    s3:
+      endpoint: {{ .Values.backup.s3_endpoint }}
+      bucket: {{ .Values.backup.s3_bucket }}/librechat
+  backup:
+    schedule: "0 2 * * *"
+    failedJobsHistoryLimit: 2
+    successfulJobsHistoryLimit: 2
+  check:
+    schedule: "0 3 * * 6"
+  prune:
+    schedule: "0 3 * * 0"
+    retention:
+      keepDaily: 14
+      keepWeekly: 8
+      keepMonthly: 12

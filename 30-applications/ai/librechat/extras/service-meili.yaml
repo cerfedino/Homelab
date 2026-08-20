@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat-meili
+spec:
+  selector:
+    app: librechat-meili
+  ports:
+    - port: 7700
+      targetPort: 7700

@@ -42,6 +42,9 @@ includes:
   kuma:
     taskfile: kuma
     dir: kuma
+  librechat:
+    taskfile: ai/librechat
+    dir: ai/librechat
   media:
     taskfile: media
     dir: media
@@ -86,6 +89,7 @@ tasks:
       - cloudflare-tunnel:apply
       - immich:apply
       - kuma:apply
+      - librechat:apply
       - media:apply
       - nextcloud:apply
       - paperless:apply

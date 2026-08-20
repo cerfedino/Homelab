@@ -28,10 +28,10 @@ proxy_config:
       litellm_params:
         model: anthropic/claude-haiku-4-5
         api_key: os.environ/ANTHROPIC_API_KEY
-    # in values-ollama.yaml
-    - model_name: llama3.2:3b
+    # embeddings for librechat's rag-api
+    - model_name: nomic-embed-text
       litellm_params:
-        model: ollama_chat/llama3.2:3b
+        model: ollama/nomic-embed-text
         api_base: http://ollama:11434
 
     - model_name: claude-code-fable

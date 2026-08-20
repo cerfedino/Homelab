@@ -2,37 +2,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai-postgres
+  name: librechat-vectordb
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: ai-postgres
+      app: librechat-vectordb
   template:
     metadata:
       labels:
-        app: ai-postgres
+        app: librechat-vectordb
       annotations:
-        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"'
         k8up.io/file-extension: .sql
     spec:
       containers:
         - name: postgres
-          image: postgres:18.4
+          image: pgvector/pgvector:0.8.6-pg18
           env:
             # subdirectory: initdb refuses the mount point itself (lost+found)
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_USER
-              value: ai
+              value: librechat
             - name: POSTGRES_DB
-              value: litellm
+              value: librechat
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
             - name: POSTGRES_PASSWORD
-              value: {{ $secrets.ai_postgres_password | quote }}
+              value: {{ $secrets.vectordb_postgres_password | quote }}
           ports:
             - containerPort: 5432
           volumeMounts:
@@ -47,9 +47,9 @@ spec:
               cpu: "1"
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "ai", "-d", "litellm"]
+              command: ["pg_isready", "-U", "librechat", "-d", "librechat"]
             initialDelaySeconds: 10
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: ai-postgres-data
+            claimName: librechat-vectordb-data

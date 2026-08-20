@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    k8up.io/backup: "false"
+  name: librechat-meili-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: proxmox-data-zfs-ephemeral
+  resources:
+    requests:
+      storage: 2Gi

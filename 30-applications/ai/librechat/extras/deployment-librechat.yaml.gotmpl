@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: librechat
+  template:
+    metadata:
+      labels:
+        app: librechat
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: librechat
+          image: ghcr.io/danny-avila/librechat:v0.8.7
+          env:
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "3080"
+            - name: MONGO_URI
+              value: mongodb://librechat-mongo:27017/LibreChat
+            - name: DOMAIN_CLIENT
+              value: https://{{ .Values.apps.librechat.external.dns_hostname }}
+            - name: DOMAIN_SERVER
+              value: https://{{ .Values.apps.librechat.external.dns_hostname }}
+            - name: SEARCH
+              value: "true"
+            - name: MEILI_HOST
+              value: http://librechat-meili:7700
+            - name: MEILI_NO_ANALYTICS
+              value: "true"
+            - name: RAG_API_URL
+              value: http://librechat-rag:8000
+            - name: ALLOW_SOCIAL_LOGIN
+              value: "true"
+            - name: ALLOW_SOCIAL_REGISTRATION
+              value: "true"
+            - name: ALLOW_EMAIL_LOGIN
+              value: "false"
+            - name: ALLOW_REGISTRATION
+              value: "false"
+            - name: OPENID_ISSUER
+              value: {{ .Values.oidc.librechat_external.issuer | quote }}
+            - name: OPENID_SCOPE
+              value: openid profile email
+            - name: OPENID_CALLBACK_URL
+              value: /oauth/openid/callback
+            - name: OPENID_BUTTON_LABEL
+              value: Login with Authentik
+          envFrom:
+            - secretRef:
+                name: librechat-env
+          ports:
+            - containerPort: 3080
+          volumeMounts:
+            - name: config
+              mountPath: /app/librechat.yaml
+              subPath: librechat.yaml
+              readOnly: true
+            - name: uploads
+              mountPath: /app/uploads
+              subPath: uploads
+            - name: uploads
+              mountPath: /app/client/public/images
+              subPath: images
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: librechat-config
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: librechat-uploads

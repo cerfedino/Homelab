@@ -27,8 +27,6 @@ repositories:
     url: https://jellyfin.github.io/jellyfin-helm
   - name: windmill
     url: https://windmill-labs.github.io/windmill-helm-charts
-  - name: open-webui
-    url: https://helm.openwebui.com
   - name: ollama
     url: https://otwld.github.io/ollama-helm/
 
@@ -283,14 +281,14 @@ releases:
     values:
       - ai/values-litellm.yaml.gotmpl
 
-  - name: open-webui
-    namespace: ai
+  - name: librechat
+    namespace: librechat
     createNamespace: true
-    chart: open-webui/open-webui
-    version: "~16.0"
+    chart: bedag/raw
+    version: "~2.0"
     wait: true
     values:
-      - ai/values-openwebui.yaml.gotmpl
+      - ai/librechat/values.yaml.gotmpl
 
   - name: claudecode
     namespace: ai

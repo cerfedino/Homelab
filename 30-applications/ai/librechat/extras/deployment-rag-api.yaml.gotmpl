@@ -1,0 +1,54 @@
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: librechat-rag
+  template:
+    metadata:
+      labels:
+        app: librechat-rag
+    spec:
+      containers:
+        - name: rag-api
+          image: ghcr.io/danny-avila/librechat-rag-api-dev:v0.9.0
+          env:
+            - name: DB_HOST
+              value: librechat-vectordb
+            - name: DB_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: librechat
+            - name: POSTGRES_USER
+              value: librechat
+            - name: POSTGRES_PASSWORD
+              value: {{ $secrets.vectordb_postgres_password | quote }}
+            - name: VECTOR_DB_TYPE
+              value: pgvector
+            - name: EMBEDDINGS_PROVIDER
+              value: openai
+            - name: EMBEDDINGS_MODEL
+              value: nomic-embed-text
+            - name: RAG_OPENAI_BASEURL
+              value: http://litellm.ai.svc.cluster.local:4000/v1
+            - name: RAG_OPENAI_API_KEY
+              value: {{ $secrets.litellm_api_key | quote }}
+            - name: RAG_PORT
+              value: "8000"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10

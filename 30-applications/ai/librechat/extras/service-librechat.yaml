@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat
+spec:
+  selector:
+    app: librechat
+  ports:
+    - port: 3080
+      targetPort: 3080

@@ -1,0 +1,46 @@
+{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-meili
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: librechat-meili
+  template:
+    metadata:
+      labels:
+        app: librechat-meili
+    spec:
+      containers:
+        - name: meilisearch
+          image: getmeili/meilisearch:v1.53.1
+          env:
+            - name: MEILI_MASTER_KEY
+              value: {{ $secrets.meili_master_key | quote }}
+            - name: MEILI_NO_ANALYTICS
+              value: "true"
+          ports:
+            - containerPort: 7700
+          volumeMounts:
+            - name: data
+              mountPath: /meili_data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 7700
+            initialDelaySeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: librechat-meili-data

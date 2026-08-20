@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-mongo
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: librechat-mongo
+  template:
+    metadata:
+      labels:
+        app: librechat-mongo
+      annotations:
+        k8up.io/backupcommand: sh -c 'mongodump --archive --quiet'
+        k8up.io/file-extension: .archive
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:8.2
+          env:
+            - name: MONGO_TCMALLOC_PER_CPU_CACHE_SIZE_BYTES
+              value: "0"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: librechat-mongo-data
