@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-mcp
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud-mcp
+  template:
+    metadata:
+      labels:
+        app: nextcloud-mcp
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/approvals.db .dump'
+        k8up.io/file-extension: .sql
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        fsGroup: 10001
+      imagePullSecrets:
+        - name: nextcloud-mcp-ghcr
+      containers:
+        - name: sqlite
+          image: keinos/sqlite3:3.53.4
+          command: ["sleep", "infinity"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+        - name: nextcloud-mcp
+          image: ghcr.io/cerfedino/nextcloud-mcp:latest
+          env:
+            - name: NEXTCLOUD_URL
+              value: http://nextcloud.nextcloud.svc.cluster.local:8080
+            - name: ADMIN_USER_HEADER
+              value: X-authentik-username
+          envFrom:
+            - secretRef:
+                name: nextcloud-mcp-secrets
+          ports:
+            - name: mcp
+              containerPort: 8000
+            - name: admin
+              containerPort: 8001
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nextcloud-mcp-data

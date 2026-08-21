@@ -25,8 +25,7 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
-        // 'nextcloud' such that notify_push can reach
-        'trusted_domains' => array('localhost', 'nextcloud', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
+        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
         'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
         'default_phone_region' => 'CH',

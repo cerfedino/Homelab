@@ -27,8 +27,74 @@ data:
           titleConvo: true
           titleModel: claude-haiku-4-5
           modelDisplayLabel: LiteLLM
+          tokenConfig:
+            # claude-opus-5:
+            #   prompt: 5
+            #   completion: 25
+            #   context: 1000000
+            # claude-sonnet-5:
+            #   prompt: 3
+            #   completion: 15
+            #   context: 1000000
+            # claude-haiku-4-5:
+            #   prompt: 1
+            #   completion: 5
+            #   context: 200000
+            claude-code-fable:
+              prompt: 10
+              completion: 50
+              context: 1000000
+            claude-code-opus:
+              prompt: 5
+              completion: 25
+              context: 1000000
+            claude-code-opus-4-8:
+              prompt: 5
+              completion: 25
+              context: 1000000
+            claude-code-opus-4-7:
+              prompt: 5
+              completion: 25
+              context: 1000000
+            claude-code-opus-4-6:
+              prompt: 5
+              completion: 25
+              context: 1000000
+            claude-code-sonnet:
+              prompt: 3
+              completion: 15
+              context: 1000000
+            claude-code-sonnet-4-6:
+              prompt: 3
+              completion: 15
+              context: 1000000
+            claude-code-haiku:
+              prompt: 1
+              completion: 5
+              context: 200000
+
+    mcpSettings:
+      allowedAddresses:
+        - "nextcloud-mcp.ai.svc.cluster.local:8000"
+
 
     mcpServers:
+      nextcloud:
+        type: streamable-http
+        url: http://nextcloud-mcp.ai.svc.cluster.local:8000/mcp
+        headers:
+          X-Nextcloud-Username: '{{"{{"}}NEXTCLOUD_USERNAME{{"}}"}}'
+          X-Nextcloud-AppToken: '{{"{{"}}NEXTCLOUD_APPTOKEN{{"}}"}}'
+        customUserVars:
+          NEXTCLOUD_USERNAME:
+            title: Nextcloud username
+            description: Your Nextcloud login name
+            sensitive: false
+          NEXTCLOUD_APPTOKEN:
+            title: Nextcloud app token
+            description: Generate under Settings → Security → Devices & sessions
+            sensitive: true
+        startup: false
       hevy:
         type: stdio
         command: npx
