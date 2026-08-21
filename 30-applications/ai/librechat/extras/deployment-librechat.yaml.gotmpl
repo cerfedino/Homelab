@@ -54,6 +54,12 @@ spec:
               value: /oauth/openid/callback
             - name: OPENID_BUTTON_LABEL
               value: Login with Authentik
+            - name: OPENID_ADMIN_ROLE
+              value: librechat_admins
+            - name: OPENID_ADMIN_ROLE_PARAMETER_PATH
+              value: groups
+            - name: OPENID_ADMIN_ROLE_TOKEN_KIND
+              value: userinfo
           envFrom:
             - secretRef:
                 name: librechat-env
