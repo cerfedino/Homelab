@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    deps: [":setup-helmfile-repos"]
+    cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=local-path-provisioner

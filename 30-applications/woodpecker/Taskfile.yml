@@ -7,6 +7,6 @@ tasks:
 
   apply:
     run: once
-    deps: [':authentik:apply', ':k8up:apply']
+    deps: [':authentik:apply', ':k8up:apply', ':local-path-provisioner:apply']
     cmds:
       - cd .. && helmfile apply --skip-refresh -l name=woodpecker

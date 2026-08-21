@@ -31,7 +31,7 @@ storageClass:
     annotations:
       storageclass.kubernetes.io/is-default-class: "true"
 
-  # for volumes that are recreated constantly, like in the case of WoodpeckerCI
+  # for temporary volumes that need to be deleted as soon as they are released
   - name: proxmox-data-zfs-ephemeral
     storage: "{{.Values.proxmox_storage_name}}"
     reclaimPolicy: Delete

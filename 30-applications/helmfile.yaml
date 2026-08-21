@@ -29,6 +29,8 @@ repositories:
     url: https://windmill-labs.github.io/windmill-helm-charts
   - name: ollama
     url: https://otwld.github.io/ollama-helm/
+  - name: containeroo
+    url: https://charts.containeroo.ch
 
 releases:
   - name: cilium
@@ -57,6 +59,15 @@ releases:
     wait: true
     values:
       - csi-proxmox/values.yaml.gotmpl
+
+  - name: local-path-provisioner
+    namespace: local-path-provisioner
+    createNamespace: true
+    chart: containeroo/local-path-provisioner
+    version: "~0.0.38"
+    wait: true
+    values:
+      - local-path-provisioner/values.yaml
 
   - name: cert-manager
     namespace: cert-manager

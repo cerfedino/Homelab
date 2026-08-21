@@ -1,0 +1,19 @@
+storageClass:
+  create: true
+  name: local-path-ephemeral
+  defaultClass: false
+  reclaimPolicy: Delete
+  volumeBindingMode: WaitForFirstConsumer
+
+nodePathMap:
+  - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+    paths:
+      - /opt/local-path-provisioner
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi

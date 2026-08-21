@@ -7,6 +7,7 @@ server:
     # nobody self-registers; repos are enabled by the admin
     WOODPECKER_OPEN: "false"
     WOODPECKER_GITHUB: "true"
+    WOODPECKER_PLUGINS_PRIVILEGED: woodpeckerci/plugin-docker-buildx
   extraSecretNamesForEnvFrom:
     - woodpecker-secrets
     - woodpecker-default-agent-secret
@@ -29,8 +30,7 @@ agent:
     WOODPECKER_BACKEND: kubernetes
     WOODPECKER_BACKEND_K8S_NAMESPACE: woodpecker
     # for pipelines we use ephemeral storage such that after the pipeline we reclaim the PV immediately
-    WOODPECKER_BACKEND_K8S_STORAGE_CLASS: proxmox-data-zfs-ephemeral
-    # csi-proxmox volumes are RWO
+    WOODPECKER_BACKEND_K8S_STORAGE_CLASS: local-path-ephemeral
     WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
     WOODPECKER_BACKEND_K8S_VOLUME_SIZE: 10G
   resources:

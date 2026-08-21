@@ -12,6 +12,9 @@ includes:
   csi-proxmox:
     taskfile: csi-proxmox
     dir: csi-proxmox
+  local-path-provisioner:
+    taskfile: local-path-provisioner
+    dir: local-path-provisioner
   cert-manager:
     taskfile: cert-manager
     dir: cert-manager
@@ -80,6 +83,7 @@ tasks:
       - ai:apply
       - cilium:apply
       - csi-proxmox:apply
+      - local-path-provisioner:apply
       - cert-manager:apply
       - traefik:apply
       - k8up:apply
