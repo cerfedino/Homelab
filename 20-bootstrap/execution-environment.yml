@@ -2,7 +2,7 @@ version: 3
 
 images:
   base_image:
-    name: registry.fedoraproject.org/fedora:45
+    name: registry.fedoraproject.org/fedora:46
 
 additional_build_steps:
   prepend_galaxy:
