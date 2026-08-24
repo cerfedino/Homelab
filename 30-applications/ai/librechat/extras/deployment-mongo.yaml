@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: mongo
-          image: mongo:8.2
+          image: mongo:8.3
           env:
             - name: MONGO_TCMALLOC_PER_CPU_CACHE_SIZE_BYTES
               value: "0"
