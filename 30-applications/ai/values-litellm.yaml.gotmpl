@@ -4,6 +4,16 @@ masterkeySecretKey: LITELLM_MASTER_KEY
 environmentSecrets:
   - litellm-secrets
 
+{{- $akBase := regexReplaceAll "application/o/.+$" .Values.oidc.litellm_external.issuer "application/o" }}
+envVars:
+  PROXY_BASE_URL: https://{{ .Values.apps.litellm.external.dns_hostname }}
+  # authentik's endpoints are global; only discovery is per-application
+  GENERIC_AUTHORIZATION_ENDPOINT: {{ $akBase }}/authorize/
+  GENERIC_TOKEN_ENDPOINT: {{ $akBase }}/token/
+  GENERIC_USERINFO_ENDPOINT: {{ $akBase }}/userinfo/
+  GENERIC_SCOPE: openid email profile
+  AUTO_REDIRECT_UI_LOGIN_TO_SSO: true
+
 db:
   deployStandalone: false
   useExisting: true
