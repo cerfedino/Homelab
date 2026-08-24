@@ -6,7 +6,7 @@ controllers:
       app:
         image:
           repository: node
-          tag: "22-slim"
+          tag: "24-slim"
         command:
           - sh
           - -c
