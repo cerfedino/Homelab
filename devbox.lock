@@ -430,41 +430,41 @@
         }
       }
     },
-    "kubernetes-helm@4.2.3": {
-      "last_modified": "2026-08-01T16:34:20Z",
-      "resolved": "github:NixOS/nixpkgs/a5cbcfe954791221bfffe2307f7d1a1bf61a871e#kubernetes-helm",
+    "kubernetes-helm@4.2.4": {
+      "last_modified": "2026-08-14T06:48:10Z",
+      "resolved": "github:NixOS/nixpkgs/f2b17eb1b90f6a359082035b4538d4c63017aec3#kubernetes-helm",
       "source": "devbox-search",
-      "version": "4.2.3",
+      "version": "4.2.4",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/zxlrdn6fsss4s2i496np7kdrwy92261j-kubernetes-helm-4.2.3",
+              "path": "/nix/store/zzbd5kzhdq4xh99ykhmsk9gdr3sgsdv4-kubernetes-helm-4.2.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/zxlrdn6fsss4s2i496np7kdrwy92261j-kubernetes-helm-4.2.3"
+          "store_path": "/nix/store/zzbd5kzhdq4xh99ykhmsk9gdr3sgsdv4-kubernetes-helm-4.2.4"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3m7a0rmsr6k5hs0xl2ym6kiv4iqgwypj-kubernetes-helm-4.2.3",
+              "path": "/nix/store/m15s22fr1c74qc24bqsi14zmvmh3wa02-kubernetes-helm-4.2.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3m7a0rmsr6k5hs0xl2ym6kiv4iqgwypj-kubernetes-helm-4.2.3"
+          "store_path": "/nix/store/m15s22fr1c74qc24bqsi14zmvmh3wa02-kubernetes-helm-4.2.4"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/wkb6xckn077grj4jqb6z6wgmwzj7g1xr-kubernetes-helm-4.2.3",
+              "path": "/nix/store/g48g9scy4mz49kwjsy0fb9kkbspvkcfi-kubernetes-helm-4.2.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/wkb6xckn077grj4jqb6z6wgmwzj7g1xr-kubernetes-helm-4.2.3"
+          "store_path": "/nix/store/g48g9scy4mz49kwjsy0fb9kkbspvkcfi-kubernetes-helm-4.2.4"
         }
       }
     },
