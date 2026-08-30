@@ -32,7 +32,6 @@ spec:
           resources:
             limits:
               memory: "64Mi"
-              cpu: "100m"
         - name: nextcloud-mcp
           image: ghcr.io/cerfedino/nextcloud-mcp:latest
           env:
@@ -53,11 +52,9 @@ spec:
               mountPath: /data
           resources:
             requests:
-              cpu: 50m
               memory: 128Mi
             limits:
               memory: "512Mi"
-              cpu: "1"
           readinessProbe:
             httpGet:
               path: /healthz

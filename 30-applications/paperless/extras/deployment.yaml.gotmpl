@@ -28,7 +28,6 @@ spec:
           resources:
             limits:
               memory: "64Mi"
-              cpu: "100m"
         - name: paperless
           image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5
           env:
@@ -75,7 +74,6 @@ spec:
           resources:
             limits:
               memory: "2Gi"
-              cpu: "2"
           readinessProbe:
             httpGet:
               path: /

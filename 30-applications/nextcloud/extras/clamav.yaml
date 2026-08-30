@@ -25,11 +25,9 @@ spec:
               mountPath: /var/lib/clamav
           resources:
             requests:
-              cpu: 100m
               memory: 1Gi
             limits:
               memory: "2Gi"
-              cpu: "1"
           startupProbe:
             # first start downloads signatures before clamd listens
             tcpSocket:

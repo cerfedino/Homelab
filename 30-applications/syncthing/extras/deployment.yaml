@@ -32,7 +32,6 @@ spec:
           resources:
             limits:
               memory: "1Gi"
-              cpu: "1"
           readinessProbe:
             httpGet:
               path: /rest/noauth/health

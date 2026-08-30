@@ -27,7 +27,6 @@ spec:
           resources:
             limits:
               memory: "64Mi"
-              cpu: "100m"
         - name: chhoto
           image: sintan1729/chhoto-url:7.5.0
           env:
@@ -56,11 +55,9 @@ spec:
               mountPath: /data
           resources:
             requests:
-              cpu: 25m
               memory: 32Mi
             limits:
               memory: "256Mi"
-              cpu: "500m"
           readinessProbe:
             httpGet:
               path: /

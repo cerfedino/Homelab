@@ -78,11 +78,9 @@ spec:
               subPath: images
           resources:
             requests:
-              cpu: 100m
               memory: 512Mi
             limits:
               memory: "2Gi"
-              cpu: "2"
           readinessProbe:
             httpGet:
               path: /health

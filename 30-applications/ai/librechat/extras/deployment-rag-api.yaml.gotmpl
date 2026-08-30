@@ -43,11 +43,9 @@ spec:
             - containerPort: 8000
           resources:
             requests:
-              cpu: 50m
               memory: 256Mi
             limits:
               memory: "1Gi"
-              cpu: "1"
           readinessProbe:
             tcpSocket:
               port: 8000

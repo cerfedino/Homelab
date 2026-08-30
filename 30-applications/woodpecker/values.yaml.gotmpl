@@ -17,11 +17,9 @@ server:
     storageClass: proxmox-data-zfs
   resources:
     requests:
-      cpu: 100m
       memory: 128Mi
     limits:
       memory: "512Mi"
-      cpu: "1"
 
 agent:
   replicaCount: 1
@@ -35,11 +33,9 @@ agent:
     WOODPECKER_BACKEND_K8S_VOLUME_SIZE: 10G
   resources:
     requests:
-      cpu: 50m
       memory: 64Mi
     limits:
       memory: "256Mi"
-      cpu: "500m"
 
 additionalObjects:
 {{- range $f := readDirEntries "extras" }}

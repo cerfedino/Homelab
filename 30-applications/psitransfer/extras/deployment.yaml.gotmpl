@@ -41,11 +41,9 @@ spec:
               subPath: config.production.js
           resources:
             requests:
-              cpu: 50m
               memory: 128Mi
             limits:
               memory: "512Mi"
-              cpu: "1"
           readinessProbe:
             httpGet:
               path: /

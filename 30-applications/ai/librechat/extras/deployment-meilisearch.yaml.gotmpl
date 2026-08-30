@@ -30,11 +30,9 @@ spec:
               mountPath: /meili_data
           resources:
             requests:
-              cpu: 50m
               memory: 128Mi
             limits:
               memory: "1Gi"
-              cpu: "1"
           readinessProbe:
             httpGet:
               path: /health

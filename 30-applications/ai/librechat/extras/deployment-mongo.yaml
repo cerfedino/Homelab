@@ -30,11 +30,9 @@ spec:
               mountPath: /data/db
           resources:
             requests:
-              cpu: 100m
               memory: 256Mi
             limits:
               memory: "1Gi"
-              cpu: "1"
           readinessProbe:
             tcpSocket:
               port: 27017

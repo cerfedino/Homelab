@@ -27,7 +27,6 @@ spec:
           resources:
             limits:
               memory: "64Mi"
-              cpu: "100m"
         - name: vaultwarden
           image: vaultwarden/server:1.37.1
           env:
@@ -83,7 +82,6 @@ spec:
           resources:
             limits:
               memory: "512Mi"
-              cpu: "500m"
           readinessProbe:
             httpGet:
               path: /alive

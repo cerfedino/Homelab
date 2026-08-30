@@ -41,7 +41,6 @@ controllers:
               periodSeconds: 10
         resources:
           requests:
-            cpu: 100m
             memory: 512Mi
           limits:
             memory: 2Gi
@@ -67,7 +66,6 @@ controllers:
               - NET_ADMIN
         resources:
           requests:
-            cpu: 50m
             memory: 128Mi
           limits:
             memory: 512Mi
