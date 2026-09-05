@@ -28,7 +28,7 @@ spec:
             limits:
               memory: "64Mi"
         - name: vaultwarden
-          image: vaultwarden/server:1.37.1
+          image: vaultwarden/server:1.37.2
           env:
             - name: DOMAIN
               value: https://{{ .Values.apps.vaultwarden.external.dns_hostname }}
