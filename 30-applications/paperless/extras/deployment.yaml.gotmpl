@@ -29,7 +29,7 @@ spec:
             limits:
               memory: "64Mi"
         - name: paperless
-          image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.1.3
           env:
             - name: PAPERLESS_URL
               value: https://{{ .Values.apps.paperless.external.dns_hostname }}
