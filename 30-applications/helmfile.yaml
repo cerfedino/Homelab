@@ -149,7 +149,7 @@ releases:
     namespace: authentik
     createNamespace: true
     chart: authentik/authentik
-    version: "~2026.5"
+    version: "~2026.8.0"
     wait: true
     values:
       - authentik/values.yaml.gotmpl
