@@ -37,6 +37,28 @@
       failed_when: false
       changed_when: false
 
+    # We need to wait for the CSI Proxmox plugin to detach the disks from the old node before deleting it from etcd, otherwise the disks risk to be attached to multiple nodes.
+    - name: Wait for the volumes to detach before the Node record disappears
+      ansible.builtin.command: >-
+        k3s kubectl get volumeattachments
+        -o jsonpath='{.items[?(@.spec.nodeName=="{{ node }}")].metadata.name}'
+      delegate_to: "{{ helper_node }}"
+      become: true
+      register: attachments
+      until: attachments.stdout | trim == ""
+      retries: 36
+      delay: 5
+      failed_when: false
+      changed_when: false
+
+    - name: Warn about volumes that never detached
+      ansible.builtin.debug:
+        msg: >-
+          {{ node }} still has VolumeAttachments ({{ attachments.stdout }}).
+          Deleting the Node now leaves their disks attached to the old VM;
+          detach them in Proxmox by hand.
+      when: attachments.stdout | trim != ""
+
     - name: Remove the node from the cluster
       ansible.builtin.command: k3s kubectl delete node {{ node }} --ignore-not-found
       delegate_to: "{{ helper_node }}"
