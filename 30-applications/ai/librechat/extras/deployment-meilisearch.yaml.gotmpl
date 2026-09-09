@@ -23,6 +23,8 @@ spec:
               value: {{ $secrets.meili_master_key | quote }}
             - name: MEILI_NO_ANALYTICS
               value: "true"
+            - name: MEILI_UPGRADE_DB
+              value: "true"
           ports:
             - containerPort: 7700
           volumeMounts:
