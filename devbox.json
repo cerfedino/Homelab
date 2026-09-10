@@ -6,7 +6,7 @@
         "ansible-navigator": "26.6.0",
         "kubectl": "1.36.3",
         "podman": {
-            "version": "5.8.4",
+            "version": "5.8.6",
             "excluded_platforms": [
                 "aarch64-darwin",
                 "x86_64-darwin"
