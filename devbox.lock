@@ -163,53 +163,53 @@
         }
       }
     },
-    "ansible@2.21.2": {
-      "last_modified": "2026-08-16T05:26:56Z",
-      "resolved": "github:NixOS/nixpkgs/54ba4bcec4043e72a4006d825e0d7aff5562008f#ansible",
+    "ansible@2.21.3": {
+      "last_modified": "2026-08-27T07:16:00Z",
+      "resolved": "github:NixOS/nixpkgs/c27cdad491a991b11ed731760aa2ef8db0cb0410#ansible",
       "source": "devbox-search",
-      "version": "2.21.2",
+      "version": "2.21.3",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rr72a8gflqfr530k27wfc811nr5xaxdn-python3.14-ansible-core-2.21.2",
+              "path": "/nix/store/s9xygrq5kiyz0qvkjm0glrn7bykjibmw-python3.14-ansible-core-2.21.3",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/kxfrpjwyjh2j6w4frmbzv3gyx4810d7j-python3.14-ansible-core-2.21.2-dist"
+              "path": "/nix/store/kkgzfg6j63hmdwlfjyz15cql82g04ydb-python3.14-ansible-core-2.21.3-dist"
             }
           ],
-          "store_path": "/nix/store/rr72a8gflqfr530k27wfc811nr5xaxdn-python3.14-ansible-core-2.21.2"
+          "store_path": "/nix/store/s9xygrq5kiyz0qvkjm0glrn7bykjibmw-python3.14-ansible-core-2.21.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/8yyvk5add3sv8d15xpz6qzazc391f7ap-python3.14-ansible-core-2.21.2",
+              "path": "/nix/store/lhb08cg5k3wsg9s0xafmj1i1x9dgfgh9-python3.14-ansible-core-2.21.3",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/wkmcmi3ci9ry3s5p2dg9d628dw0nkq21-python3.14-ansible-core-2.21.2-dist"
+              "path": "/nix/store/fhnhjlnv60952rkz1z1m26lgnhz8yvdx-python3.14-ansible-core-2.21.3-dist"
             }
           ],
-          "store_path": "/nix/store/8yyvk5add3sv8d15xpz6qzazc391f7ap-python3.14-ansible-core-2.21.2"
+          "store_path": "/nix/store/lhb08cg5k3wsg9s0xafmj1i1x9dgfgh9-python3.14-ansible-core-2.21.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6v7934ch0pnsnc8xc8p5xl80zzl1h2k1-python3.14-ansible-core-2.21.2",
+              "path": "/nix/store/khvfvdk8r3qqp4smfx6k9nj1igf302ax-python3.14-ansible-core-2.21.3",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/hl0mrnxjj7rxzr1ln2c58ck4zfqi7ivl-python3.14-ansible-core-2.21.2-dist"
+              "path": "/nix/store/c11dlhkm01rvg8xwdfi6y08c6la42gk0-python3.14-ansible-core-2.21.3-dist"
             }
           ],
-          "store_path": "/nix/store/6v7934ch0pnsnc8xc8p5xl80zzl1h2k1-python3.14-ansible-core-2.21.2"
+          "store_path": "/nix/store/khvfvdk8r3qqp4smfx6k9nj1igf302ax-python3.14-ansible-core-2.21.3"
         }
       }
     },
