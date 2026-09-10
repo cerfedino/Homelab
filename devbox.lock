@@ -255,41 +255,41 @@
         }
       }
     },
-    "helmfile@1.7.3": {
-      "last_modified": "2026-08-12T11:28:58Z",
-      "resolved": "github:NixOS/nixpkgs/044bfe75bfe4c7bbe043dc17b5e42ea823b84a09#helmfile",
+    "helmfile@1.7.4": {
+      "last_modified": "2026-08-27T07:16:00Z",
+      "resolved": "github:NixOS/nixpkgs/c27cdad491a991b11ed731760aa2ef8db0cb0410#helmfile",
       "source": "devbox-search",
-      "version": "1.7.3",
+      "version": "1.7.4",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/x07dxgc6vhxp0a20zr1gj1pxz99sjs7y-helmfile-1.7.3",
+              "path": "/nix/store/2594az28x37dlbag6alv5wcivb63y5a7-helmfile-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/x07dxgc6vhxp0a20zr1gj1pxz99sjs7y-helmfile-1.7.3"
+          "store_path": "/nix/store/2594az28x37dlbag6alv5wcivb63y5a7-helmfile-1.7.4"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cyvsxg2arqkig2rkmlkfjnyzi9wrs2b0-helmfile-1.7.3",
+              "path": "/nix/store/p1xamnhgj6y6sw2g9d0wlaqdpvpa3g3r-helmfile-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cyvsxg2arqkig2rkmlkfjnyzi9wrs2b0-helmfile-1.7.3"
+          "store_path": "/nix/store/p1xamnhgj6y6sw2g9d0wlaqdpvpa3g3r-helmfile-1.7.4"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/ypnzabkj466asnv9v8j3v2hygj9bahiv-helmfile-1.7.3",
+              "path": "/nix/store/3ls098ckcn58liiiimnzrh59kdik2lxy-helmfile-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/ypnzabkj466asnv9v8j3v2hygj9bahiv-helmfile-1.7.3"
+          "store_path": "/nix/store/3ls098ckcn58liiiimnzrh59kdik2lxy-helmfile-1.7.4"
         }
       }
     },
