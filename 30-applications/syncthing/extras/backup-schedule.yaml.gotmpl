@@ -8,6 +8,8 @@ spec:
       endpoint: {{ .Values.backup.s3_endpoint }}
       bucket: {{ .Values.backup.s3_bucket }}/syncthing
   backup:
+    podSecurityContext:
+      runAsUser: 0
     schedule: "0 2 * * *"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 2
