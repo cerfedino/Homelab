@@ -39,6 +39,9 @@ ports:
   websecure:
     port: 8443
     exposedPort: 443
+    transport:
+      respondingTimeouts:
+        readTimeout: 0
 
 ingressRoute:
   dashboard:
