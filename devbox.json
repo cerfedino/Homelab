@@ -20,7 +20,7 @@
         "pre-commit": "4.5.1",
         "restic": "0.19.1",
         "k9s": "0.51.0",
-        "go-task": "3.52.0"
+        "go-task": "3.53.1"
     },
     "shell": {
         "init_hook": [
