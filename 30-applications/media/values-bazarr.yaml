@@ -15,7 +15,7 @@ controllers:
       app:
         image:
           repository: lscr.io/linuxserver/bazarr
-          tag: "1.6.0"
+          tag: "1.6.1"
         env:
           PUID: "1000"
           PGID: "1000"
