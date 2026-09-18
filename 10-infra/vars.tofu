@@ -4,7 +4,7 @@ variable "proxmox" {
     endpoint_internal = string
 
     # User with following Role permissions on /:
-    # VM.Config.HWType, Pool.Allocate, Sys.Modify, VM.Config.CDROM, VM.Config.Cloudinit, VM.Clone, VM.Config.Network, Sys.Console, VM.Config.Memory, VM.PowerMgmt, VM.Config.CPU, VM.Config.Disk, VM.Migrate, VM.Allocate, User.Modify, Sys.Audit, VM.Config.Options, Datastore.Allocate, VM.Audit, SDN.Use, VM.Monitor, Datastore.AllocateTemplate, Datastore.Audit, Realm.AllocateUser, Datastore.AllocateSpace, Pool.Audit
+    # Datastore.Audit, Sys.Audit, VM.Migrate, VM.Audit, VM.PowerMgmt, SDN.Use, Realm.AllocateUser, VM.Config.Network, Pool.Allocate, Datastore.Allocate, VM.GuestAgent.Audit, User.Modify, VM.Config.Disk, VM.Config.HWType, Sys.Console, VM.Allocate, VM.Config.CPU, VM.Config.Cloudinit, Datastore.AllocateSpace, VM.Config.Options, VM.Clone, Datastore.AllocateTemplate, VM.Config.Memory, Pool.Audit, VM.Config.CDROM, Sys.Modify, Group.Allocate, Mapping.Audit, Mapping.Modify, Mapping.Use, Permissions.Modify, Realm.Allocate, SDN.Allocate, SDN.Audit, Sys.AccessNetwork, Sys.Incoming, Sys.PowerMgmt, Sys.Syslog, VM.Backup, VM.Console, VM.GuestAgent.FileRead, VM.GuestAgent.FileSystemMgmt, VM.GuestAgent.FileWrite, VM.GuestAgent.Unrestricted, VM.Replicate, VM.Snapshot, VM.Snapshot.Rollback
     api_token = string # format: USER@REALM!TOKENID=SECRET
     # Path relative to REPO_ROOT
     root_privkey_path = string
