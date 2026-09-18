@@ -5,7 +5,7 @@ controllers:
       app:
         image:
           repository: lscr.io/linuxserver/prowlarr
-          tag: "2.5.2"
+          tag: "2.6.5"
         env:
           PUID: "1000"
           PGID: "1000"
