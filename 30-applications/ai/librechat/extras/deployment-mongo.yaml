@@ -20,7 +20,7 @@ spec:
       containers:
         - name: mongo
           # Every 8.3.x refuses to start on kernel >= 6.19 (SERVER-121912); the check will be dropped in 8.3.9
-          image: mongo:8.2
+          image: mongo:8.3
           env:
             - name: MONGO_TCMALLOC_PER_CPU_CACHE_SIZE_BYTES
               value: "0"
