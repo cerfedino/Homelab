@@ -93,7 +93,7 @@ resource "proxmox_user_token" "CSI" {
 
 
 data "http" "ubuntu_images_checksums" {
-  url    = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/SHA256SUMS"
+  url    = "https://cloud-images.ubuntu.com/releases/resolute/${local.ubuntu_image_release}/SHA256SUMS"
   method = "GET"
 }
 
@@ -126,8 +126,8 @@ resource "proxmox_network_linux_bridge" "network_internal" {
 }
 
 locals {
-  ubuntu_image_release  = "20260627"
-  ubuntu_image_filename = "resolute-server-cloudimg-amd64"
+  ubuntu_image_release  = "release-20260918"
+  ubuntu_image_filename = "ubuntu-26.04-server-cloudimg-amd64"
 
   lan_prefix      = split("/", var.network_lan.cidr)[1]
   internal_prefix = split("/", var.network_internal.cidr)[1]
@@ -144,7 +144,7 @@ resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   node_name = var.proxmox_node_name
   depends_on = [proxmox_network_linux_bridge.network_lan]
 
-  url       = "https://cloud-images.ubuntu.com/resolute/${local.ubuntu_image_release}/${local.ubuntu_image_filename}.img"
+  url       = "https://cloud-images.ubuntu.com/releases/resolute/${local.ubuntu_image_release}/${local.ubuntu_image_filename}.img"
   file_name = "${local.ubuntu_image_filename}.qcow2"
 
   checksum           = regex("(?m)^([a-f0-9]{64}) \\*${local.ubuntu_image_filename}.img$",data.http.ubuntu_images_checksums.response_body)[0]
