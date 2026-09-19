@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   annotations:
     helm.sh/resource-policy: keep
+    # the pod's backupcommand dump covers it
+    k8up.io/backup: "false"
   name: librechat-vectordb-data
 spec:
   accessModes:
