@@ -15,6 +15,13 @@ spec:
       labels:
         pod: cloudflare-tunnel
     spec:
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              pod: cloudflare-tunnel
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       containers:
         - command:
             - cloudflared

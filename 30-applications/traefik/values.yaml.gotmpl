@@ -13,6 +13,18 @@ deployment:
         name: traefik-dynamic
         optional: true # don't block pod start while the CM doesn't exist yet
 
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: traefik
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+
 additionalVolumeMounts:
   - name: dynamic
     mountPath: /dynamic

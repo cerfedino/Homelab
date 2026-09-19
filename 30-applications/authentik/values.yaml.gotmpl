@@ -6,6 +6,19 @@ authentik:
     enabled: false
 
 server:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
+  topologySpreadConstraints:
+    - labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: server
+          app.kubernetes.io/instance: authentik
+          app.kubernetes.io/name: authentik
+      maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
   ingress:
     enabled: false
 
