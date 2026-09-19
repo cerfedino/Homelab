@@ -13,6 +13,9 @@ spec:
       priority: 10
       middlewares:
         - name: nextcloud-hsts
+{{- if eq $v.type "forward-auth" }}
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
       services:
         - name: nextcloud
           port: 8080

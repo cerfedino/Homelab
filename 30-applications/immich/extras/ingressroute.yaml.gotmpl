@@ -13,5 +13,9 @@ spec:
       services:
         - name: immich-server
           port: 2283
+{{- if eq $v.type "forward-auth" }}
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
 {{- end }}
 {{- end }}

@@ -80,7 +80,7 @@ data:
             - websecure
 {{- if eq .Values.apps.haos.external.type "forward-auth" }}
           middlewares:
-            - authentik-forward-auth-local
+            - authentik-forward-auth-external
 {{- end }}
           service: haos
 

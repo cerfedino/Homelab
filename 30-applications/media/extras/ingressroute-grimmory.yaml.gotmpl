@@ -13,5 +13,9 @@ spec:
       services:
         - name: grimmory
           port: 6060
+{{- if eq $v.type "forward-auth" }}
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
 {{- end }}
 {{- end }}
