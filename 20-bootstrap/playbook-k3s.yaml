@@ -59,3 +59,42 @@
 #       #   - docker status
 - name: K3s playbook
   ansible.builtin.import_playbook: k3s.orchestration.site
+
+# Restarts servers that are running k3s with a version different from the binary available on disk (i.e k3s updated but old version still running)
+- name: Restart servers running a stale binary
+  hosts: server
+  serial: 1
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Read the installed binary version
+      ansible.builtin.command: /usr/local/bin/k3s --version
+      register: k3s_binary
+      changed_when: false
+
+    - name: Read the running version
+      ansible.builtin.command: k3s kubectl get node {{ inventory_hostname }} -o jsonpath='{.status.nodeInfo.kubeletVersion}'
+      register: k3s_running
+      changed_when: false
+
+    - name: Set binary_version
+      ansible.builtin.set_fact:
+        binary_version: "{{ k3s_binary.stdout_lines[0].split(' ')[2] }}"
+
+    - name: Restart onto the new binary
+      when: binary_version != k3s_running.stdout
+      block:
+        - name: Restart k3s
+          ansible.builtin.systemd_service:
+            name: k3s
+            state: restarted
+
+        - name: Wait for the node to report Ready on the new version
+          ansible.builtin.command: >-
+            k3s kubectl get node {{ inventory_hostname }}
+            -o jsonpath='{.status.nodeInfo.kubeletVersion} {.status.conditions[?(@.type=="Ready")].status}'
+          register: node_state
+          until: node_state.stdout == binary_version ~ ' True'
+          retries: 36
+          delay: 5
+          changed_when: false
