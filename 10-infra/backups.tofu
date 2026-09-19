@@ -10,3 +10,20 @@ resource "minio_s3_bucket" "backups" {
   bucket = var.backup_bucket
   acl    = "private"
 }
+
+resource "minio_s3_bucket_versioning" "backups" {
+  bucket = minio_s3_bucket.backups.bucket
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "minio_ilm_policy" "backups" {
+  bucket = minio_s3_bucket.backups.bucket
+  rule {
+    id = "expire-noncurrent-versions"
+    noncurrent_expiration {
+      days = "30d"
+    }
+  }
+}
