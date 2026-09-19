@@ -15,7 +15,7 @@ spec:
       labels:
         app: windmill-postgres
       annotations:
-        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"'
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
         k8up.io/file-extension: .sql
     spec:
       containers:
