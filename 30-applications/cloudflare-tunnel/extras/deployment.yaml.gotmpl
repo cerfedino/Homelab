@@ -29,12 +29,17 @@ spec:
             - --metrics
             - 0.0.0.0:2000
             - run
-          args:
-            - --token
-            #prettier-ignore
-            - {{ .Values.cloudflareTunnelToken }}
           image: cloudflare/cloudflared:2026.9.1
           name: cloudflare-tunnel
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-tunnel-token
+                  key: TUNNEL_TOKEN
+          resources:
+            requests:
+              memory: 64Mi
           livenessProbe:
             httpGet:
               path: /ready
