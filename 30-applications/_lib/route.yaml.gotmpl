@@ -1,0 +1,21 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+{{- range $variant, $v := index .Values.apps .app }}
+{{- if $v.dns_hostname }}
+    - match: Host(`{{ $v.dns_hostname }}`)
+      kind: Rule
+      services:
+        - name: {{ $.service }}
+          port: {{ $.port }}
+{{- if eq $v.type "forward-auth" }}
+      middlewares:
+        - name: authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}@file
+{{- end }}
+{{- end }}
+{{- end }}
