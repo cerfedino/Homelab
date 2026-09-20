@@ -5,6 +5,15 @@ authentik:
   error_reporting:
     enabled: false
 
+  email:
+    host: {{ .Values.smtp.host }}
+    port: {{ .Values.smtp.port }}
+    username: {{ .Values.smtp.username }}
+    password: {{ .Values.smtp.password | quote }}
+    from: {{ .Values.smtp.from }}
+    use_tls: {{ eq .Values.smtp.security "starttls" }}
+    use_ssl: {{ eq .Values.smtp.security "ssl" }}
+
 server:
   replicas: 2
   pdb:

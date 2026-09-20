@@ -17,7 +17,7 @@ nextcloud:
     smtp:
       host: {{ .Values.smtp.host }}
       port: {{ .Values.smtp.port }}
-      secure: starttls
+      secure: {{ .Values.smtp.security }}
       name: {{ .Values.smtp.username }}
       password: {{ .Values.smtp.password | quote }}
 
