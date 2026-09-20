@@ -22,7 +22,7 @@ resource "prowlarr_application_sonarr" "sonarr" {
   sync_level   = "fullSync"
   prowlarr_url = "http://prowlarr.media.svc.cluster.local:9696"
   base_url     = "http://sonarr.media.svc.cluster.local:8989"
-  api_key      = var.sonarr_api_key
+  api_key      = local.secrets.arr.sonarr_api_key
 }
 
 resource "prowlarr_application_radarr" "radarr" {
@@ -30,5 +30,5 @@ resource "prowlarr_application_radarr" "radarr" {
   sync_level   = "fullSync"
   prowlarr_url = "http://prowlarr.media.svc.cluster.local:9696"
   base_url     = "http://radarr.media.svc.cluster.local:7878"
-  api_key      = var.radarr_api_key
+  api_key      = local.secrets.arr.radarr_api_key
 }

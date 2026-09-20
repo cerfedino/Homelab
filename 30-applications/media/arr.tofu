@@ -13,8 +13,8 @@ resource "sonarr_download_client_qbittorrent" "qbittorrent" {
   host                       = "qbittorrent.media.svc.cluster.local"
   port                       = 8080
   use_ssl                    = false
-  username                   = var.qbittorrent.username
-  password                   = var.qbittorrent.password
+  username                   = local.secrets.qbittorrent.username
+  password                   = local.secrets.qbittorrent.password
   tv_category                = "tvshows"
   initial_state              = 0
   remove_completed_downloads = false
@@ -28,8 +28,8 @@ resource "radarr_download_client_qbittorrent" "qbittorrent" {
   host                       = "qbittorrent.media.svc.cluster.local"
   port                       = 8080
   use_ssl                    = false
-  username                   = var.qbittorrent.username
-  password                   = var.qbittorrent.password
+  username                   = local.secrets.qbittorrent.username
+  password                   = local.secrets.qbittorrent.password
   movie_category             = "movies"
   initial_state              = 0
   remove_completed_downloads = false

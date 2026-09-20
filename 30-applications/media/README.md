@@ -43,7 +43,7 @@ Configure
 
 ## Sonarr/Radarr/Prowlarr
 
-- set Authentication to Forms with Authentication Required: Disabled for Local Addresses (authentik fwauth protects it), copy the API key into the tfvars
+- set Authentication to Forms with Authentication Required: Disabled for Local Addresses (authentik fwauth protects it), copy the API key into [values.enc.yaml](values.enc.yaml)
 - Add indexers in Prowlarr's GUI
 
 ## Bazarr
@@ -73,7 +73,7 @@ Configure
 
 In the settings:
 
-- temporary WebUI password is in the pod log. Set a real one and put it in the tfvars
+- temporary WebUI password is in the pod log. Set a real one and put it in [values.enc.yaml](values.enc.yaml)
 - Default Save Path `/media/downloads`, incomplete torrents in `/media/downloads/incomplete`.
 - Pre-allocate disk space
 - TOrrent management node automatic etc.
