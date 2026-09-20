@@ -6,3 +6,9 @@ repos:
         entry: devbox run --quiet --recompute=false -- task sops-check -- --staged
         language: system
         files: \.enc(\.|$)
+      - id: gitleaks
+        name: Scan staged changes for secrets
+        entry: devbox run --quiet --recompute=false -- gitleaks git --pre-commit --staged --no-banner
+        language: system
+        pass_filenames: false
+        always_run: true
