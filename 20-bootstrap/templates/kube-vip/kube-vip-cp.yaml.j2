@@ -16,6 +16,7 @@ spec:
       labels:
         app.kubernetes.io/name: kube-vip-ds-cp
     spec:
+      priorityClassName: system-node-critical
       # Only run on control-plane (server) nodes because they're the ones that can own the API VIP.
       affinity:
         nodeAffinity:
@@ -57,6 +58,10 @@ spec:
               value: "{{ kube_vip_cp_interface }}"
             - name: address # the VIP itself
               value: "{{ kube_vip_cp_address }}"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
           securityContext:
             capabilities:
               add: ["NET_ADMIN", "NET_RAW"] # needed to bind the VIP + send ARP

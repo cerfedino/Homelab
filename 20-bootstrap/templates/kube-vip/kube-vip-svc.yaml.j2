@@ -19,6 +19,7 @@ spec:
       labels:
         app.kubernetes.io/name: kube-vip-ds-svc
     spec:
+      priorityClassName: system-node-critical
       containers:
         - name: kube-vip
           image: ghcr.io/kube-vip/kube-vip:{{ kube_vip_version }}
@@ -44,6 +45,10 @@ spec:
 
             - name: vip_interface # which NIC to announce on (the LAN one)
               value: "{{ kube_vip_svc_interface }}"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
           securityContext:
             capabilities:
               add: ["NET_ADMIN", "NET_RAW"] # needed to bind the VIP + send ARP
