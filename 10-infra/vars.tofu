@@ -2,6 +2,7 @@ variable "proxmox" {
   type = object({
     endpoint_lan  = string
     endpoint_internal = string
+    insecure          = bool
 
     # User with following Role permissions on /:
     # Datastore.Audit, Sys.Audit, VM.Migrate, VM.Audit, VM.PowerMgmt, SDN.Use, Realm.AllocateUser, VM.Config.Network, Pool.Allocate, Datastore.Allocate, VM.GuestAgent.Audit, User.Modify, VM.Config.Disk, VM.Config.HWType, Sys.Console, VM.Allocate, VM.Config.CPU, VM.Config.Cloudinit, Datastore.AllocateSpace, VM.Config.Options, VM.Clone, Datastore.AllocateTemplate, VM.Config.Memory, Pool.Audit, VM.Config.CDROM, Sys.Modify, Group.Allocate, Mapping.Audit, Mapping.Modify, Mapping.Use, Permissions.Modify, Realm.Allocate, SDN.Allocate, SDN.Audit, Sys.AccessNetwork, Sys.Incoming, Sys.PowerMgmt, Sys.Syslog, VM.Backup, VM.Console, VM.GuestAgent.FileRead, VM.GuestAgent.FileSystemMgmt, VM.GuestAgent.FileWrite, VM.GuestAgent.Unrestricted, VM.Replicate, VM.Snapshot, VM.Snapshot.Rollback
@@ -19,6 +20,15 @@ variable "REPO_ROOT" {
 
 variable "proxmox_cluster_name" {
   type      = string
+}
+
+# data of the PVE ACME DNS plugin
+variable "acme_cloudflare" {
+  type = object({
+    CF_Account_ID = string
+    CF_Token      = string
+  })
+  sensitive = true
 }
 
 variable "proxmox_node_name" {

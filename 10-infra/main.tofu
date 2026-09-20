@@ -45,7 +45,7 @@ provider proxmox {
 
   endpoint  = var.proxmox.endpoint_lan
   api_token = var.proxmox.api_token
-  insecure  = true
+  insecure  = var.proxmox.insecure
 
   ssh {
     agent    = true

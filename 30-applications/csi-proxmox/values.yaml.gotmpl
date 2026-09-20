@@ -2,7 +2,7 @@
 config:
   clusters:
     - url: "{{.Values.proxmox_endpoint_internal}}/api2/json"
-      insecure: true
+      insecure: false
       token_id: "{{.Values.csi_tokenid}}"
       token_secret: "{{.Values.csi_tokensecret}}"
       region: "{{.Values.proxmox_cluster_name}}"
