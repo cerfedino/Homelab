@@ -1,8 +1,9 @@
 {{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+# renovate: datasource=docker depName=nextcloud
+{{- $ncTag := "35.0.0-apache" }}
 
 image:
-  # renovate: datasource=docker depName=nextcloud
-  tag: 35.0.0-apache
+  tag: {{ $ncTag }}
 
 nextcloud:
   host: {{ .Values.apps.filecloud.external.dns_hostname }}
@@ -80,9 +81,7 @@ nextcloud:
   # the push binary ships inside the notify_push app on the shared PVC
   extraSidecarContainers:
     - name: notify-push
-      # keep in sync with image.tag above
-      # renovate: datasource=docker
-      image: nextcloud:35.0.0-apache
+      image: nextcloud:{{ $ncTag }}
       command:
         - /var/www/html/custom_apps/notify_push/bin/x86_64/notify_push
         - --database-url
