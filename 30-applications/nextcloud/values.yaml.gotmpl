@@ -55,7 +55,10 @@ nextcloud:
     - name: WHITEBOARD_URL
       value: https://{{ .Values.apps.filecloud.external.dns_hostname }}/whiteboard
     - name: WHITEBOARD_JWT_SECRET
-      value: {{ $secrets.whiteboard_jwt_secret | quote }}
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-whiteboard
+          key: jwt_secret
     - name: COLLABORA_WOPI_URL
       value: https://{{ .Values.apps.filecloud.external.dns_hostname }}
     - name: OIDC_CLIENT_ID

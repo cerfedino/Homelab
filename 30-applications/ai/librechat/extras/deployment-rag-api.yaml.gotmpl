@@ -1,4 +1,3 @@
-{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +25,10 @@ spec:
             - name: POSTGRES_USER
               value: librechat
             - name: POSTGRES_PASSWORD
-              value: {{ $secrets.vectordb_postgres_password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-vectordb
+                  key: password
             - name: VECTOR_DB_TYPE
               value: pgvector
             - name: EMBEDDINGS_PROVIDER
@@ -36,7 +38,10 @@ spec:
             - name: RAG_OPENAI_BASEURL
               value: http://litellm.ai.svc.cluster.local:4000/v1
             - name: RAG_OPENAI_API_KEY
-              value: {{ $secrets.litellm_api_key | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-env
+                  key: LITELLM_API_KEY
             - name: RAG_PORT
               value: "8000"
           ports:
