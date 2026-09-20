@@ -316,3 +316,22 @@ variable "vm_haos" {
     usb_host     = string
   })
 }
+
+# k3s pod and service networks (its cluster-cidr and service-cidr)
+variable "k3s_cluster_cidr" {
+  type = string
+
+  validation {
+    condition     = can(cidrhost(var.k3s_cluster_cidr, 0))
+    error_message = "k3s_cluster_cidr must be an IPv4 CIDR."
+  }
+}
+
+variable "k3s_service_cidr" {
+  type = string
+
+  validation {
+    condition     = can(cidrhost(var.k3s_service_cidr, 0))
+    error_message = "k3s_service_cidr must be an IPv4 CIDR."
+  }
+}

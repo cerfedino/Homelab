@@ -40,7 +40,7 @@ releases:
     installed: true
     wait: true
     values:
-      - cilium/values.yaml
+      - cilium/values.yaml.gotmpl
 
   - name: cilium-extras
     namespace: kube-system

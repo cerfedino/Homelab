@@ -54,12 +54,13 @@ controllers:
           SERVER_COUNTRIES: Switzerland
           FIREWALL_VPN_INPUT_PORTS: "56269"
           FIREWALL_INPUT_PORTS: "8080"
-          FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/16,10.43.0.0/16"
           TZ: Europe/Zurich
           LOG_LEVEL: info
         envFrom:
           - secretRef:
               name: gluetun-vpn
+          - configMapRef:
+              name: gluetun-env
         securityContext:
           capabilities:
             add:

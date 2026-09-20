@@ -57,6 +57,8 @@ output "ansible_yaml_inventory" {
                 kube_vip_svc_address = var.kube_vip_svc_address
                 k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
                 proxmox_cluster_name = var.proxmox_cluster_name
+                k3s_cluster_cidr = var.k3s_cluster_cidr
+                k3s_service_cidr = var.k3s_service_cidr
             }
         }
         pve = {
@@ -162,6 +164,8 @@ output "helmfile_values" {
     proxmox_endpoint_internal = trimsuffix(var.proxmox.endpoint_internal, "/")
     proxmox_cluster_name = var.proxmox_cluster_name
     proxmox_storage_name = var.proxmox_storage_name
+    k3s_cluster_cidr = var.k3s_cluster_cidr
+    k3s_service_cidr = var.k3s_service_cidr
     csi_tokenid = proxmox_user_token.CSI.id
     csi_tokensecret = trimprefix(proxmox_user_token.CSI.value, "${proxmox_user_token.CSI.id}=")
   })

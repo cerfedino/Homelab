@@ -32,7 +32,7 @@ nextcloud:
         'default_phone_region' => 'CH',
         'maintenance_window_start' => 1,
         // trust the pod network such that we can read the X-Forwarded-For IP
-        'trusted_proxies' => array('10.42.0.0/16'),
+        'trusted_proxies' => array('{{ .Values.k3s_cluster_cidr }}'),
         // imaginary offloads image preview generation (chart service, port 80)
         'preview_imaginary_url' => 'http://nextcloud-imaginary/',
         'enabledPreviewProviders' => array(

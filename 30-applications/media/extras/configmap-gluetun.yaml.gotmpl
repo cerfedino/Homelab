@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gluetun-env
+data:
+  # the VPN firewall must let the pod and service networks through
+  FIREWALL_OUTBOUND_SUBNETS: "{{ .Values.k3s_cluster_cidr }},{{ .Values.k3s_service_cidr }}"

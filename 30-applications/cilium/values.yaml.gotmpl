@@ -1,7 +1,7 @@
 ipam:
   operator:
     clusterPoolIPv4PodCIDRList:
-      - 10.42.0.0/16
+      - {{ .Values.k3s_cluster_cidr }}
 
 operator:
   replicas: 1
