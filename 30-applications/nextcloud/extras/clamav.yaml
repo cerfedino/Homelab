@@ -27,7 +27,7 @@ spec:
             requests:
               memory: 1Gi
             limits:
-              memory: "2Gi"
+              memory: "3Gi"
           startupProbe:
             # first start downloads signatures before clamd listens
             tcpSocket:
@@ -38,6 +38,11 @@ spec:
             tcpSocket:
               port: 3310
             periodSeconds: 15
+          livenessProbe:
+            tcpSocket:
+              port: 3310
+            periodSeconds: 30
+            failureThreshold: 4
       volumes:
         - name: db
           persistentVolumeClaim:
