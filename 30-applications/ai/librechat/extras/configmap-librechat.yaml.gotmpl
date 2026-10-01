@@ -25,7 +25,7 @@ data:
               - claude-sonnet-5
             fetch: true
           titleConvo: true
-          titleModel: claude-haiku-4-5
+          titleModel: claude-code-haiku
           modelDisplayLabel: LiteLLM
           tokenConfig:
             # claude-opus-5:
@@ -72,6 +72,17 @@ data:
               prompt: 1
               completion: 5
               context: 200000
+
+    memory:
+      disabled: false
+      personalize: true
+      validKeys: [preferences, work_info, personal_info, skills, interests, context]
+      tokenLimit: 2000
+      messageWindowSize: 5
+      agent:
+        enabled: true
+        provider: LiteLLM
+        model: claude-code-haiku
 
     mcpSettings:
       allowedAddresses:
