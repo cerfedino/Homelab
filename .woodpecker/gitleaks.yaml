@@ -4,6 +4,7 @@ clone:
     settings:
       partial: false
       depth: 0
+      recursive: false
 
 when:
   - event: push
