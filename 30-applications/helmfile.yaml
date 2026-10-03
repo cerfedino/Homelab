@@ -274,7 +274,7 @@ releases:
     namespace: nextcloud
     createNamespace: true
     chart: nextcloud/nextcloud
-    version: "9.2.6"
+    version: "9.3.0"
     wait: true
     timeout: 600
     values:
