@@ -23,13 +23,16 @@ immich:
       externalDomain: https://{{ .Values.apps.immich.external.dns_hostname }}
     oauth:
       enabled: true
+      #prettier-ignore
       issuerUrl: {{ .Values.oidc.immich_external.issuer | quote }}
+      #prettier-ignore
       clientId: {{ .Values.oidc.immich_external.client_id | quote }}
+      #prettier-ignore
       clientSecret: {{ .Values.oidc.immich_external.client_secret | quote }}
       scope: openid email profile
       buttonText: Login with Authentik
       autoRegister: true
-      autoLaunch: false
+      autoLaunch: true
       storageQuotaClaim: immich_quota
       defaultStorageQuota: 5
     passwordLogin:
@@ -44,8 +47,6 @@ machine-learning:
     main:
       containers:
         main:
-          # image CMD minus --log-config-json: the rich logging handler deadlocks
-          # the freshly forked gunicorn worker on the inherited console lock
           command:
             - python
             - -m
