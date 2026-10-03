@@ -53,6 +53,7 @@ variable "applications" {
       }))
 
       # for type = "ldap"
+      # the client pod also needs an ingress rule in authentik's NetworkPolicy
       ldap = optional(object({
         base_dn          = string
         bind_mode        = optional(string, "direct")

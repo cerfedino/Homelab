@@ -9,9 +9,6 @@ spec:
   ingress:
     - from:
         - podSelector: {}
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: traefik
     - from:
         - namespaceSelector:
             matchLabels:
@@ -19,3 +16,24 @@ spec:
       ports:
         - port: 4000
         - port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: traefik-ingress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - litellm
+          - claudecode
+          - nextcloud-mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik

@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: uptime-kuma
+        app.kubernetes.io/name: uptime-kuma
       annotations:
         k8up.io/backupcommand: sh -c 'mariadb-dump --single-transaction --socket=/app/data/run/mariadb.sock kuma'
         k8up.io/file-extension: .sql

@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: psitransfer
+        app.kubernetes.io/name: psitransfer
     spec:
       # a Service named psitransfer would inject PSITRANSFER_PORT into the app's env namespace
       enableServiceLinks: false

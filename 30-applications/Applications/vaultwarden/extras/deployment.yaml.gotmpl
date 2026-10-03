@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: vaultwarden
+        app.kubernetes.io/name: vaultwarden
       annotations:
         k8up.io/backupcommand: sh -c 'sqlite3 /data/db.sqlite3 .dump'
         k8up.io/file-extension: .sql

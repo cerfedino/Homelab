@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: pihole
+        app.kubernetes.io/name: pihole
       annotations:
         # force a rollout when dnsmasq entries change
         checksum/dnsmasq: {{ .Values.dnsmasq_address_entries | toYaml | sha256sum }}

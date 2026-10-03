@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: nextcloud-mcp
+        app.kubernetes.io/name: nextcloud-mcp
       annotations:
         k8up.io/backupcommand: sh -c 'sqlite3 /data/approvals.db .dump'
         k8up.io/file-extension: .sql

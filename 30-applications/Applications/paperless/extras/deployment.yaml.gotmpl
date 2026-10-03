@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: paperless
+        app.kubernetes.io/name: paperless
       annotations:
         k8up.io/backupcommand: sh -c 'sqlite3 /data/data/db.sqlite3 .dump'
         k8up.io/file-extension: .sql

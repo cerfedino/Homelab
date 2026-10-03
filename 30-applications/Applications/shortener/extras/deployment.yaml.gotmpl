@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: shortener
+        app.kubernetes.io/name: shortener
       annotations:
         k8up.io/backupcommand: sh -c 'sqlite3 /data/urls.sqlite .dump'
         k8up.io/file-extension: .sql

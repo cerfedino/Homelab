@@ -9,6 +9,22 @@ spec:
   ingress:
     - from:
         - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: traefik-ingress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - vaultwarden
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: traefik

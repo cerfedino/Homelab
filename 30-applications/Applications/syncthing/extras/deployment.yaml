@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: syncthing
+        app.kubernetes.io/name: syncthing
     spec:
       containers:
         - name: syncthing
