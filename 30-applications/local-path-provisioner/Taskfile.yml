@@ -10,3 +10,4 @@ tasks:
     deps: [":setup-helmfile-repos"]
     cmds:
       - cd .. && helmfile apply --skip-refresh -l name=local-path-provisioner
+      - cd .. && helmfile apply --skip-refresh -l name=local-path-provisioner-extras

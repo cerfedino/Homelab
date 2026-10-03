@@ -58,6 +58,15 @@ releases:
     values:
       - csi-proxmox/values.yaml.gotmpl
 
+  - name: csi-proxmox-extras
+    namespace: csi-proxmox
+    createNamespace: true
+    chart: bedag/raw
+    version: "2.0.2"
+    wait: false
+    values:
+      - csi-proxmox/extras.yaml.gotmpl
+
   - name: local-path-provisioner
     namespace: local-path-provisioner
     createNamespace: true
@@ -66,6 +75,15 @@ releases:
     wait: true
     values:
       - local-path-provisioner/values.yaml
+
+  - name: local-path-provisioner-extras
+    namespace: local-path-provisioner
+    createNamespace: true
+    chart: bedag/raw
+    version: "2.0.2"
+    wait: false
+    values:
+      - local-path-provisioner/extras.yaml.gotmpl
 
   - name: cert-manager
     namespace: cert-manager

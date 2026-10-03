@@ -34,6 +34,8 @@ server:
 postgresql:
   enabled: true
   primary:
+    networkPolicy:
+      enabled: false
     podAnnotations:
       k8up.io/backupcommand: sh -c 'PGPASSWORD="$(cat "$POSTGRES_PASSWORD_FILE")" pg_dumpall --clean -U "$POSTGRES_USER"'
       k8up.io/file-extension: .sql
