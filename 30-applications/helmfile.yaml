@@ -321,7 +321,7 @@ releases:
     namespace: ai
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/ai/values-claudecode.yaml
@@ -358,7 +358,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-sonarr.yaml
@@ -367,7 +367,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-radarr.yaml
@@ -376,7 +376,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-prowlarr.yaml
@@ -385,7 +385,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-flaresolverr.yaml
@@ -394,7 +394,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-qbittorrent.yaml
@@ -403,7 +403,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-bazarr.yaml
@@ -412,7 +412,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-unpackerr.yaml
@@ -421,7 +421,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-grimmory-db.yaml
@@ -430,7 +430,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: true
     values:
       - Applications/media/values-grimmory.yaml
@@ -439,7 +439,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: false
     values:
       - Applications/media/values-autobrr.yaml
@@ -448,7 +448,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: "4.6.2"
+    version: "5.2.1"
     wait: false
     values:
       - Applications/media/values-managerscript.yaml
