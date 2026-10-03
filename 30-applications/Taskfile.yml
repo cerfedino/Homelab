@@ -4,8 +4,8 @@ output: prefixed
 
 includes:
   ai:
-    taskfile: ai
-    dir: ai
+    taskfile: Applications/ai
+    dir: Applications/ai
   app-registry:
     taskfile: app-registry
     dir: app-registry
@@ -40,41 +40,41 @@ includes:
     taskfile: cloudflare-tunnel
     dir: cloudflare-tunnel
   immich:
-    taskfile: immich
-    dir: immich
+    taskfile: Applications/immich
+    dir: Applications/immich
   kuma:
     taskfile: kuma
     dir: kuma
   librechat:
-    taskfile: ai/librechat
-    dir: ai/librechat
+    taskfile: Applications/ai/librechat
+    dir: Applications/ai/librechat
   media:
-    taskfile: media
-    dir: media
+    taskfile: Applications/media
+    dir: Applications/media
   nextcloud:
-    taskfile: nextcloud
-    dir: nextcloud
+    taskfile: Applications/nextcloud
+    dir: Applications/nextcloud
   paperless:
-    taskfile: paperless
-    dir: paperless
+    taskfile: Applications/paperless
+    dir: Applications/paperless
   psitransfer:
-    taskfile: psitransfer
-    dir: psitransfer
+    taskfile: Applications/psitransfer
+    dir: Applications/psitransfer
   shortener:
-    taskfile: shortener
-    dir: shortener
+    taskfile: Applications/shortener
+    dir: Applications/shortener
   syncthing:
-    taskfile: syncthing
-    dir: syncthing
+    taskfile: Applications/syncthing
+    dir: Applications/syncthing
   vaultwarden:
-    taskfile: vaultwarden
-    dir: vaultwarden
+    taskfile: Applications/vaultwarden
+    dir: Applications/vaultwarden
   windmill:
-    taskfile: windmill
-    dir: windmill
+    taskfile: Applications/windmill
+    dir: Applications/windmill
   woodpecker:
-    taskfile: woodpecker
-    dir: woodpecker
+    taskfile: Applications/woodpecker
+    dir: Applications/woodpecker
 
 tasks:
   apps:

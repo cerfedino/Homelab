@@ -169,7 +169,7 @@ releases:
     version: "2.0.2"
     wait: false
     values:
-      - immich/extras.yaml.gotmpl
+      - Applications/immich/extras.yaml.gotmpl
 
   - name: immich
     namespace: immich
@@ -178,7 +178,7 @@ releases:
     version: "0.13.2"
     wait: true
     values:
-      - immich/values.yaml.gotmpl
+      - Applications/immich/values.yaml.gotmpl
 
   - name: vaultwarden
     namespace: vaultwarden
@@ -187,7 +187,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - vaultwarden/values.yaml.gotmpl
+      - Applications/vaultwarden/values.yaml.gotmpl
 
   - name: windmill-extras
     namespace: windmill
@@ -196,7 +196,7 @@ releases:
     version: "2.0.2"
     wait: false
     values:
-      - windmill/extras.yaml.gotmpl
+      - Applications/windmill/extras.yaml.gotmpl
 
   - name: windmill
     namespace: windmill
@@ -205,7 +205,7 @@ releases:
     version: "4.0.265"
     wait: true
     values:
-      - windmill/values.yaml.gotmpl
+      - Applications/windmill/values.yaml.gotmpl
 
   - name: shortener
     namespace: shortener
@@ -214,7 +214,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - shortener/values.yaml.gotmpl
+      - Applications/shortener/values.yaml.gotmpl
 
   - name: psitransfer
     namespace: psitransfer
@@ -223,7 +223,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - psitransfer/values.yaml.gotmpl
+      - Applications/psitransfer/values.yaml.gotmpl
 
   - name: paperless
     namespace: paperless
@@ -232,7 +232,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - paperless/values.yaml.gotmpl
+      - Applications/paperless/values.yaml.gotmpl
 
   - name: syncthing
     namespace: syncthing
@@ -241,7 +241,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - syncthing/values.yaml.gotmpl
+      - Applications/syncthing/values.yaml.gotmpl
 
   - name: woodpecker
     namespace: woodpecker
@@ -250,7 +250,7 @@ releases:
     version: "3.7.3"
     wait: true
     values:
-      - woodpecker/values.yaml.gotmpl
+      - Applications/woodpecker/values.yaml.gotmpl
 
   - name: nextcloud
     namespace: nextcloud
@@ -260,7 +260,7 @@ releases:
     wait: true
     timeout: 600
     values:
-      - nextcloud/values.yaml.gotmpl
+      - Applications/nextcloud/values.yaml.gotmpl
 
     # AI
   - name: ai-extras
@@ -270,7 +270,7 @@ releases:
     version: "2.0.2"
     wait: false
     values:
-      - ai/extras.yaml.gotmpl
+      - Applications/ai/extras.yaml.gotmpl
 
   - name: ollama
     namespace: ai
@@ -279,7 +279,7 @@ releases:
     version: "1.79.0"
     wait: true
     values:
-      - ai/values-ollama.yaml
+      - Applications/ai/values-ollama.yaml
 
   - name: litellm
     namespace: ai
@@ -288,7 +288,7 @@ releases:
     version: "1.97.0"
     wait: true
     values:
-      - ai/values-litellm.yaml.gotmpl
+      - Applications/ai/values-litellm.yaml.gotmpl
 
   - name: librechat
     namespace: librechat
@@ -297,7 +297,7 @@ releases:
     version: "2.0.2"
     wait: true
     values:
-      - ai/librechat/values.yaml.gotmpl
+      - Applications/ai/librechat/values.yaml.gotmpl
 
   - name: claudecode
     namespace: ai
@@ -306,7 +306,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - ai/values-claudecode.yaml
+      - Applications/ai/values-claudecode.yaml
 
     # *arr MEDIA STACK
   - name: media-extras
@@ -316,7 +316,7 @@ releases:
     version: "2.0.2"
     wait: false
     values:
-      - media/values.yaml.gotmpl
+      - Applications/media/values.yaml.gotmpl
 
   - name: jellyfin
     namespace: media
@@ -325,7 +325,7 @@ releases:
     version: "3.2.0"
     wait: true
     values:
-      - media/values-jellyfin.yaml
+      - Applications/media/values-jellyfin.yaml
 
   - name: seerr
     namespace: media
@@ -334,7 +334,7 @@ releases:
     version: "3.9.1"
     wait: true
     values:
-      - media/values-seerr.yaml
+      - Applications/media/values-seerr.yaml
 
   - name: sonarr
     namespace: media
@@ -343,7 +343,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-sonarr.yaml
+      - Applications/media/values-sonarr.yaml
 
   - name: radarr
     namespace: media
@@ -352,7 +352,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-radarr.yaml
+      - Applications/media/values-radarr.yaml
 
   - name: prowlarr
     namespace: media
@@ -361,7 +361,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-prowlarr.yaml
+      - Applications/media/values-prowlarr.yaml
 
   - name: flaresolverr
     namespace: media
@@ -370,7 +370,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-flaresolverr.yaml
+      - Applications/media/values-flaresolverr.yaml
 
   - name: qbittorrent
     namespace: media
@@ -379,7 +379,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-qbittorrent.yaml
+      - Applications/media/values-qbittorrent.yaml
 
   - name: bazarr
     namespace: media
@@ -388,7 +388,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-bazarr.yaml
+      - Applications/media/values-bazarr.yaml
 
   - name: unpackerr
     namespace: media
@@ -397,7 +397,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-unpackerr.yaml
+      - Applications/media/values-unpackerr.yaml
 
   - name: grimmory-db
     namespace: media
@@ -406,7 +406,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-grimmory-db.yaml
+      - Applications/media/values-grimmory-db.yaml
 
   - name: grimmory
     namespace: media
@@ -415,7 +415,7 @@ releases:
     version: "4.6.2"
     wait: true
     values:
-      - media/values-grimmory.yaml
+      - Applications/media/values-grimmory.yaml
 
   - name: autobrr
     namespace: media
@@ -424,7 +424,7 @@ releases:
     version: "4.6.2"
     wait: false
     values:
-      - media/values-autobrr.yaml
+      - Applications/media/values-autobrr.yaml
 
   - name: managerscript
     namespace: media
@@ -433,5 +433,5 @@ releases:
     version: "4.6.2"
     wait: false
     values:
-      - media/values-managerscript.yaml
+      - Applications/media/values-managerscript.yaml
   ###

@@ -87,12 +87,19 @@
             "automerge": true
         },
         {
-            "description": "Groups app deps by folder",
+            "description": "Groups deps by folder",
             "matchFileNames": [
                 "/^30-applications/[^/]+/.+/"
             ],
             "groupName": "{{{lookup (split packageFileDir '/') 1}}}",
             "separateMinorPatch": true
+        },
+        {
+            "description": "Apps sit one level deeper",
+            "matchFileNames": [
+                "/^30-applications/Applications/[^/]+/.+/"
+            ],
+            "groupName": "{{{lookup (split packageFileDir '/') 2}}}"
         },
         {
             "description": "linuxserver repos have shit legacy tags",

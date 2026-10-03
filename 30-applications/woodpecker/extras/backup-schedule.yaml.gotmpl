@@ -1,2 +1,0 @@
-# only the chart's own volumes such that pipelines dont get backed up
-{{ tpl (readFile "../_lib/schedule.yaml.gotmpl") (dict "bucket" "woodpecker" "matchLabels" (dict "app.kubernetes.io/instance" "woodpecker") "Values" .Values) }}

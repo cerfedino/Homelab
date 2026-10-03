@@ -1,0 +1,38 @@
+grimmory:
+    db_password: ENC[AES256_GCM,data:JqlB+rPiTiv4hsa/HfRxSzPsJtG8jnSk9mBVgn6RWfs=,iv:ElzZIyrCgZyJimCeeGN7u4b2L5Mpp6V0IaZhh1vGIrY=,tag:atuuMwMBZ1RjCo11Dt8HdQ==,type:str]
+    db_root_password: ENC[AES256_GCM,data:O+ZQZUj+d1ow8dvXfT25cat8OA+rSkgmuLd23qZ8tJA=,iv:0L/cfI0DSE5IMdFCfbCZljHMm+5bvGuq+0z4o44dK68=,tag:Q2c1IJ/Ju06fTDrqkznsCg==,type:str]
+arr:
+    #ENC[AES256_GCM,data:W7lvy2K3nomeRY500oh1Iwtgq4eMiw4bo71eZRb9ZABRtYVeMqJA26GSTtlD5rQvhPMNWdU=,iv:HmQO+TE6XxYZ86sRBXBKy7SphFKVGCeRvdEFQZC3F6k=,tag:ilYS+/uET1w7aVbav3KNCw==,type:comment]
+    sonarr_api_key: ENC[AES256_GCM,data:UI/ASR0RZ7F2dLLSeOuncL1G94MHiOa42aOnFuUvaHw=,iv:eoBjXJBm6WxfLY9ELWSrxYB+0AL9W9DJ1dL3D7lACvs=,tag:Aa9fg2WPLRpQUMeZapOJpA==,type:str]
+    radarr_api_key: ENC[AES256_GCM,data:E7kzyJP06hPeVKvLXJhhot1I0rcIqr4qpNnYGfKW0js=,iv:thvTNc2KUc2FwtQ1OBY/vxdlknR//WfHzPq5hADRwdk=,tag:RhrAbNk/g9mzo5USRIVZng==,type:str]
+    prowlarr_api_key: ENC[AES256_GCM,data:lIAussMx13F9mPEb7untalVIsWV1c+Valhl6fS4g2/8=,iv:UQbFaXnN4w05M+lhQNbadSXYoWzsoXN++ya+gB+fcos=,tag:ZvRc2b4ZfRY2t9lJ3zln5Q==,type:str]
+seedbox:
+    username: ENC[AES256_GCM,data:mXOxsKnr,iv:PufBf4z6XkCeWu22kmYygBkwLDRAi4MwwT2k+XzdDtU=,tag:unNED+l0tiia1jgUSX+ecw==,type:str]
+    qb_host: ENC[AES256_GCM,data:ad+q+8qGRhfUcctiISiTnBO16DlH6m/fnIA88uY76w4xmHrj4RsU,iv:JeqdUkRP0IW6TXAmNOKw9e6E1gHA0gjF8dalIvYSrBM=,tag:Feyld9oFSxpcgw5RB/j1ew==,type:str]
+    qb_password: ENC[AES256_GCM,data:j0icEBPsZj9s/fSttk75/XoCgZg=,iv:v4irvxZiOzvgiS965sw1bKHd8f1LfSMiDJFHSt/bGXc=,tag:Plg9rsIlwVu7GKrCO8JRYQ==,type:str]
+    ssh_host: ENC[AES256_GCM,data:3ukxa/UdH1satbO8,iv:YFJfrZTbBznctLTevxuycbMWmSxnftifIa5G6gH44vU=,tag:/mdWaRbZ8ADbAf8BsvK+ug==,type:str]
+    ssh_password: ENC[AES256_GCM,data:eFiPbeFVlw1i+WYVO3Ed4SVEO3E=,iv:sQt7u64pP1RIBF0dQCTbq8Rs0Qs2wxzy0Jt/TxhiXO4=,tag:AzOt8tncNV286wZlmccRCw==,type:str]
+    discord_webhook_url: ENC[AES256_GCM,data:bwewpM52uPfBbnWclKBx8dwSeZs7PwniEN3es3PIBjuxtnpySg4sty+JRYoQR6bb84QIO0vBBngCW/M2cMUq8Icu/oF47we5ru6PPYtkPlU5o5qb1ILfumTZBfKNS+Ro88lZ0VE28ep0Hqz0N6PqX/7+0ZMEapzUpw==,iv:YDh/29jBNhyTF04Rx3zvogdhLt5vgc4TRTYmrAW+mck=,tag:TEnvJihXChqspmLNMzSl8w==,type:str]
+gluetun:
+    #ENC[AES256_GCM,data:5+o3WoJbXkSkpzF/IoVV3fkYFvFwcDS4,iv:ELFopp+19Bv4azGU8k6UDN0Pjy60BTjoZF9MIfoPGlw=,tag:g+TJEwS1pa/XecvLsJnQCw==,type:comment]
+    WIREGUARD_PRIVATE_KEY: ENC[AES256_GCM,data:0LxBv0utcgi185QGx/mN4VHWfPK/9R6z/pSNM5dEULiRK5NSFb3L5qlFc0Y=,iv:o+oxI3ux23mZFzeboB2priaFUwj40ULYAyjE20iLBlw=,tag:BUSSYDTneX9vruvqUOViMw==,type:str]
+    WIREGUARD_PRESHARED_KEY: ENC[AES256_GCM,data:r2ARg27ZT/MREKd2N0iLCldHyfiM1gFHg5TCFpYT5zkNhyC4o/6lM5+pfjo=,iv:A2ob8+BM/MoNO7kCYAN/FQmFlVkY40Hfjo+aXOtbars=,tag:XUkayEfgiNTP/ljR3OdwIg==,type:str]
+    WIREGUARD_ADDRESSES: ENC[AES256_GCM,data:d/TSYvaaHsiOLRjB7EO+LuDP/t3arj50xJvpFTnQG/Q7t0izVVQJ7hNhpMK0TFwGyUxZk7Szdzaw4o4=,iv:ytBpqAyKzyXv5tiub6LpCDQnr2effoUutcGKLRZ0m6g=,tag:CoO8d0tA7f+hWhsRC8kTKg==,type:str]
+qbittorrent:
+    username: ENC[AES256_GCM,data:KXht+EY=,iv:46TIG2zt14I7rTe96Gf+K1cwG5GkDgWOxpl3UBRjIOI=,tag:lK9T3zx0PCt5Knk08DDQHw==,type:str]
+    password: ENC[AES256_GCM,data:qj7CKqIuaoYMWby+Cbw/QZr9I24=,iv:IeDvsqJWSYpYrxjy89E5ow8SAUfKkNnRHnxZyWjYfyo=,tag:1zSNwcaQfKQbvQJPJUKxYw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBUZ2FUQURDZVFiNkdSSUNx
+            cEFXS0J4b251dFBjaldZNFkyTGxUVzBXMVdvCjdSbTVBOWl4UnM0SU5PbXVJTjI0
+            N1VSMGVkbnVESDdkSGY4Z2pnc2lZNmsKLS0tIFozYWg2OE44b05lV1hiWElmbUQ5
+            TEJHVTJWajBSQmxVRXJRZmxRZG45cXcKCCZZbMi8d/QD6YjW19q8U0CasteiSJRA
+            j47DL1Gh/B6QztdTIhWKkYMVSXqdaKlRDbAi6wSZxbizEZX1CxyziQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-10-03T13:36:23Z"
+    mac: ENC[AES256_GCM,data:7dtJkY/0XNnBFeJYlAwaDG0gyaq+nb4V8BuvluD9cSjL9ogKvBsSmT1kcAayo5etxYADy7T8iv3lqaLDJ1Nc5H1AgmcItyLC/ymo89RzOqRxpawhUxBpeVZdmTf+lzpFisOC73MbskarKu0MK8gnj93e7qyStLVEo4xk+FzuFrk=,iv:eVCZrW8IUZXNqTwGREeYrBd779z6BhwQCVtplYr+7yc=,tag:Sd6QWLarD1gn1y8MpmRw/A==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3
