@@ -170,6 +170,8 @@ persistence:
 extraManifests:
 {{- range $f := readDirEntries "extras" }}
 {{- if not (hasPrefix "." $f.Name) }}
-  - {{ tpl (readFile (printf "extras/%s" $f.Name)) $ | fromYaml | toYaml | nindent 4 | trim }}
+{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
+  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- end }}
 {{- end }}
 {{- end }}
