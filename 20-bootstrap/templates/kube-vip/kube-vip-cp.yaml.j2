@@ -32,7 +32,7 @@ spec:
           env:
             - name: vip_arp # layer-2 mode: announce via ARP
               value: "true"
-            - name: vip_cidr # a single-host VIP
+            - name: vip_subnet # a single-host VIP
               value: "32"
             - name: prometheus_server
               value: ":{{ kube_vip_metrics_port }}"
