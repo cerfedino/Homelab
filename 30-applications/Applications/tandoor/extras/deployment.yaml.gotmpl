@@ -21,7 +21,7 @@ spec:
           image: ghcr.io/tandoorrecipes/recipes:2.6.15
           env:
             - name: ALLOWED_HOSTS
-              value: {{ .Values.apps.tandoor.external.dns_hostname }}
+              value: {{ .Values.apps.tandoor.external.dns_hostname }},tandoor.tandoor.svc.cluster.local
             - name: TZ
               value: Europe/Zurich
             - name: SECRET_KEY

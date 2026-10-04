@@ -16,6 +16,8 @@ data:
         public: false
 
     endpoints:
+      agents:
+        recursionLimit: 1000
       custom:
         - name: LiteLLM
           apiKey: '${LITELLM_API_KEY}'
@@ -161,5 +163,30 @@ data:
           MIGROS_TOTP_SECRET:
             title: MIGROS TOTP Secret
             description: Your MIGROS TOTP secret
+            sensitive: true
+        startup: false
+      tandoor:
+        type: stdio
+        command: npx
+        args:
+          - -y
+          - '@cliftonz/tandoor-recipes-mcp@2.0.1'
+        env:
+          TANDOOR_URL: http://tandoor.tandoor.svc.cluster.local
+          TANDOOR_TOKEN: '{{"{{"}}TANDOOR_TOKEN{{"}}"}}'
+          TANDOOR_MCP_PROFILE: full
+          TANDOOR_MCP_INCLUDE_ONLY: >-
+            get_version, get_guard_stats, jq_query, jq_stash_stats,
+            list_recipes, list_recipes_flat, get_recipe, search_recipes, related_recipes,
+            list_meal_plans, get_meal_plan, list_meal_types, list_shopping_entries,
+            list_foods, get_food, list_ingredients, parse_ingredient,
+            list_keywords, get_keyword, get_current_space,
+            create_recipe, update_recipe, delete_recipe, delete_recipe_external,
+            import_recipe_from_url, upload_recipe_image, add_recipe_to_shopping_list,
+            recipe_batch_update
+        customUserVars:
+          TANDOOR_TOKEN:
+            title: Tandoor API Token
+            description: Create under Settings → API Tokens in Tandoor
             sensitive: true
         startup: false
