@@ -105,13 +105,13 @@ data:
             title: Nextcloud app token
             description: Generate under Settings → Security → Devices & sessions
             sensitive: true
-        startup: false
+        startup: true
       hevy:
         type: stdio
         command: npx
         args:
           - -y
-          - 'hevy-mcp'
+          - 'hevy-mcp@6.1.19'
         env:
           HEVY_API_KEY: '{{"{{"}}HEVY_API_KEY{{"}}"}}'
         customUserVars:
@@ -119,13 +119,13 @@ data:
             title: Hevy API Key
             description: Get API key at https://hevy.com/settings?developer
             sensitive: true
-        startup: false
+        startup: true
       yazio:
         type: stdio
         command: npx
         args:
           - -y
-          - 'yazio-mcp'
+          - 'yazio-mcp@0.0.14'
         env:
           YAZIO_USERNAME: '{{"{{"}}YAZIO_USERNAME{{"}}"}}'
           YAZIO_PASSWORD: '{{"{{"}}YAZIO_PASSWORD{{"}}"}}'
@@ -138,4 +138,5 @@ data:
             title: Password
             description: Your YAZIO password
             sensitive: true
+        startup: true
         startup: false

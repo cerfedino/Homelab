@@ -29,6 +29,17 @@
         },
         {
             "customType": "regex",
+            "description": "npm packages run through npx in gotmpl-templated manifests",
+            "managerFilePatterns": [
+                "/^30-applications/.+/extras/.+\\.yaml\\.gotmpl$/"
+            ],
+            "matchStrings": [
+                "- '(?<depName>[a-z0-9@/.\\-]+)@(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+            ],
+            "datasourceTemplate": "npm"
+        },
+        {
+            "customType": "regex",
             "description": "Anything carrying a `# renovate:` annotation",
             "managerFilePatterns": [
                 "/^(10-infra|20-bootstrap|30-applications)/.+\\.(yaml|yml|gotmpl|tofu)$/"
