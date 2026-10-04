@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tandoor
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tandoor
+  template:
+    metadata:
+      labels:
+        app: tandoor
+        app.kubernetes.io/name: tandoor
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: tandoor
+          image: ghcr.io/tandoorrecipes/recipes:2.6.15
+          env:
+            - name: ALLOWED_HOSTS
+              value: {{ .Values.apps.tandoor.external.dns_hostname }}
+            - name: TZ
+              value: Europe/Zurich
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tandoor-secrets
+                  key: secret_key
+            - name: DB_ENGINE
+              value: django.db.backends.postgresql
+            - name: POSTGRES_HOST
+              value: tandoor-postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: tandoor
+            - name: POSTGRES_DB
+              value: tandoor
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tandoor-postgres
+                  key: password
+            - name: SOCIAL_PROVIDERS
+              value: allauth.socialaccount.providers.openid_connect
+            - name: SOCIALACCOUNT_PROVIDERS
+              valueFrom:
+                secretKeyRef:
+                  name: tandoor-secrets
+                  key: socialaccount_providers
+            - name: HIDE_LOGIN_FORM
+              value: "1"
+            - name: SOCIAL_DEFAULT_ACCESS
+              value: "1"
+            - name: SOCIAL_DEFAULT_GROUP
+              value: user
+            - name: AI_ALLOWED_URLS
+              value: http://litellm.ai.svc.cluster.local:4000/v1
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: media
+              mountPath: /opt/recipes/mediafiles
+            - name: static
+              mountPath: /opt/recipes/staticfiles
+          resources:
+            limits:
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+              httpHeaders:
+                - name: Host
+                  value: {{ .Values.apps.tandoor.external.dns_hostname }}
+            initialDelaySeconds: 20
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: tandoor-media
+        - name: static
+          emptyDir: {}

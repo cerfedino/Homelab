@@ -1,0 +1,17 @@
+tandoor_secret_key: ENC[AES256_GCM,data:93YHaFIyYaJoJPN2kxLQRGTxVckdhIpUpSaCJ44fU2CquoE9fUoSv9952W2B8csC5ve0YfQrKJVdfE0XyO/GWw==,iv:3mCNBaF+fUKKkejKBRh2MjIRBCjwD4dpiyDEoP+25DU=,tag:YrAuEJ8q4jRXDUMXpwXJVw==,type:str]
+tandoor_postgres_password: ENC[AES256_GCM,data:djsZbTZG+mpijni5QZuvvCJA95L7ouNsk35+WFu5oYKpG2O3o2lGPA==,iv:KI34VAj0v8WCwrV+i9HwfNZ2U4D8tROwCq8M2GtE4MU=,tag:r4uxbYS4cWiWxRZHXmbilw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBxcTFQdVZKMVNLQ2FmUjdj
+            U1U4MmJlSnFTd3V0VHYvcmd2M29KSk9OM0hvCk1idUkydklpREd2OG8xWlFyZjZm
+            MkU0Ulh1L2w2NC9sajFZT0d5d3hCN0UKLS0tIFlRZUdBempIelh2ck5jWU4waklK
+            dE95VnlrVEVrRGVQUG9HbGFnSzA2a00KDS6wF0xSxln9zfiuq+wSnSuwBG6uPXPi
+            VlULy02H77k/NK647AQs6upQQlqxnqeqFH1hXounxDuImGvNjmP3Gg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-10-04T13:33:01Z"
+    mac: ENC[AES256_GCM,data:/odWQD3HfGAci33mx8gpX0v+fKSsudJQVS/Q9eEdXUqC5nDQ0Bn9O5KlbsCxvjzCkR0uuCdL8YsDyx0Mq7eXSgRPkqrzrdsEEyPZX5goEbnwirck1GrJ6ZfhXtxk+kqeVdFsdKqEyB91OcPq2/yqXYYPpmomDDVjyLai11Dwe4M=,iv:Y5OB8U65mKGtlzMBv+fr6xbQjQoXX+2THopIAyQG/Yg=,tag:XFWh46O/CR60xy2XW+2OTw==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3

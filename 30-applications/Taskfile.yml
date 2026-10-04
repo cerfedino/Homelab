@@ -66,6 +66,9 @@ includes:
   syncthing:
     taskfile: Applications/syncthing
     dir: Applications/syncthing
+  tandoor:
+    taskfile: Applications/tandoor
+    dir: Applications/tandoor
   vaultwarden:
     taskfile: Applications/vaultwarden
     dir: Applications/vaultwarden
@@ -100,6 +103,7 @@ tasks:
       - psitransfer:apply
       - shortener:apply
       - syncthing:apply
+      - tandoor:apply
       - vaultwarden:apply
       - windmill:apply
       - woodpecker:apply

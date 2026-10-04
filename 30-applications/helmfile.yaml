@@ -252,6 +252,15 @@ releases:
     values:
       - Applications/paperless/values.yaml.gotmpl
 
+  - name: tandoor
+    namespace: tandoor
+    createNamespace: true
+    chart: bedag/raw
+    version: "2.0.2"
+    wait: true
+    values:
+      - Applications/tandoor/values.yaml.gotmpl
+
   - name: syncthing
     namespace: syncthing
     createNamespace: true

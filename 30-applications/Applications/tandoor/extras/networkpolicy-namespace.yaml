@@ -9,19 +9,6 @@ spec:
   ingress:
     - from:
         - podSelector: {}
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: librechat
-      ports:
-        - port: 4000
-        - port: 8000
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: tandoor
-      ports:
-        - port: 4000
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -33,9 +20,7 @@ spec:
       - key: app.kubernetes.io/name
         operator: In
         values:
-          - litellm
-          - claudecode
-          - nextcloud-mcp
+          - tandoor
   policyTypes:
     - Ingress
   ingress:
