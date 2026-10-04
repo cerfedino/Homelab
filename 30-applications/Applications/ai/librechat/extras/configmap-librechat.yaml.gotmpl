@@ -139,4 +139,27 @@ data:
             description: Your YAZIO password
             sensitive: true
         startup: true
+      migros:
+        type: stdio
+        command: npx
+        args:
+          - -y
+          - 'migros-mcp@0.3.1'
+        env:
+          MIGROS_EMAIL: '{{"{{"}}MIGROS_EMAIL{{"}}"}}'
+          MIGROS_PASSWORD: '{{"{{"}}MIGROS_PASSWORD{{"}}"}}'
+          MIGROS_TOTP_SECRET: '{{"{{"}}MIGROS_TOTP_SECRET{{"}}"}}'
+        customUserVars:
+          MIGROS_EMAIL:
+            title: MIGROS Email
+            description: Your MIGROS email
+            sensitive: false
+          MIGROS_PASSWORD:
+            title: MIGROS Password
+            description: Your MIGROS password
+            sensitive: true
+          MIGROS_TOTP_SECRET:
+            title: MIGROS TOTP Secret
+            description: Your MIGROS TOTP secret
+            sensitive: true
         startup: false
