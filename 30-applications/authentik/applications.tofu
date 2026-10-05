@@ -75,6 +75,7 @@ resource "authentik_provider_proxy" "proxies" {
   authorization_flow = data.authentik_flow.default-authorization-flow.id
   authentication_flow = authentik_flow.homelab_login.uuid
   invalidation_flow = data.authentik_flow.default-invalidation-flow.id
+  access_token_validity = "days=1"
 }
 
 

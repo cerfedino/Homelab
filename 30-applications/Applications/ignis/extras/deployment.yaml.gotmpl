@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ignis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ignis
+  template:
+    metadata:
+      labels:
+        app: ignis
+        app.kubernetes.io/name: ignis
+    spec:
+      containers:
+        - name: ignis
+          image: nobbe/ignis:0.8.16
+          env:
+            - name: WS_ORIGINS
+              value: https://{{ .Values.apps.ignis.internal.dns_hostname }}
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: data
+              mountPath: /vaults
+              # keep lost+found out of the vault list
+              subPath: vaults
+            - name: data
+              mountPath: /app/data
+              subPath: data
+            - name: data
+              mountPath: /app/obsidian-app
+              subPath: obsidian-app
+          resources:
+            requests:
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: 8080
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ignis-data

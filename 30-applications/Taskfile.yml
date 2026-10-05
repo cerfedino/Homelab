@@ -39,6 +39,9 @@ includes:
   cloudflare-tunnel:
     taskfile: cloudflare-tunnel
     dir: cloudflare-tunnel
+  ignis:
+    taskfile: Applications/ignis
+    dir: Applications/ignis
   immich:
     taskfile: Applications/immich
     dir: Applications/immich
@@ -94,6 +97,7 @@ tasks:
       - pihole:apply
       - backrest:apply
       - cloudflare-tunnel:apply
+      - ignis:apply
       - immich:apply
       - kuma:apply
       - librechat:apply

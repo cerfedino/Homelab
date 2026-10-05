@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ignis
+spec:
+  selector:
+    app: ignis
+  ports:
+    - port: 8080
+      targetPort: 8080
