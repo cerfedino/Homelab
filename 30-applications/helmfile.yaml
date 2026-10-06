@@ -270,15 +270,6 @@ releases:
     values:
       - Applications/syncthing/values.yaml.gotmpl
 
-  - name: ignis
-    namespace: ignis
-    createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
-    wait: true
-    values:
-      - Applications/ignis/values.yaml.gotmpl
-
   - name: woodpecker
     namespace: woodpecker
     createNamespace: true
