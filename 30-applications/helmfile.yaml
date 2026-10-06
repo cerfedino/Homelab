@@ -283,7 +283,7 @@ releases:
     namespace: woodpecker
     createNamespace: true
     chart: oci://ghcr.io/woodpecker-ci/helm/woodpecker
-    version: "3.7.3"
+    version: "3.7.4"
     wait: true
     values:
       - Applications/woodpecker/values.yaml.gotmpl
