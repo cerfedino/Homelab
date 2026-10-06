@@ -1,6 +1,6 @@
 image:
   # renovate: datasource=docker depName=jellyfin/jellyfin
-  tag: 12.1
+  tag: 12.2
 
 deploymentStrategy:
   type: Recreate
