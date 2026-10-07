@@ -3,6 +3,9 @@ service:
   annotations:
     # prettier-ignore
     kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
+  additionalServices:
+    cloudflared:
+      type: ClusterIP
 
 deployment:
   replicas: 3
@@ -54,6 +57,21 @@ ports:
     transport:
       respondingTimeouts:
         readTimeout: 0
+  cloudflared:
+    port: 8444
+    expose:
+      default: false
+      cloudflared: true
+    http:
+      tls:
+        enabled: true
+    forwardedHeaders:
+      # trust any pod is fine because we are restricting it to just cloudflared with the traefik NetworkPolicy
+      trustedIPs:
+        - {{ .Values.k3s_cluster_cidr }}
+    transport:
+      respondingTimeouts:
+        readTimeout: 0
 
 ingressRoute:
   dashboard:
@@ -74,12 +92,6 @@ tlsStore:
 tlsOptions:
   default:
     minVersion: VersionTLS12
-
-experimental:
-  plugins:
-    cloudflarewarp:
-      moduleName: github.com/BetterCorp/cloudflarewarp
-      version: v1.3.3
 
 additionalArguments:
   - "--providers.file.directory=/dynamic"

@@ -11,10 +11,6 @@ data:
           insecureSkipVerify: true
 
       middlewares:
-        my-cloudflarewarp:
-          plugin:
-            cloudflarewarp:
-              disableDefault: false
         https-redirect:
           redirectScheme:
             scheme: https
@@ -56,33 +52,21 @@ data:
             - https-redirect
           service: noop@internal
 
-        pve1:
-          rule: Host(`{{ .Values.apps.pve1.internal.dns_hostname }}`)
+{{- range $app := tuple "pve1" "pbs1" "haos" }}
+{{- range $variant, $v := index $.Values.apps $app }}
+{{- if $v.dns_hostname }}
+        {{ $app }}-{{ $variant }}:
+          rule: Host(`{{ $v.dns_hostname }}`)
           entryPoints:
-            - websecure
-{{- if eq .Values.apps.pve1.internal.type "forward-auth" }}
+            - {{ eq $variant "internal" | ternary "websecure" "cloudflared" }}
+{{- if eq $v.type "forward-auth" }}
           middlewares:
-            - authentik-forward-auth-local
+            - authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}
 {{- end }}
-          service: pve1
-        pbs1:
-          rule: Host(`{{ .Values.apps.pbs1.internal.dns_hostname }}`)
-          entryPoints:
-            - websecure
-{{- if eq .Values.apps.pbs1.internal.type "forward-auth" }}
-          middlewares:
-            - authentik-forward-auth-local
+          service: {{ $app }}
 {{- end }}
-          service: pbs1
-        haos:
-          rule: Host(`{{ .Values.apps.haos.external.dns_hostname }}`)
-          entryPoints:
-            - websecure
-{{- if eq .Values.apps.haos.external.type "forward-auth" }}
-          middlewares:
-            - authentik-forward-auth-external
 {{- end }}
-          service: haos
+{{- end }}
 
       services:
         pve1:

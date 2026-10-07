@@ -1,13 +1,18 @@
+{{- $first := true }}
+{{- range $variant, $v := index .Values.apps .app }}
+{{- if $v.dns_hostname }}
+{{- if not $first }}
+---
+{{- end }}
+{{- $first = false }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: {{ .name }}
+  name: {{ $.name }}-{{ $variant }}
 spec:
   entryPoints:
-    - websecure
+    - {{ eq $variant "internal" | ternary "websecure" "cloudflared" }}
   routes:
-{{- range $variant, $v := index .Values.apps .app }}
-{{- if $v.dns_hostname }}
     - match: Host(`{{ $v.dns_hostname }}`)
       kind: Rule
       services:

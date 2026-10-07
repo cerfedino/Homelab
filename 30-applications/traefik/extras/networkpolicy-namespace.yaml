@@ -8,8 +8,19 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # Same namespace
     - from:
         - podSelector: {}
+
+    # web and websecure entrypoints
     - ports:
         - port: 8000
         - port: 8443
+
+    # For the clouflared entrypoint, only cloudflared can talk to it because we trust its CF headers for the real IP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - port: 8444

@@ -17,7 +17,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homelab" {
     ingress = concat(
       [for k, hostname in local.exposed : {
         hostname = hostname
-        service  = "https://traefik.traefik.svc.cluster.local:443"
+        service  = "https://traefik-cloudflared.traefik.svc.cluster.local:8444"
         origin_request = {
           origin_server_name = hostname
         }

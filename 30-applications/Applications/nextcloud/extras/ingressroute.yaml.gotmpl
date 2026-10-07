@@ -1,13 +1,18 @@
+{{- $first := true }}
+{{- range $variant, $v := .Values.apps.filecloud }}
+{{- if $v.dns_hostname }}
+{{- if not $first }}
+---
+{{- end }}
+{{- $first = false }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: nextcloud
+  name: nextcloud-{{ $variant }}
 spec:
   entryPoints:
-    - websecure
+    - {{ eq $variant "internal" | ternary "websecure" "cloudflared" }}
   routes:
-{{- range $variant, $v := .Values.apps.filecloud }}
-{{- if $v.dns_hostname }}
     - match: Host(`{{ $v.dns_hostname }}`)
       kind: Rule
       priority: 10
@@ -19,10 +24,6 @@ spec:
       services:
         - name: nextcloud
           port: 8080
-{{- end }}
-{{- end }}
-{{- range $variant, $v := .Values.apps.filecloud }}
-{{- if $v.dns_hostname }}
     # Collabora is under the same hostname
     - match: Host(`{{ $v.dns_hostname }}`) && (PathPrefix(`/browser`) || PathPrefix(`/hosting/discovery`) || PathPrefix(`/hosting/capabilities`) || PathPrefix(`/cool`))
       kind: Rule
