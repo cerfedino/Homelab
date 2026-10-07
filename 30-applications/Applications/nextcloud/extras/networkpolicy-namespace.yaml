@@ -3,21 +3,18 @@ kind: NetworkPolicy
 metadata:
   name: namespace-ingress
 spec:
-  podSelector: {}
+  # Anything other than the server can receive from anywhere in the namespace
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: NotIn
+        values:
+          - app
   policyTypes:
     - Ingress
   ingress:
     - from:
         - podSelector: {}
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: ai
-          podSelector:
-            matchLabels:
-              app: nextcloud-mcp
-      ports:
-        - port: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -57,7 +54,28 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # Only traefik can talk to the HTTP ports, because we trust its IP as a trusted proxy
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: traefik
+      ports:
+        - port: 80
+        - port: 7867
+
+    # notify-push sidecar reaches nextcloud through the Service, which hairpins to this pod
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: app
+      ports:
+        - port: 80
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ai
+          podSelector:
+            matchLabels:
+              app: nextcloud-mcp
+      ports:
+        - port: 80
