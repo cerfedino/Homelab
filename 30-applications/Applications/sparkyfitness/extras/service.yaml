@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sparkyfitness
+spec:
+  selector:
+    app: sparkyfitness
+  ports:
+    - port: 80
+      targetPort: 80

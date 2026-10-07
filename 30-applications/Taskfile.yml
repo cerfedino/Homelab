@@ -63,6 +63,9 @@ includes:
   shortener:
     taskfile: Applications/shortener
     dir: Applications/shortener
+  sparkyfitness:
+    taskfile: Applications/sparkyfitness
+    dir: Applications/sparkyfitness
   syncthing:
     taskfile: Applications/syncthing
     dir: Applications/syncthing
@@ -102,6 +105,7 @@ tasks:
       - paperless:apply
       - psitransfer:apply
       - shortener:apply
+      - sparkyfitness:apply
       - syncthing:apply
       - tandoor:apply
       - vaultwarden:apply

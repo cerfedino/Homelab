@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparkyfitness
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sparkyfitness
+  template:
+    metadata:
+      labels:
+        app: sparkyfitness
+        app.kubernetes.io/name: sparkyfitness
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: frontend
+          image: codewithcj/sparkyfitness:v1.7.3
+          env:
+            - name: SPARKY_FITNESS_FRONTEND_URL
+              value: https://{{ .Values.apps.sparkyfitness.external.dns_hostname }}
+            - name: SPARKY_FITNESS_SERVER_HOST
+              value: sparkyfitness-server.sparkyfitness.svc.cluster.local
+            - name: SPARKY_FITNESS_SERVER_PORT
+              value: "3010"
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80

@@ -22,6 +22,12 @@ spec:
               kubernetes.io/metadata.name: tandoor
       ports:
         - port: 4000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: sparkyfitness
+      ports:
+        - port: 4000
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparkyfitness-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sparkyfitness-server
+  template:
+    metadata:
+      labels:
+        app: sparkyfitness-server
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: server
+          image: codewithcj/sparkyfitness_server:v1.7.3
+          env:
+            - name: TZ
+              value: Europe/Zurich
+            - name: SPARKY_FITNESS_FRONTEND_URL
+              value: https://{{ .Values.apps.sparkyfitness.external.dns_hostname }}
+            - name: SPARKY_FITNESS_DB_HOST
+              value: sparkyfitness-postgres
+            - name: SPARKY_FITNESS_DB_NAME
+              value: sparkyfitness
+            - name: SPARKY_FITNESS_DB_USER
+              value: sparkyfitness
+            - name: SPARKY_FITNESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sparkyfitness-postgres
+                  key: password
+            - name: SPARKY_FITNESS_API_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sparkyfitness-secrets
+                  key: api_encryption_key
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sparkyfitness-secrets
+                  key: better_auth_secret
+            - name: SPARKY_FITNESS_DISABLE_EMAIL_LOGIN
+              value: "true"
+            - name: SPARKY_FITNESS_OIDC_AUTH_ENABLED
+              value: "true"
+            - name: SPARKY_FITNESS_OIDC_AUTO_REDIRECT
+              value: "true"
+            - name: SPARKY_FITNESS_OIDC_PROVIDER_SLUG
+              value: authentik
+            - name: SPARKY_FITNESS_OIDC_PROVIDER_NAME
+              value: Authentik
+            - name: SPARKY_FITNESS_OIDC_ISSUER_URL
+              value: {{ .Values.oidc.sparkyfitness_external.issuer }}
+            - name: SPARKY_FITNESS_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sparkyfitness-secrets
+                  key: oidc_client_id
+            - name: SPARKY_FITNESS_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sparkyfitness-secrets
+                  key: oidc_client_secret
+            - name: SPARKY_FITNESS_OIDC_SCOPE
+              value: openid email profile groups
+            - name: SPARKY_FITNESS_OIDC_ADMIN_GROUP
+              value: admin
+          ports:
+            - containerPort: 3010
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/SparkyFitnessServer/uploads
+          resources:
+            limits:
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3010
+            initialDelaySeconds: 10
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: sparkyfitness-uploads

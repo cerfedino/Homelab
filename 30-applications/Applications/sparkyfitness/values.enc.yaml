@@ -1,0 +1,18 @@
+sparkyfitness_postgres_password: ENC[AES256_GCM,data:5FRnUI0Mapszrl0zeERvxOs5nbTAz6hvAkKk0f2/kNxcHAyPuTzINw==,iv:nLXAPMM6o5zih+129+WPYBQP6gwb0hAxW0nixPEz5f0=,tag:J8sQ75LcdZGwijh+402xAQ==,type:str]
+sparkyfitness_api_encryption_key: ENC[AES256_GCM,data:B4DgF4S4+NTAnfx4SoDisUeA4HH4cnsTiyqzmuzgoZCWxgr6/FvriGeR6cxri/yZLEqz7NGkzT0jChiZTOxRjw==,iv:bbQmBvTGeJ17fCKNOYbbH/5Ji0dJNQJCdbLsXrcNdv0=,tag:JJhVkp5cvWGw5gSNAmMmcA==,type:str]
+sparkyfitness_better_auth_secret: ENC[AES256_GCM,data:IfMQfKVPHmSe1iJUGaTjQxLwFAo8RFi2nXPuFyV3n4ZmW7jWnomQlP/qqJ4=,iv:rdokcOBaKtz/01aSmwZvA764qLVQvgQVbeBkkBH10p4=,tag:Ie8V1vEv5RWTrSyS1C7cCQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWRExvaTlSY1gzdmZDK2Fn
+            MDM4TzhMK2RzRDFTYWpFWkVNemhuN1FqRUJVCkRKMTM0U1dETWx4U0hBd2J3eWZR
+            TXBPVlRyWHozWk9mUlNNN0pzZVc3VUUKLS0tIDF1VTRvZkZVWlYwNnNOQ3BCS0dn
+            bEpqSU05VFpVYmtXUElXMmxmOGpMSzgKP/8rvXTbcxK62Q0K+eOXbQcTc5i96Txv
+            BoIwmfiAadxEyEOanmRJuxbT4vys24I/Bvr5Ytag28+64MnQJfr+Dw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-10-06T14:23:30Z"
+    mac: ENC[AES256_GCM,data:sgvo/fsXqA+K3PnOdRJRun8UkzSyDJvP0HpohBOPyM7YynTqvyj6FquVLd3k5CGmS8j7q937Y1VXeStUeJbR/nuMHeY+HpKiTqRt/Xbf4AAVMNs4fKcOXfrYr+WWTrc7gbM4CZC+xoIEjhRd/sBhUsAkCNshYyZj6wT5kHKoBYw=,iv:v1sqHkWiiS/Uc03KjZDpODWKZFYjlXnyOTRpY3z/Nuw=,tag:p3v6Em3/BXufQf6YaDyHgQ==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3

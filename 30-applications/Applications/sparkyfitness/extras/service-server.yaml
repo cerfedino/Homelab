@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sparkyfitness-server
+spec:
+  selector:
+    app: sparkyfitness-server
+  ports:
+    - port: 3010
+      targetPort: 3010

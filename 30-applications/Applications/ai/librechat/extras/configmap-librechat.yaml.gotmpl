@@ -89,6 +89,7 @@ data:
     mcpSettings:
       allowedAddresses:
         - "nextcloud-mcp.ai.svc.cluster.local:8000"
+        - "sparkyfitness-server.sparkyfitness.svc.cluster.local:3010"
 
 
     mcpServers:
@@ -215,4 +216,17 @@ data:
             title: Tandoor API Token
             description: Create under Settings → API Tokens in Tandoor
             sensitive: true
-        startup: false
+        startup: true
+
+      sparkyfitness:
+        type: streamable-http
+        requiresOAuth: false
+        url: http://sparkyfitness-server.sparkyfitness.svc.cluster.local:3010/mcp
+        headers:
+          Authorization: '{{"Bearer {{"}}API_KEY{{"}}"}}'
+        customUserVars:
+          API_KEY:
+            title: SparkyFitness API KEY
+            description: Generate under Settings → Developer & Integrations → API Key Management
+            sensitive: true
+        startup: true
