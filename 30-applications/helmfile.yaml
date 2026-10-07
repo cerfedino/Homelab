@@ -193,7 +193,7 @@ releases:
     namespace: immich
     createNamespace: true
     chart: oci://ghcr.io/immich-app/immich-charts/immich
-    version: "0.13.2"
+    version: "0.13.4"
     wait: true
     values:
       - Applications/immich/values.yaml.gotmpl
