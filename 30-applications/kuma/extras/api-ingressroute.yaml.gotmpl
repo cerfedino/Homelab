@@ -4,7 +4,7 @@ metadata:
   name: uptime-kuma-api
 spec:
   entryPoints:
-    - websecure
+    - lan-https
   routes:
     - match: Host(`{{ (index .Values.apps "kuma-api").internal.dns_hostname }}`)
       kind: Rule

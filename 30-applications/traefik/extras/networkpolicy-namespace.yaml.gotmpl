@@ -12,10 +12,16 @@ spec:
     - from:
         - podSelector: {}
 
-    # web and websecure entrypoints
-    - ports:
-        - port: 8000
-        - port: 8443
+    # lan-http and lan-https entrypoints: LAN clients, plus kuma's monitors of the internal hostnames
+    - from:
+        - ipBlock:
+            cidr: {{ .Values.network_lan_cidr }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kuma
+      ports:
+        - port: 80
+        - port: 443
 
     # For the clouflared entrypoint, only cloudflared can talk to it because we trust its CF headers for the real IP
     - from:

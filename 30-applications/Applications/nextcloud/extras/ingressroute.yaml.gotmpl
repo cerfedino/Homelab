@@ -11,7 +11,7 @@ metadata:
   name: nextcloud-{{ $variant }}
 spec:
   entryPoints:
-    - {{ eq $variant "internal" | ternary "websecure" "cloudflared" }}
+    - {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
   routes:
     - match: Host(`{{ $v.dns_hostname }}`)
       kind: Rule

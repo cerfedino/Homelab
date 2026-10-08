@@ -11,11 +11,6 @@ data:
           insecureSkipVerify: true
 
       middlewares:
-        https-redirect:
-          redirectScheme:
-            scheme: https
-            permanent: true
-
         authentik-forward-auth-local:
           forwardAuth:
             # Forward to the Authentik outpost specifically responsible for applications exposed to the local network
@@ -42,23 +37,13 @@ data:
             authResponseHeaders: *authentikResponseHeaders
 
       routers:
-        # Catch-all on the plain-HTTP entrypoint: everything redirects to TLS
-        http-catchall:
-          rule: PathPrefix(`/`)
-          entryPoints:
-            - web
-          priority: 1
-          middlewares:
-            - https-redirect
-          service: noop@internal
-
 {{- range $app := tuple "pve1" "pbs1" "haos" }}
 {{- range $variant, $v := index $.Values.apps $app }}
 {{- if $v.dns_hostname }}
         {{ $app }}-{{ $variant }}:
           rule: Host(`{{ $v.dns_hostname }}`)
           entryPoints:
-            - {{ eq $variant "internal" | ternary "websecure" "cloudflared" }}
+            - {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
 {{- if eq $v.type "forward-auth" }}
           middlewares:
             - authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}

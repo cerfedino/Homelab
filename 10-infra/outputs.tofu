@@ -161,6 +161,7 @@ output "helmfile_values" {
     }
     domain               = var.domain
     domain_lan           = var.domain_lan
+    network_lan_cidr     = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
     proxmox_endpoint_internal = trimsuffix(var.proxmox.endpoint_internal, "/")
     proxmox_cluster_name = var.proxmox_cluster_name
     proxmox_storage_name = var.proxmox_storage_name
