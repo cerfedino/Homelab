@@ -1,5 +1,9 @@
+# Note to self: In order to have the actual LAN ip of a local client show up, I have to make sure that a traefik pod is guaranteed to run on the same node that is reached through the LAN kube-VIP, because otherwise kube-proxy would rewrite the source IP when forwarding the traffic to a node that has a traefik pod running. That's why we make Traefik a DaemonSet.
+
 service:
-  type: LoadBalancer
+  spec:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
   annotations:
     # prettier-ignore
     kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
@@ -8,7 +12,7 @@ service:
       type: ClusterIP
 
 deployment:
-  replicas: 3
+  kind: DaemonSet
   # External dynamic traefik config
   additionalVolumes:
     - name: dynamic
@@ -19,14 +23,6 @@ deployment:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
-
-topologySpreadConstraints:
-  - labelSelector:
-      matchLabels:
-        app.kubernetes.io/name: traefik
-    maxSkew: 1
-    topologyKey: kubernetes.io/hostname
-    whenUnsatisfiable: ScheduleAnyway
 
 additionalVolumeMounts:
   - name: dynamic
