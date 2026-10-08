@@ -12,6 +12,8 @@ Setup wizard:
 - Movies at `/media/movies`
 - Shows at `/media/tvshows`
 
+3. Dashboard > Networking: add the cluster's pod CIDR to Known proxies, so the forwarded client address is used
+
 Install plugins:
 
 - "LDAP Authentication"
@@ -86,6 +88,7 @@ In the settings:
 Setup wizard:
 
 - Login as the jellyfin `admin` user
+- Settings > General: enable Trust Proxy
 
 Amongst other things add Sonarr and Radarr
 

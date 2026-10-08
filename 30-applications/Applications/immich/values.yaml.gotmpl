@@ -6,6 +6,7 @@ controllers:
           DB_HOSTNAME: immich-postgres
           DB_USERNAME: immich
           DB_DATABASE_NAME: immich
+          IMMICH_TRUSTED_PROXIES: {{ .Values.k3s_cluster_cidr }}
           DB_PASSWORD:
             valueFrom:
               secretKeyRef:

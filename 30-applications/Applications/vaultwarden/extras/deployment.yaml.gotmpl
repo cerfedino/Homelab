@@ -33,6 +33,8 @@ spec:
           env:
             - name: DOMAIN
               value: https://{{ .Values.apps.vaultwarden.external.dns_hostname }}
+            - name: IP_HEADER
+              value: X-Forwarded-For
             - name: SIGNUPS_ALLOWED
               value: "false"
             # SSO logins from this domain create accounts
