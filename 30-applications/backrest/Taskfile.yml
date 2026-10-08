@@ -9,4 +9,11 @@ tasks:
     run: once
     deps: [':authentik:apply']
     cmds:
+      - task: repos
       - cd .. && helmfile apply --skip-refresh -l name=backrest
+
+  repos:
+    desc: the namespaces with a k8up schedule, one restic repo each
+    cmds:
+      - mkdir -p generated
+      - '{ echo "backrest_repos:"; kubectl get schedules.k8up.io -A -o jsonpath="{range .items[*]}{.metadata.namespace}{\"\n\"}{end}" | sort -u | sed "s/^/  - /"; } > generated/generated.repos.yaml'

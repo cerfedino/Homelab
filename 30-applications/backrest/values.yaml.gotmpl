@@ -1,7 +1,8 @@
+{{- $vals := merge (readFile "generated/generated.repos.yaml" | fromYaml) .Values }}
 resources:
 {{- range $f := readDirEntries "extras" }}
 {{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
+{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) (dict "Values" $vals)) }}
   - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
 {{- end }}
 {{- end }}
