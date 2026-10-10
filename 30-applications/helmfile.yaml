@@ -312,7 +312,7 @@ releases:
     namespace: ai
     createNamespace: true
     chart: ollama/ollama
-    version: "1.82.0"
+    version: "1.84.0"
     wait: true
     values:
       - Applications/ai/values-ollama.yaml
