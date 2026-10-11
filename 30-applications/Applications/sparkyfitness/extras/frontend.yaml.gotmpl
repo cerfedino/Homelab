@@ -16,7 +16,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: frontend
-          image: codewithcj/sparkyfitness:v1.7.3
+          image: codewithcj/sparkyfitness:v1.8.0
           env:
             - name: SPARKY_FITNESS_FRONTEND_URL
               value: https://{{ .Values.apps.sparkyfitness.external.dns_hostname }}
