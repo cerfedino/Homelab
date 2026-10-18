@@ -11,4 +11,4 @@ command -v pre-commit >/dev/null && [ ! -f "$(git rev-parse --git-path hooks/pre
 
 helm plugin list 2>/dev/null | grep -q '^diff' || helm plugin install --verify=false https://github.com/databus23/helm-diff >/dev/null 2>&1 || true
 
-[ -n "$BASH_VERSION" ] && case "$-" in *i*) eval 'source <(kubectl completion bash) && source <(helm completion bash) && source <(helmfile completion bash) && alias k=kubectl && complete -o default -F __start_kubectl k' ;; esac || true
+[ -n "$BASH_VERSION" ] && case "$-" in *i*) eval 'source <(kubectl completion bash) && source <(helm completion bash) && source <(helmfile completion bash) && alias k=kubectl && source "$REPO_ROOT/scripts/kubectl-cp-complete.bash"' ;; esac || true
