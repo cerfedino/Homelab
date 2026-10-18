@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: pgvector/pgvector:0.8.6-pg18
+          image: pgvector/pgvector:0.8.7-pg18
           env:
             # subdirectory: initdb refuses the mount point itself (lost+found)
             - name: PGDATA
