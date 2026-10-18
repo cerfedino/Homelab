@@ -19,16 +19,24 @@ data:
       agents:
         recursionLimit: 1000
       custom:
-        - name: LiteLLM
+        - name: Anthropic
+          iconURL: anthropic
           apiKey: '${LITELLM_API_KEY}'
           baseURL: http://litellm.ai.svc.cluster.local:4000/v1
           models:
             default:
-              - claude-sonnet-5
-            fetch: true
+              - claude-code-sonnet
+              - claude-code-fable
+              - claude-code-opus
+              - claude-code-opus-4-8
+              - claude-code-opus-4-7
+              - claude-code-opus-4-6
+              - claude-code-sonnet-4-6
+              - claude-code-haiku
+            fetch: false
           titleConvo: true
           titleModel: claude-code-haiku
-          modelDisplayLabel: LiteLLM
+          modelDisplayLabel: Anthropic
           tokenConfig:
             # claude-opus-5:
             #   prompt: 5
@@ -74,6 +82,36 @@ data:
               prompt: 1
               completion: 5
               context: 200000
+        - name: Mistral
+          apiKey: '${LITELLM_API_KEY}'
+          baseURL: http://litellm.ai.svc.cluster.local:4000/v1
+          models:
+            default:
+              - mistral-large-latest
+              - mistral-medium-latest
+              - mistral-small-latest
+              - codestral-latest
+            fetch: false
+          titleConvo: true
+          titleModel: claude-code-haiku
+          modelDisplayLabel: Mistral
+          tokenConfig:
+            mistral-large-latest:
+              prompt: 0.5
+              completion: 1.5
+              context: 1000000
+            mistral-medium-latest:
+              prompt: 1.5
+              completion: 7.5
+              context: 256000
+            mistral-small-latest:
+              prompt: 0.15
+              completion: 0.6
+              context: 256000
+            codestral-latest:
+              prompt: 0.3
+              completion: 0.9
+              context: 128000
 
     memory:
       disabled: false
@@ -83,7 +121,7 @@ data:
       messageWindowSize: 10
       agent:
         enabled: true
-        provider: LiteLLM
+        provider: Anthropic
         model: claude-code-haiku
 
     mcpSettings:

@@ -84,6 +84,22 @@ proxy_config:
         model: openai/claude-haiku-4-5
         api_base: http://claudecode:8000/v1
         api_key: dummy
+    - model_name: mistral-large-latest
+      litellm_params:
+        model: mistral/mistral-large-latest
+        api_key: os.environ/MISTRAL_API_KEY
+    - model_name: mistral-medium-latest
+      litellm_params:
+        model: mistral/mistral-medium-latest
+        api_key: os.environ/MISTRAL_API_KEY
+    - model_name: mistral-small-latest
+      litellm_params:
+        model: mistral/mistral-small-latest
+        api_key: os.environ/MISTRAL_API_KEY
+    - model_name: codestral-latest
+      litellm_params:
+        model: mistral/codestral-latest
+        api_key: os.environ/MISTRAL_API_KEY
   router_settings:
     num_retries: 0
     disable_cooldowns: true
