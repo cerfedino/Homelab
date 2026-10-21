@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: syncthing
-          image: syncthing/syncthing:2.1.5
+          image: syncthing/syncthing:2.1.6
           ports:
             - name: gui
               containerPort: 8384
