@@ -220,7 +220,7 @@ releases:
     namespace: windmill
     createNamespace: true
     chart: windmill/windmill
-    version: "4.0.268"
+    version: "4.0.277"
     wait: true
     values:
       - Applications/windmill/values.yaml.gotmpl
