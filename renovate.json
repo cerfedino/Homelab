@@ -45,7 +45,7 @@
                 "/^(10-infra|20-bootstrap|30-applications)/.+\\.(yaml|yml|gotmpl|tofu)$/"
             ],
             "matchStrings": [
-                "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[^\\n]*?[:=]\\s*\"?(?<currentValue>[\\w.+\\-]+)\"?"
+                "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[^\\n]*?[:=]\\s*\"?(?<currentValue>[\\w.+\\-]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?"
             ]
         },
         {
