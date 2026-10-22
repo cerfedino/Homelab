@@ -1,20 +1,14 @@
 
 locals {
   machines = merge(
-    { for k, v in local.vms : v.display_name => {
-        fqdn_internal = "${v.display_name}.internal.${var.domain}"
-        fqdn_lan      = "${v.display_name}.lan.${var.domain}"
+    { for k, v in var.vms : k => {
+        fqdn_internal = "${k}.internal.${var.domain}"
+        fqdn_lan      = "${k}.lan.${var.domain}"
         ip_internal   = cidrhost(var.network_internal.cidr, v.vm_id)
         ip_lan        = cidrhost(var.network_lan.cidr, v.vm_id)
     } },
-    { (var.vm_haos.display_name) = {
-        fqdn_internal = "${var.vm_haos.display_name}.internal.${var.domain}"
-        fqdn_lan      = "${var.vm_haos.display_name}.lan.${var.domain}"
-        ip_internal   = cidrhost(var.network_internal.cidr, var.vm_haos.vm_id)
-        ip_lan        = cidrhost(var.network_lan.cidr, var.vm_haos.vm_id)
-    } },
     # the PVE hosts: their addresses are the host parts of the network cidrs
-    { for n in toset([for _, v in local.vms : v.node_name]) : n => {
+    { for n in toset([for _, v in var.vms : v.node_name]) : n => {
         fqdn_internal = "${n}.internal.${var.domain}"
         fqdn_lan      = "${n}.lan.${var.domain}"
         ip_internal   = split("/", var.network_internal.cidr)[0]
@@ -28,84 +22,72 @@ locals {
   dnsmasq_all_entries = concat(local.machine_dns_entries, var.dnsmasq_address_entries)
 }
 
+# every host Ansible and ssh can log into: the cloud-init guests and the PVE hosts
+locals {
+  ansible_hosts = merge(
+    { for k, v in var.vms : k => {
+        ansible_host                 = local.machines[k].ip_lan
+        ansible_user                 = var.vm_username
+        ansible_ssh_private_key_file = "${var.REPO_ROOT}/${v.ssh_private_key_paths[0]}"
+        vm_id                        = v.vm_id
+        proxmox_node_name            = v.node_name
+        ip_lan                       = local.machines[k].ip_lan
+        ip_internal                  = local.machines[k].ip_internal
+    } if v.role != "haos" },
+    { for n in toset([for _, v in var.vms : v.node_name]) : n => {
+        ansible_host                 = local.machines[n].ip_lan
+        ansible_user                 = "root"
+        ansible_ssh_private_key_file = "${var.REPO_ROOT}/${var.proxmox.root_privkey_path}"
+        ansible_ssh_common_args      = "-o IdentitiesOnly=yes"
+        ip_lan                       = local.machines[n].ip_lan
+        ip_internal                  = local.machines[n].ip_internal
+    } },
+  )
+}
+
 output "ansible_yaml_inventory" {
   sensitive = true
   value = yamlencode({
     all = {
+      hosts = local.ansible_hosts
       children = {
         k3s_cluster = {
-            children = {
-                server = {
-                    hosts = {
-                        for k, v in var.vm_k3s :
-                        proxmox_virtual_environment_vm.this[k].name => {
-                            ansible_host = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-                            ansible_user = var.vm_username
-                            ansible_ssh_private_key_file : "${var.REPO_ROOT}/${v.ssh_private_key_paths[0]}"
-
-                            vm_id = proxmox_virtual_environment_vm.this[k].vm_id
-                            proxmox_node_name = v.node_name
-                            ip_lan = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-                            ip_internal = split("/", [for ni in local.vm_network_interfaces[k] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
-
-                        }
-                    }
-                }
-            },
-            vars = {
-                kube_vip_cp_address  = var.kube_vip_cp_address
-                kube_vip_svc_address = var.kube_vip_svc_address
-                k3s_server_lan_ips = [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)]
-                proxmox_cluster_name = var.proxmox_cluster_name
-                k3s_cluster_cidr = var.k3s_cluster_cidr
-                k3s_service_cidr = var.k3s_service_cidr
+          children = {
+            server = {
+              hosts = { for k, v in var.vms : k => null if v.role == "k3s" }
             }
-        }
-        pve = {
-          hosts = {
-            for n in toset([for _, v in local.vms : v.node_name]) : n => {
-              ansible_host                 = split("/", var.network_lan.cidr)[0]
-              ansible_user                 = "root"
-              ansible_ssh_private_key_file = "${var.REPO_ROOT}/${var.proxmox.root_privkey_path}"
-              ansible_ssh_common_args      = "-o IdentitiesOnly=yes"
-              ip_lan                       = split("/", var.network_lan.cidr)[0]
-              ip_internal                  = split("/", var.network_internal.cidr)[0]
-            }
+          }
+          vars = {
+            kube_vip_cp_address  = var.kube_vip_cp_address
+            kube_vip_svc_address = var.kube_vip_svc_address
+            k3s_server_lan_ips   = [for _, v in var.vms : cidrhost(var.network_lan.cidr, v.vm_id) if v.role == "k3s"]
+            proxmox_cluster_name = var.proxmox_cluster_name
+            k3s_cluster_cidr     = var.k3s_cluster_cidr
+            k3s_service_cidr     = var.k3s_service_cidr
           }
         }
         tailscale_gw = {
-          hosts = {
-            (proxmox_virtual_environment_vm.this["tailscale"].name) = {
-              vm_id:  proxmox_virtual_environment_vm.this["tailscale"].vm_id
-
-              ansible_host = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-
-
-              ansible_host_lan = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_lan.bridge][0])[0]
-
-              ansible_host_internal = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
-
-              ip_internal = split("/", [for ni in local.vm_network_interfaces["tailscale"] : ni.address if ni.bridge == var.network_internal.bridge][0])[0]
-
-              ansible_user = var.vm_username
-
-              ansible_ssh_private_key_file : "${var.REPO_ROOT}/${var.vm_tailscale.ssh_private_key_paths[0]}"
-            }
-          }
+          hosts = { for k, v in var.vms : k => null if v.role == "tailscale" }
+        }
+        generic_vms = {
+          hosts = { for k, v in var.vms : k => null if v.role == "" }
+        }
+        pve = {
+          hosts = { for n in toset([for _, v in var.vms : v.node_name]) : n => null }
         }
       }
-      vars: {
+      vars = {
         dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
         dnsmasq_address_entries  = local.dnsmasq_all_entries
         network_lan = {
-            cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
-            bridge  = var.network_lan.bridge
-            gateway = var.network_lan.gateway
+          cidr    = "${cidrhost(var.network_lan.cidr, 0)}/${split("/", var.network_lan.cidr)[1]}"
+          bridge  = var.network_lan.bridge
+          gateway = var.network_lan.gateway
         }
         network_internal = {
-            cidr    = "${cidrhost(var.network_internal.cidr, 0)}/${split("/", var.network_internal.cidr)[1]}"
-            bridge = var.network_internal.bridge
-            gateway = var.network_internal.gateway
+          cidr    = "${cidrhost(var.network_internal.cidr, 0)}/${split("/", var.network_internal.cidr)[1]}"
+          bridge  = var.network_internal.bridge
+          gateway = var.network_internal.gateway
         }
       }
     }
@@ -143,6 +125,18 @@ output "ansible_yaml_inventory" {
     condition     = !contains(local.vm_lan_ips, var.pihole_svc_address)
     error_message = "pihole_svc_address ${var.pihole_svc_address} clashes with a VM LAN IP (${join(", ", local.vm_lan_ips)})."
   }
+}
+
+output "ssh_config" {
+  sensitive = true
+  value = join("\n", [for name, h in local.ansible_hosts : <<-EOT
+    Host ${name}
+      HostName ${h.ansible_host}
+      User ${h.ansible_user}
+      IdentityFile ${h.ansible_ssh_private_key_file}
+      IdentitiesOnly yes
+  EOT
+  ])
 }
 
 output "helmfile_values" {

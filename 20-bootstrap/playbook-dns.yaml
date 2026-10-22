@@ -1,6 +1,6 @@
 ---
 - name: Configure local DNS
-  hosts: "{{ node | default('k3s_cluster:tailscale_gw:pve') }}"
+  hosts: "{{ node | default('k3s_cluster:tailscale_gw:pve:generic_vms') }}"
   become: true
   tasks:
     - name: Validate DNS configuration
