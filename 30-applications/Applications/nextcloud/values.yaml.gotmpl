@@ -29,6 +29,7 @@ nextcloud:
         'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
         'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
+        'allow_local_remote_servers' => true,
         'default_phone_region' => 'CH',
         'maintenance_window_start' => 1,
         // trust the pod network such that we can read the X-Forwarded-For IP
