@@ -18,7 +18,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: tandoor
-          image: ghcr.io/tandoorrecipes/recipes:2.6.15
+          image: ghcr.io/tandoorrecipes/recipes:2.7.2
           env:
             - name: ALLOWED_HOSTS
               value: {{ .Values.apps.tandoor.external.dns_hostname }},tandoor.tandoor.svc.cluster.local
