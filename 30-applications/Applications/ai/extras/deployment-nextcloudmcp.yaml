@@ -25,7 +25,7 @@ spec:
         - name: nextcloud-mcp-ghcr
       containers:
         - name: sqlite
-          image: keinos/sqlite3:3.53.4
+          image: keinos/sqlite3:3.54.1
           command: ["sleep", "infinity"]
           volumeMounts:
             - name: data
