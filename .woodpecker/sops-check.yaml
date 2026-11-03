@@ -1,0 +1,14 @@
+when:
+  - event: push
+
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    settings:
+      recursive: false
+
+steps:
+  sops-check:
+    image: ghcr.io/getsops/sops:v3.13.3-alpine
+    commands:
+      - find . -path ./.git -prune -o -type f -name '*.enc*' -print | grep -E '\.enc(\.|$)' | xargs sh scripts/sops-check
