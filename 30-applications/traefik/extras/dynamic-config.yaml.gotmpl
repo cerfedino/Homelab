@@ -37,18 +37,20 @@ data:
             authResponseHeaders: *authentikResponseHeaders
 
       routers:
-{{- range $app := tuple "pve1" "pbs1" "haos" }}
-{{- range $variant, $v := index $.Values.apps $app }}
+{{- range $f := tuple "app-pve1.enc.yaml" "app-pbs1.enc.yaml" "app-haos.enc.yaml" }}
+{{- $app := readFile $f | fromYaml }}
+{{- range $variant, $v := omit $app "name" }}
 {{- if $v.dns_hostname }}
-        {{ $app }}-{{ $variant }}:
+        {{ $app.name }}-{{ $variant }}:
           rule: Host(`{{ $v.dns_hostname }}`)
           entryPoints:
-            - {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+            #- {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+            - lan-https
 {{- if eq $v.type "forward-auth" }}
           middlewares:
             - authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}
 {{- end }}
-          service: {{ $app }}
+          service: {{ $app.name }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -61,7 +63,7 @@ data:
         pbs1:
           loadBalancer:
             servers:
-              - url: "https://sylvester-pbs1.proxmox-internal.{{ .Values.domain }}:8007"
+              - url: "https://pbs1.internal.crfda.com:8007"
         haos:
           loadBalancer:
             servers:

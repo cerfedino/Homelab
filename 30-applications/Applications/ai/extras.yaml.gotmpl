@@ -1,8 +1,314 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $litellm := readFile "app-litellm.enc.yaml" | fromYaml }}
+{{- $claudecode := readFile "app-claudecode.enc.yaml" | fromYaml }}
+{{- $nextcloudmcp := readFile "app-nextcloudmcp.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  nextcloud-mcp:
+    forceRename: nextcloud-mcp
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/approvals.db .dump'
+        k8up.io/file-extension: .sql
+      securityContext:
+        fsGroup: 10001
+      imagePullSecrets:
+        - name: nextcloud-mcp-ghcr
+    containers:
+      sqlite:
+        image:
+          repository: keinos/sqlite3
+          tag: 3.53.4
+        command: ["sleep", "infinity"]
+        resources:
+          limits:
+            memory: 64Mi
+      app:
+        nameOverride: nextcloud-mcp
+        image:
+          repository: ghcr.io/cerfedino/nextcloud-mcp
+          tag: latest
+        env:
+          - name: NEXTCLOUD_URL
+            value: http://nextcloud.nextcloud.svc.cluster.local:8080
+          - name: ADMIN_USER_HEADER
+            value: X-authentik-username
+        envFrom:
+          - secretRef:
+              name: nextcloud-mcp-secrets
+        ports:
+          - name: mcp
+            containerPort: 8000
+          - name: admin
+            containerPort: 8001
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 8000
+              periodSeconds: 10
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 8001
+              initialDelaySeconds: 10
+              periodSeconds: 30
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+  postgres:
+    forceRename: ai-postgres
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        nameOverride: postgres
+        image:
+          repository: postgres
+          tag: "18.6"
+        env:
+          # subdirectory: initdb refuses the mount point itself (lost+found)
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: ai
+          - name: POSTGRES_DB
+            value: litellm
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ai-postgres
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "ai", "-d", "litellm"]
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  nextcloud-mcp:
+    forceRename: nextcloud-mcp
+    controller: nextcloud-mcp
+    ports:
+      mcp:
+        port: 8000
+      admin:
+        port: 8001
+  postgres:
+    forceRename: ai-postgres
+    controller: postgres
+    ports:
+      postgres:
+        port: 5432
+
+persistence:
+  nextcloud-mcp-data:
+    forceRename: nextcloud-mcp-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 1Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      nextcloud-mcp:
+        sqlite:
+          - path: /data
+        app:
+          - path: /data
+  postgres-data:
+    forceRename: ai-postgres-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+
+configMaps:
+  claudecode:
+    forceRename: claudecode
+    data:
+      # the chart runs tpl over values, so the file's own template braces must be escaped
+      server.py: {{ readFile "claudecode/server.enc.py" | replace "{{" `{{"{{"}}` | toYaml | indent 8 | trim }}
+
+secrets:
+  litellm:
+    forceRename: litellm-secrets
+    stringData:
+      LITELLM_MASTER_KEY: {{ $secrets.litellm_master_key | quote }}
+      ANTHROPIC_API_KEY: {{ $secrets.anthropic_api_key | quote }}
+      MISTRAL_API_KEY: {{ $secrets.mistral_api_key | quote }}
+      GENERIC_CLIENT_ID: {{ $litellm.external.oidc.client_id | quote }}
+      GENERIC_CLIENT_SECRET: {{ $litellm.external.oidc.client_secret | quote }}
+  nextcloud-mcp-ghcr:
+    forceRename: nextcloud-mcp-ghcr
+    type: kubernetes.io/dockerconfigjson
+    stringData:
+      .dockerconfigjson: {{ dict "auths" (dict "ghcr.io" (dict "auth" (printf "%s:%s" $secrets.ghcr_pull_username $secrets.ghcr_pull_token | b64enc))) | toJson | quote }}
+  nextcloud-mcp:
+    forceRename: nextcloud-mcp-secrets
+    stringData:
+      NEXTCLOUD_USERNAME: {{ $secrets.nextcloud_mcp_username | quote }}
+      NEXTCLOUD_APP_TOKEN: {{ $secrets.nextcloud_mcp_app_token | quote }}
+  postgres:
+    forceRename: ai-postgres
+    stringData:
+      username: ai
+      password: {{ $secrets.ai_postgres_password | quote }}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: librechat
+          ports:
+            - port: 4000
+            - port: 8000
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: tandoor
+          ports:
+            - port: 4000
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: sparkyfitness
+          ports:
+            - port: 4000
+  # litellm and claudecode are their own releases, so select them by name
+  traefik:
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - litellm
+            - claudecode
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+  traefik-nextcloud-mcp:
+    controller: nextcloud-mcp
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  # owned by the claudecode release, which mounts it as an existing claim
+  claudecode-data:
+    forceRename: claudecode-data
+    manifest:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          helm.sh/resource-policy: keep
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: proxmox-data-zfs
+        resources:
+          requests:
+            storage: 1Gi
+  litellm-external:
+    forceRename: litellm-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $litellm.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $litellm.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
+            services:
+              - name: litellm
+                port: 4000
+  claudecode-internal:
+    forceRename: claudecode-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $claudecode.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $claudecode.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: claudecode
+                port: 8000
+  nextcloud-mcp-internal:
+    forceRename: nextcloud-mcp-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $nextcloudmcp.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $nextcloudmcp.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: nextcloud-mcp
+                port: 8001
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "ai" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

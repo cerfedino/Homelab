@@ -11,7 +11,7 @@ terraform {
 }
 
 locals {
-  values    = yamldecode(file("./values.enc.yaml"))
+  values    = yamldecode(file("./secrets.enc.yaml"))
   generated = yamldecode(file("../../10-infra/generated/generated.infra.yaml"))
 }
 

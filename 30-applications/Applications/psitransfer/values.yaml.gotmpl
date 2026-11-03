@@ -1,8 +1,133 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  psitransfer:
+    pod:
+      securityContext:
+        fsGroup: 1000
+    containers:
+      app:
+        image:
+          repository: psitrax/psitransfer
+          tag: v2.4.4
+        env:
+          - name: PSITRANSFER_ACCESS_LOG
+            value: warn
+          - name: PSITRANSFER_ADMIN_PASS
+            valueFrom:
+              secretKeyRef:
+                name: psitransfer
+                key: admin_pass
+        ports:
+          - containerPort: 3000
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 3000
+              initialDelaySeconds: 5
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    forceRename: psitransfer
+    controller: psitransfer
+    ports:
+      http:
+        port: 3000
+
+secrets:
+  app:
+    forceRename: psitransfer
+    stringData:
+      admin_pass: {{ $secrets.psitransfer_admin_pass | quote }}
+
+configMaps:
+  config:
+    forceRename: psitransfer-config
+    data:
+      # adminPass and uploadPass stay unset here so the env-aware defaults apply
+      config.production.js: |
+        module.exports = {
+          retentions: {
+            "one-time": "one time download",
+            60: "1 Minute",
+            300: "5 Minutes",
+            3600: "1 Hour",
+            21600: "6 Hours",
+            86400: "1 Day",
+            259200: "3 Days",
+            604800: "1 Week",
+            1209600: "2 Weeks",
+          },
+          defaultRetention: "3600",
+          baseUrl: "/",
+          uploadAppPath: "/",
+          maxFileSize: Math.pow(2, 30) * 40,
+        };
+
+persistence:
+  data:
+    forceRename: psitransfer-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 50Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # transfers expire by design
+      k8up.io/backup: "false"
+    globalMounts:
+      - path: /data
+        # keep lost+found outside the app's bucket scan
+        subPath: data
+  config:
+    type: configMap
+    identifier: config
+    globalMounts:
+      - path: /app/config.production.js
+        subPath: config.production.js
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: psitransfer
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    forceRename: psitransfer-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: psitransfer
+                port: 3000

@@ -1,5 +1,6 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
 {{- $first := true }}
-{{- range $variant, $v := .Values.apps.filecloud }}
+{{- range $variant, $v := omit $app "name" }}
 {{- if $v.dns_hostname }}
 {{- if not $first }}
 ---
@@ -11,7 +12,8 @@ metadata:
   name: nextcloud-{{ $variant }}
 spec:
   entryPoints:
-    - {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+    #- {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+    - lan-https
   routes:
     - match: Host(`{{ $v.dns_hostname }}`)
       kind: Rule

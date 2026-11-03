@@ -1,9 +1,171 @@
-{{- $vals := merge (readFile "generated/generated.repos.yaml" | fromYaml) .Values }}
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) (dict "Values" $vals)) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $repos := (readFile "generated/generated.repos.yaml" | fromYaml).backrest_repos }}
+{{- $env := list (printf "AWS_ACCESS_KEY_ID=%s" .Values.backup.s3_access_key) (printf "AWS_SECRET_ACCESS_KEY=%s" .Values.backup.s3_secret_key) }}
+{{- $repoConfigs := list }}
+{{- range $repos }}
+{{- $repoConfigs = append $repoConfigs (dict
+      "id" .
+      "guid" (sha256sum .)
+      "uri" (printf "s3:%s/%s/%s" $.Values.backup.s3_endpoint $.Values.backup.s3_bucket .)
+      "password" $.Values.backup.restic_password
+      "env" $env
+      "checkPolicy" (dict
+        "schedule" (dict "cron" "0 6 * * *")
+        "structureOnly" true)) }}
 {{- end }}
+controllers:
+  backrest:
+    initContainers:
+      seed-config:
+        image:
+          repository: busybox
+          tag: "1.38"
+        command:
+          - sh
+          - -c
+          - "mkdir -p /data/config && cp /seed/config.json /data/config/config.json"
+    containers:
+      app:
+        nameOverride: backrest
+        image:
+          repository: ghcr.io/garethgeorge/backrest
+          tag: v1.14.1
+        env:
+          - name: TZ
+            value: "Europe/Zurich"
+          - name: BACKREST_PORT
+            value: "0.0.0.0:9898"
+          - name: BACKREST_DATA
+            value: "/data/data"
+          - name: BACKREST_CONFIG
+            value: "/data/config/config.json"
+          - name: XDG_CACHE_HOME
+            value: "/data/cache"
+        ports:
+          - containerPort: 9898
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 9898
+              initialDelaySeconds: 5
+        resources:
+          limits:
+            memory: 512Mi
+
+  # Periodically indexes the backrest repos
+  index-snapshots:
+    forceRename: index-snapshots
+    type: cronjob
+    cronjob:
+      schedule: "00 7 * * *"
+      concurrencyPolicy: Forbid
+      successfulJobsHistory: 1
+      failedJobsHistory: 2
+    pod:
+      restartPolicy: OnFailure
+    containers:
+      index:
+        image:
+          repository: curlimages/curl
+          tag: 8.22.0
+        command:
+          - sh
+          - -c
+          - |
+            for repo in {{ range $repos }}{{ . }} {{ end }}; do
+              curl -sf -X POST -H "Content-Type: application/json" \
+                -d "{\"repoId\":\"$repo\",\"task\":\"TASK_INDEX_SNAPSHOTS\"}" \
+                http://backrest.backrest.svc.cluster.local:9898/v1.Backrest/DoRepoTask \
+                || echo "index failed: $repo"
+            done
+        resources:
+          requests:
+            memory: 32Mi
+          limits:
+            memory: 64Mi
+
+service:
+  app:
+    forceRename: backrest
+    controller: backrest
+    ports:
+      http:
+        port: 9898
+
+secrets:
+  config-seed:
+    forceRename: backrest-config-seed
+    stringData:
+      config.json: |+
+        {
+          "modno": 1,
+          "version": 6,
+          "instance": "backrest",
+          "auth": { "disabled": true },
+          "repos": {{ $repoConfigs | toJson }}
+        }
+
+
+persistence:
+  data:
+    forceRename: backrest-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 1Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      backrest:
+        seed-config:
+          - path: /data
+        app:
+          - path: /data
+  config-seed:
+    type: secret
+    identifier: config-seed
+    advancedMounts:
+      backrest:
+        seed-config:
+          - path: /seed
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: backrest
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  internal:
+    forceRename: backrest-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
-{{- end }}
+            services:
+              - name: backrest
+                port: 9898

@@ -1,4 +1,5 @@
-{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := fromYaml (readFile "secrets.enc.yaml") }}
 # renovate: datasource=docker depName=nextcloud
 {{- $ncTag := "35.0.2-apache@sha256:3f05f4d5eded9d3d029e617926500645cca6344710364737a374088f6811095a" }}
 
@@ -6,7 +7,7 @@ image:
   tag: {{ $ncTag }}
 
 nextcloud:
-  host: {{ .Values.apps.filecloud.external.dns_hostname }}
+  host: {{ $app.external.dns_hostname }}
   username: admin
   password: {{ $secrets.nextcloud_admin_password | quote }}
 
@@ -26,8 +27,8 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
-        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
-        'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
+        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ $app.external.dns_hostname }}'),
+        'overwrite.cli.url' => 'https://{{ $app.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
         'allow_local_remote_servers' => true,
         'default_phone_region' => 'CH',
@@ -55,14 +56,14 @@ nextcloud:
 
   extraEnv:
     - name: WHITEBOARD_URL
-      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}/whiteboard
+      value: https://{{ $app.external.dns_hostname }}/whiteboard
     - name: WHITEBOARD_JWT_SECRET
       valueFrom:
         secretKeyRef:
           name: nextcloud-whiteboard
           key: jwt_secret
     - name: COLLABORA_WOPI_URL
-      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}
+      value: https://{{ $app.external.dns_hostname }}
     - name: OIDC_CLIENT_ID
       valueFrom:
         secretKeyRef:
@@ -137,9 +138,9 @@ collabora:
   enabled: true
   collabora:
     # Collabora is under the same hostname
-    server_name: {{ .Values.apps.filecloud.external.dns_hostname }}
+    server_name: {{ $app.external.dns_hostname }}
     aliasgroups:
-      - host: "https://{{ .Values.apps.filecloud.external.dns_hostname }}:443"
+      - host: "https://{{ $app.external.dns_hostname }}:443"
     username: admin
     password: {{ $secrets.collabora_admin_password | quote }}
     # TLS terminates at traefik

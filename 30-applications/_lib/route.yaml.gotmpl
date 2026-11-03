@@ -1,5 +1,5 @@
 {{- $first := true }}
-{{- range $variant, $v := index .Values.apps .app }}
+{{- range $variant, $v := omit .app "name" }}
 {{- if $v.dns_hostname }}
 {{- if not $first }}
 ---
@@ -11,7 +11,8 @@ metadata:
   name: {{ $.name }}-{{ $variant }}
 spec:
   entryPoints:
-    - {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+    #- {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
+    - lan-https
   routes:
     - match: Host(`{{ $v.dns_hostname }}`)
       kind: Rule

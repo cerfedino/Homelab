@@ -45,7 +45,7 @@ resource "authentik_outpost" "embedded" {
 
 
 locals {
-    applications = yamldecode(file("../app-registry/generated/generated.applications.yaml"))
+    applications = module.apps.applications
 
     fwauth_variants = {
         for k, app in local.applications : k => merge(app, {
@@ -90,7 +90,7 @@ data "authentik_property_mapping_provider_scope" "oidc_scopes" {
 
 # process oidc group claim mapping
 resource "authentik_property_mapping_provider_scope" "app_group_map" {
-  for_each   = {for k, app in local.oidc_apps : k => app.oidc.group_map if app.oidc.group_map != null}
+  for_each   = {for k, app in local.oidc_apps : k => {for m in app.oidc.group_map : m.from => m.to} if app.oidc.group_map != null}
   name       = "groups mapping (${each.key})"
   scope_name = "groups"
   expression = <<-EOT

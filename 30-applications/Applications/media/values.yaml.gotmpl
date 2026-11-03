@@ -1,8 +1,347 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $autobrr := readFile "app-autobrr.enc.yaml" | fromYaml }}
+{{- $bazarr := readFile "app-bazarr.enc.yaml" | fromYaml }}
+{{- $grimmory := readFile "app-grimmory.enc.yaml" | fromYaml }}
+{{- $jellyfin := readFile "app-jellyfin.enc.yaml" | fromYaml }}
+{{- $prowlarr := readFile "app-prowlarr.enc.yaml" | fromYaml }}
+{{- $qbittorrent := readFile "app-qbittorrent.enc.yaml" | fromYaml }}
+{{- $radarr := readFile "app-radarr.enc.yaml" | fromYaml }}
+{{- $seerr := readFile "app-seerr.enc.yaml" | fromYaml }}
+{{- $sonarr := readFile "app-sonarr.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+
+# claims and config for the releases of this namespace (jellyfin, the *arr stack, gluetun, managerscript)
+persistence:
+  autobrr-config:
+    forceRename: autobrr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  bazarr-config:
+    forceRename: bazarr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  media-data:
+    forceRename: media-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 1Ti
+    annotations:
+      helm.sh/resource-policy: keep
+      k8up.io/backup: "false"
+  grimmory-data:
+    forceRename: grimmory-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 10Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  grimmory-db-config:
+    forceRename: grimmory-db-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+  jellyfin-cache:
+    forceRename: jellyfin-cache
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 50Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      k8up.io/backup: "false"
+  jellyfin-config:
+    forceRename: jellyfin-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 30Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  prowlarr-config:
+    forceRename: prowlarr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  qbittorrent-config:
+    forceRename: qbittorrent-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  radarr-config:
+    forceRename: radarr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  seerr-config:
+    forceRename: seerr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+  sonarr-config:
+    forceRename: sonarr-config
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+
+configMaps:
+  gluetun-env:
+    forceRename: gluetun-env
+    data:
+      # the VPN firewall must let the pod and service networks through
+      FIREWALL_OUTBOUND_SUBNETS: "{{ .Values.k3s_cluster_cidr }},{{ .Values.k3s_service_cidr }}"
+  managerscript:
+    forceRename: managerscript
+    data:
+      filterscript.py: {{ readFile "managerscript/filterscript.py" | toYaml | indent 8 | trim }}
+      known_hosts: {{ readFile "managerscript/known_hosts.enc" | toYaml | indent 8 | trim }}
+
+secrets:
+  gluetun-vpn:
+    forceRename: gluetun-vpn
+    stringData:
+      WIREGUARD_PRIVATE_KEY: {{ $secrets.gluetun.WIREGUARD_PRIVATE_KEY | quote }}
+      WIREGUARD_PRESHARED_KEY: {{ $secrets.gluetun.WIREGUARD_PRESHARED_KEY | quote }}
+      WIREGUARD_ADDRESSES: {{ $secrets.gluetun.WIREGUARD_ADDRESSES | quote }}
+  grimmory-db:
+    forceRename: grimmory-db
+    stringData:
+      MYSQL_PASSWORD: {{ $secrets.grimmory.db_password | quote }}
+      MYSQL_ROOT_PASSWORD: {{ $secrets.grimmory.db_root_password | quote }}
+      DATABASE_PASSWORD: {{ $secrets.grimmory.db_password | quote }}
+  managerscript:
+    forceRename: managerscript
+    stringData:
+      QB_HOST: {{ $secrets.seedbox.qb_host | quote }}
+      QB_USER: {{ $secrets.seedbox.username | quote }}
+      QB_PASS: {{ $secrets.seedbox.qb_password | quote }}
+      SSH_HOST: {{ $secrets.seedbox.ssh_host | quote }}
+      SSH_USER: {{ $secrets.seedbox.username | quote }}
+      SSH_PASSWORD: {{ $secrets.seedbox.ssh_password | quote }}
+      DISCORD_WEBHOOK_URL: {{ $secrets.seedbox.discord_webhook_url | quote }}
+  unpackerr-arr:
+    forceRename: unpackerr-arr
+    stringData:
+      UN_SONARR_0_API_KEY: {{ $secrets.arr.sonarr_api_key | quote }}
+      UN_RADARR_0_API_KEY: {{ $secrets.arr.radarr_api_key | quote }}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  # the routed apps are their own releases, so select them by name
+  traefik:
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - autobrr
+            - bazarr
+            - grimmory
+            - jellyfin
+            - prowlarr
+            - qbittorrent
+            - radarr
+            - seerr-chart
+            - sonarr
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  autobrr-internal:
+    forceRename: autobrr-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $autobrr.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $autobrr.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: autobrr
+                port: 7474
+  bazarr-internal:
+    forceRename: bazarr-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $bazarr.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $bazarr.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: bazarr
+                port: 6767
+  grimmory-external:
+    forceRename: grimmory-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $grimmory.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $grimmory.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
+            services:
+              - name: grimmory
+                port: 6060
+  jellyfin-external:
+    forceRename: jellyfin-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $jellyfin.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $jellyfin.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: jellyfin
+                port: 8096
+  prowlarr-internal:
+    forceRename: prowlarr-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $prowlarr.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $prowlarr.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: prowlarr
+                port: 9696
+  qbittorrent-internal:
+    forceRename: qbittorrent-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $qbittorrent.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $qbittorrent.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: qbittorrent
+                port: 8080
+  radarr-internal:
+    forceRename: radarr-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $radarr.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $radarr.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: radarr
+                port: 7878
+  seerr-external:
+    forceRename: seerr-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $seerr.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $seerr.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: seerr
+                port: 80
+  sonarr-internal:
+    forceRename: sonarr-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $sonarr.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $sonarr.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: sonarr
+                port: 8989
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "media" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

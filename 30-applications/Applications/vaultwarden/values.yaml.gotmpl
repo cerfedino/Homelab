@@ -1,8 +1,154 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+controllers:
+  vaultwarden:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/db.sqlite3 .dump'
+        k8up.io/file-extension: .sql
+    containers:
+      sqlite:
+        image:
+          repository: keinos/sqlite3
+          tag: 3.53.4
+        command: ["sleep", "infinity"]
+        resources:
+          limits:
+            memory: 64Mi
+      app:
+        nameOverride: vaultwarden
+        image:
+          repository: vaultwarden/server
+          tag: 1.37.4
+        env:
+          - name: DOMAIN
+            value: https://{{ $app.external.dns_hostname }}
+          - name: IP_HEADER
+            value: X-Forwarded-For
+          - name: SIGNUPS_ALLOWED
+            value: "false"
+          # SSO logins from this domain create accounts
+          - name: SIGNUPS_DOMAINS_WHITELIST
+            value: {{ .Values.domain | quote }}
+          - name: SIGNUPS_VERIFY
+            value: "true"
+          - name: SMTP_HOST
+            value: {{ .Values.smtp.host | quote }}
+          - name: SMTP_PORT
+            value: {{ .Values.smtp.port | quote }}
+          - name: SMTP_SECURITY
+            value: {{ .Values.smtp.security | quote }}
+          - name: SMTP_USERNAME
+            value: {{ .Values.smtp.username | quote }}
+          - name: SMTP_FROM
+            value: {{ .Values.smtp.from | quote }}
+          - name: SMTP_FROM_NAME
+            value: Vaultwarden
+          - name: SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vaultwarden-smtp
+                key: password
+          - name: INVITATIONS_ALLOWED
+            value: "false"
+          # no ADMIN_TOKEN: the /admin panel stays disabled entirely
+          - name: SSO_ENABLED
+            value: "true"
+          - name: SSO_ONLY
+            value: "true"
+          - name: SSO_AUTHORITY
+            value: {{ $app.external.oidc.issuer | quote }}
+          - name: SSO_CLIENT_ID
+            value: {{ $app.external.oidc.client_id | quote }}
+          - name: SSO_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: vaultwarden-sso
+                key: client_secret
+          - name: SSO_SCOPES
+            value: "email profile offline_access"
+        ports:
+          - containerPort: 80
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /alive
+                port: 80
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    forceRename: vaultwarden
+    controller: vaultwarden
+    ports:
+      http:
+        port: 80
+
+secrets:
+  smtp:
+    forceRename: vaultwarden-smtp
+    stringData:
+      password: {{ .Values.smtp.password | quote }}
+  sso:
+    forceRename: vaultwarden-sso
+    stringData:
+      client_secret: {{ $app.external.oidc.client_secret | quote }}
+
+persistence:
+  data:
+    forceRename: vaultwarden-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    globalMounts:
+      - path: /data
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: vaultwarden
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: vaultwarden
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "vaultwarden" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

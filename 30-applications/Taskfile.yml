@@ -6,9 +6,6 @@ includes:
   ai:
     taskfile: Applications/ai
     dir: Applications/ai
-  app-registry:
-    taskfile: app-registry
-    dir: app-registry
   csi-proxmox:
     taskfile: csi-proxmox
     dir: csi-proxmox
@@ -36,9 +33,6 @@ includes:
   cilium:
     taskfile: cilium
     dir: cilium
-  cloudflare-tunnel:
-    taskfile: cloudflare-tunnel
-    dir: cloudflare-tunnel
   immich:
     taskfile: Applications/immich
     dir: Applications/immich
@@ -75,6 +69,9 @@ includes:
   vaultwarden:
     taskfile: Applications/vaultwarden
     dir: Applications/vaultwarden
+  whoami:
+    taskfile: Applications/whoami
+    dir: Applications/whoami
   windmill:
     taskfile: Applications/windmill
     dir: Applications/windmill
@@ -96,7 +93,6 @@ tasks:
       - authentik:apply
       - pihole:apply
       - backrest:apply
-      - cloudflare-tunnel:apply
       - immich:apply
       - kuma:apply
       - librechat:apply
@@ -109,8 +105,16 @@ tasks:
       - syncthing:apply
       - tandoor:apply
       - vaultwarden:apply
+      - whoami:apply
       - windmill:apply
       - woodpecker:apply
+
+  check:
+    desc: validate every app*.enc.yaml against the schema
+    dir: _lib/apps
+    cmds:
+      - tofu init -input=false
+      - tofu plan -input=false
 
   setup-helmfile-repos:
     run: once

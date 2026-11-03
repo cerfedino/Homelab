@@ -1,8 +1,17 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}
-{{- end }}
-{{- end }}
+networkpolicies:
+  namespace:
+    forceRename: namespace-ingress
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+
+secrets:
+  credentials:
+    forceRename: global-backup-credentials
+    stringData:
+      access-key: {{ .Values.backup.s3_access_key | quote }}
+      secret-key: {{ .Values.backup.s3_secret_key | quote }}
+      repo-password: {{ .Values.backup.restic_password | quote }}

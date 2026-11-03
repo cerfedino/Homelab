@@ -2,8 +2,6 @@ environments:
   default:
     values:
       - ../10-infra/generated/generated.infra.yaml
-      - app-registry/generated/generated.apps-summary.yaml
-      - app-registry/generated/generated.oidc.yaml
       - smtp.enc.yaml
 ---
 repositories:
@@ -13,8 +11,6 @@ repositories:
     url: https://traefik.github.io/charts
   - name: jetstack
     url: https://charts.jetstack.io
-  - name: bedag
-    url: https://bedag.github.io/helm-charts
   - name: authentik
     url: https://charts.goauthentik.io
   - name: nextcloud
@@ -42,8 +38,8 @@ releases:
 
   - name: cilium-extras
     namespace: kube-system
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     installed: true
     wait: false
     values:
@@ -61,8 +57,8 @@ releases:
   - name: csi-proxmox-extras
     namespace: csi-proxmox
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - csi-proxmox/extras.yaml.gotmpl
@@ -79,8 +75,8 @@ releases:
   - name: local-path-provisioner-extras
     namespace: local-path-provisioner
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - local-path-provisioner/extras.yaml.gotmpl
@@ -97,8 +93,8 @@ releases:
   - name: cert-manager-issuers
     namespace: cert-manager
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - cert-manager-issuers/values.yaml.gotmpl
@@ -116,8 +112,8 @@ releases:
   - name: kuma
     namespace: kuma
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - kuma/values.yaml.gotmpl
@@ -126,8 +122,8 @@ releases:
   - name: k8up-globals
     namespace: k8up
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - k8up/extras.yaml.gotmpl
@@ -144,8 +140,8 @@ releases:
   - name: backrest
     namespace: backrest
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - backrest/values.yaml.gotmpl
@@ -155,8 +151,8 @@ releases:
   - name: pihole
     namespace: pihole
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - pihole/values.yaml.gotmpl
@@ -169,22 +165,13 @@ releases:
     wait: true
     values:
       - authentik/values.yaml.gotmpl
-      - authentik/values.enc.yaml
-
-  - name: cloudflare-tunnel
-    namespace: cloudflare-tunnel
-    createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
-    wait: true
-    values:
-      - cloudflare-tunnel/values.yaml.gotmpl
+      - authentik/secrets.enc.yaml
 
   - name: immich-extras
     namespace: immich
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - Applications/immich/extras.yaml.gotmpl
@@ -201,8 +188,8 @@ releases:
   - name: vaultwarden
     namespace: vaultwarden
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/vaultwarden/values.yaml.gotmpl
@@ -210,8 +197,8 @@ releases:
   - name: windmill-extras
     namespace: windmill
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - Applications/windmill/extras.yaml.gotmpl
@@ -228,8 +215,8 @@ releases:
   - name: shortener
     namespace: shortener
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/shortener/values.yaml.gotmpl
@@ -237,8 +224,8 @@ releases:
   - name: psitransfer
     namespace: psitransfer
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/psitransfer/values.yaml.gotmpl
@@ -246,8 +233,8 @@ releases:
   - name: paperless
     namespace: paperless
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/paperless/values.yaml.gotmpl
@@ -255,8 +242,8 @@ releases:
   - name: tandoor
     namespace: tandoor
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/tandoor/values.yaml.gotmpl
@@ -264,8 +251,8 @@ releases:
   - name: sparkyfitness
     namespace: sparkyfitness
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/sparkyfitness/values.yaml.gotmpl
@@ -273,8 +260,8 @@ releases:
   - name: syncthing
     namespace: syncthing
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/syncthing/values.yaml.gotmpl
@@ -302,8 +289,8 @@ releases:
   - name: ai-extras
     namespace: ai
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - Applications/ai/extras.yaml.gotmpl
@@ -329,8 +316,8 @@ releases:
   - name: librechat
     namespace: librechat
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: true
     values:
       - Applications/ai/librechat/values.yaml.gotmpl
@@ -348,8 +335,8 @@ releases:
   - name: media-extras
     namespace: media
     createNamespace: true
-    chart: bedag/raw
-    version: "2.0.2"
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
     wait: false
     values:
       - Applications/media/values.yaml.gotmpl

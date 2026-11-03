@@ -12,21 +12,37 @@ spec:
     - from:
         - podSelector: {}
 
-    # lan-http and lan-https entrypoints: LAN clients, plus kuma's monitors of the internal hostnames
+    # lan-http and lan-https entrypoints: LAN clients, kuma's monitors, and pods that call apps by hostname (OIDC against authentik, nextcloud and collabora)
     - from:
         - ipBlock:
             cidr: {{ .Values.network_lan_cidr }}
+        #- namespaceSelector:
+        #    matchLabels:
+        #      kubernetes.io/metadata.name: kuma
         - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kuma
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - kuma
+                  - ai
+                  - immich
+                  - librechat
+                  - media
+                  - nextcloud
+                  - paperless
+                  - sparkyfitness
+                  - tandoor
+                  - vaultwarden
+                  - windmill
       ports:
         - port: 80
         - port: 443
 
     # For the clouflared entrypoint, only cloudflared can talk to it because we trust its CF headers for the real IP
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cloudflare-tunnel
-      ports:
-        - port: 8444
+    #- from:
+    #    - namespaceSelector:
+    #        matchLabels:
+    #          kubernetes.io/metadata.name: #cloudflare-tunnel
+    #  ports:
+    #    - port: 8444

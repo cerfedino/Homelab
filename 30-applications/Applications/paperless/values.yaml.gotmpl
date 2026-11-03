@@ -1,8 +1,159 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  paperless:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'sqlite3 /data/data/db.sqlite3 .dump'
+        k8up.io/file-extension: .sql
+    containers:
+      sqlite:
+        image:
+          repository: keinos/sqlite3
+          tag: 3.53.4
+        command: ["sleep", "infinity"]
+        resources:
+          limits:
+            memory: 64Mi
+      app:
+        image:
+          repository: ghcr.io/paperless-ngx/paperless-ngx
+          tag: 3.2.1
+        env:
+          - name: PAPERLESS_URL
+            value: https://{{ $app.external.dns_hostname }}
+          - name: PAPERLESS_REDIS
+            value: redis://paperless-redis:6379
+          - name: PAPERLESS_TIME_ZONE
+            value: Europe/Zurich
+          - name: PAPERLESS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: paperless-secrets
+                key: secret_key
+          - name: PAPERLESS_APPS
+            value: allauth.socialaccount.providers.openid_connect
+          - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+            valueFrom:
+              secretKeyRef:
+                name: paperless-secrets
+                key: socialaccount_providers
+          - name: PAPERLESS_SOCIALACCOUNT_AUTO_SIGNUP
+            value: "true"
+          # SSO-only: hide the local login form and go straight to authentik
+          - name: PAPERLESS_DISABLE_REGULAR_LOGIN
+            value: "true"
+          - name: PAPERLESS_REDIRECT_LOGIN_TO_SSO
+            value: "true"
+        ports:
+          - containerPort: 8000
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+              initialDelaySeconds: 20
+        resources:
+          limits:
+            memory: 2Gi
+  redis:
+    containers:
+      app:
+        image:
+          repository: redis
+          tag: 8.10.3-alpine
+        ports:
+          - containerPort: 6379
+        resources:
+          limits:
+            memory: 128Mi
+
+service:
+  app:
+    forceRename: paperless
+    controller: paperless
+    ports:
+      http:
+        port: 8000
+  redis:
+    forceRename: paperless-redis
+    controller: redis
+    ports:
+      redis:
+        port: 6379
+
+persistence:
+  data:
+    forceRename: paperless-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 20Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      paperless:
+        sqlite:
+          - path: /data
+        app:
+          - path: /usr/src/paperless/data
+            subPath: data
+          - path: /usr/src/paperless/media
+            subPath: media
+          - path: /usr/src/paperless/export
+            subPath: export
+          - path: /usr/src/paperless/consume
+            subPath: consume
+
+secrets:
+  secrets:
+    forceRename: paperless-secrets
+    stringData:
+      secret_key: {{ $secrets.paperless_secret_key | quote }}
+      socialaccount_providers: |
+        {"openid_connect": {"APPS": [{"provider_id": "authentik", "name": "Authentik", "client_id": {{ $app.external.oidc.client_id | quote }}, "secret": {{ $app.external.oidc.client_secret | quote }}, "settings": {"server_url": "{{ $app.external.oidc.issuer }}.well-known/openid-configuration"}}]}}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: paperless
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: paperless
+                port: 8000
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "paperless" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

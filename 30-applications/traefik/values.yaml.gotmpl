@@ -1,3 +1,4 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
 # Note to self: In order to have the actual LAN ip of a local client show up, I have to make sure that a traefik pod is guaranteed to run on the same node that is reached through the LAN kube-VIP, because otherwise kube-proxy would rewrite the source IP when forwarding the traffic to a node that has a traefik pod running. That's why we make Traefik a DaemonSet.
 
 service:
@@ -89,9 +90,9 @@ ingressRoute:
     enabled: true
     entryPoints:
       - lan-https
-    matchRule: Host(`{{ .Values.apps.traefik.internal.dns_hostname }}`)
+    matchRule: Host(`{{ $app.internal.dns_hostname }}`)
     middlewares:
-{{- if eq .Values.apps.traefik.internal.type "forward-auth" }}
+{{- if eq $app.internal.type "forward-auth" }}
       - name: authentik-forward-auth-local@file
 {{- end }}
 

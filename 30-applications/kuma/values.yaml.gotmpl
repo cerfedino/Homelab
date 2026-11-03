@@ -1,8 +1,121 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $api := readFile "app-kuma-api.enc.yaml" | fromYaml }}
+controllers:
+  uptime-kuma:
+    forceRename: uptime-kuma
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'mariadb-dump --single-transaction --socket=/app/data/run/mariadb.sock kuma'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        image:
+          repository: louislam/uptime-kuma
+          tag: 2.5.6
+        ports:
+          - containerPort: 3001
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 3001
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 2Gi
+
+service:
+  app:
+    forceRename: uptime-kuma
+    controller: uptime-kuma
+    ports:
+      http:
+        port: 3001
+
+persistence:
+  data:
+    forceRename: uptime-kuma-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    globalMounts:
+      - path: /app/data
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: uptime-kuma
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  internal:
+    forceRename: uptime-kuma-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: uptime-kuma
+                port: 3001
+  external:
+    forceRename: uptime-kuma-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
+            services:
+              - name: uptime-kuma
+                port: 3001
+  api:
+    forceRename: uptime-kuma-api
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $api.internal.dns_hostname }}`)
+            kind: Rule
+            services:
+              - name: uptime-kuma
+                port: 3001
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../_lib/schedule.yaml.gotmpl") (dict "bucket" "kuma" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}
