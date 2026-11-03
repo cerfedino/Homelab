@@ -3,8 +3,7 @@ ansible-navigator:
   ansible:
     inventory:
       entries:
-        - ../10-infra/generated/generated.inventory.yaml
-        - inventory-anchor.yaml
+        - inventory.yaml
     config:
       path: ansible.cfg
   execution-environment:
