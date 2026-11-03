@@ -10,4 +10,5 @@ tasks:
     deps: [":setup-helmfile-repos"]
     cmds:
       - cd .. && helmfile apply --skip-refresh -l name=cert-manager
+      - cd .. && helmfile apply --skip-refresh -l name=cert-manager-extras
       - cd .. && helmfile apply --skip-refresh -l name=cert-manager-issuers

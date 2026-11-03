@@ -81,6 +81,15 @@ releases:
     values:
       - local-path-provisioner/extras.yaml.gotmpl
 
+  - name: cert-manager-extras
+    namespace: cert-manager
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: false
+    values:
+      - cert-manager/extras.yaml.gotmpl
+
   - name: cert-manager
     namespace: cert-manager
     createNamespace: true
@@ -98,6 +107,15 @@ releases:
     wait: true
     values:
       - cert-manager-issuers/values.yaml.gotmpl
+
+  - name: traefik-extras
+    namespace: traefik
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: false
+    values:
+      - traefik/extras.yaml.gotmpl
 
   - name: traefik
     namespace: traefik
@@ -156,6 +174,15 @@ releases:
     wait: true
     values:
       - pihole/values.yaml.gotmpl
+
+  - name: authentik-extras
+    namespace: authentik
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: false
+    values:
+      - authentik/extras.yaml.gotmpl
 
   - name: authentik
     namespace: authentik
@@ -266,6 +293,15 @@ releases:
     values:
       - Applications/syncthing/values.yaml.gotmpl
 
+  - name: woodpecker-extras
+    namespace: woodpecker
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: false
+    values:
+      - Applications/woodpecker/extras.yaml.gotmpl
+
   - name: woodpecker
     namespace: woodpecker
     createNamespace: true
@@ -274,6 +310,15 @@ releases:
     wait: true
     values:
       - Applications/woodpecker/values.yaml.gotmpl
+
+  - name: nextcloud-extras
+    namespace: nextcloud
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: false
+    values:
+      - Applications/nextcloud/extras.yaml.gotmpl
 
   - name: nextcloud
     namespace: nextcloud
@@ -284,6 +329,15 @@ releases:
     timeout: 600
     values:
       - Applications/nextcloud/values.yaml.gotmpl
+
+  - name: whoami
+    namespace: whoami
+    createNamespace: true
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: "5.2.1"
+    wait: true
+    values:
+      - Applications/whoami/values.yaml.gotmpl
 
     # AI
   - name: ai-extras

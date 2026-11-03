@@ -1,0 +1,431 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  postgres:
+    forceRename: nextcloud-postgres
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        nameOverride: postgres
+        image:
+          repository: postgres
+          tag: "18.6"
+        env:
+          # subdirectory: initdb refuses the mount point itself (lost+found)
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: oc_nextcloud
+          - name: POSTGRES_DB
+            value: nextcloud_database
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-postgres
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "oc_nextcloud", "-d", "nextcloud_database"]
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 1Gi
+
+  redis:
+    forceRename: nextcloud-redis
+    containers:
+      app:
+        nameOverride: redis
+        image:
+          repository: redis
+          tag: 8.10.3-alpine
+        ports:
+          - containerPort: 6379
+        resources:
+          limits:
+            memory: 256Mi
+
+  clamav:
+    forceRename: nextcloud-clamav
+    containers:
+      app:
+        nameOverride: clamav
+        image:
+          repository: clamav/clamav
+          tag: 1.4.5-debian13-slim
+        ports:
+          - containerPort: 3310
+        probes:
+          startup:
+            # first start downloads signatures before clamd listens
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 3310
+              periodSeconds: 10
+              failureThreshold: 60
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 3310
+              periodSeconds: 15
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 3310
+              periodSeconds: 30
+              failureThreshold: 4
+        resources:
+          requests:
+            memory: 1Gi
+          limits:
+            memory: 3Gi
+
+  elasticsearch:
+    forceRename: nextcloud-elasticsearch
+    pod:
+      securityContext:
+        fsGroup: 1000
+    containers:
+      app:
+        nameOverride: elasticsearch
+        image:
+          repository: elasticsearch
+          tag: 9.5.3
+        env:
+          - name: discovery.type
+            value: single-node
+          # in-cluster only, reachable through the ClusterIP alone
+          - name: xpack.security.enabled
+            value: "false"
+          - name: ES_JAVA_OPTS
+            value: -Xms512m -Xmx512m
+        ports:
+          - containerPort: 9200
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /_cluster/health
+                port: 9200
+              initialDelaySeconds: 30
+              periodSeconds: 15
+        resources:
+          requests:
+            memory: 1Gi
+          limits:
+            memory: 1536Mi
+
+  whiteboard:
+    forceRename: nextcloud-whiteboard
+    containers:
+      app:
+        nameOverride: whiteboard
+        image:
+          repository: ghcr.io/nextcloud-releases/whiteboard
+          tag: v2.0.0-beta.1
+        env:
+          - name: NEXTCLOUD_URL
+            value: https://{{ $app.external.dns_hostname }}
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-whiteboard
+                key: jwt_secret
+        ports:
+          - containerPort: 3002
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  postgres:
+    forceRename: nextcloud-postgres
+    controller: postgres
+    ports:
+      postgres:
+        port: 5432
+  redis:
+    forceRename: nextcloud-redis
+    controller: redis
+    ports:
+      redis:
+        port: 6379
+  clamav:
+    forceRename: nextcloud-clamav
+    controller: clamav
+    ports:
+      clamav:
+        port: 3310
+  elasticsearch:
+    forceRename: nextcloud-elasticsearch
+    controller: elasticsearch
+    ports:
+      http:
+        port: 9200
+  whiteboard:
+    forceRename: nextcloud-whiteboard
+    controller: whiteboard
+    ports:
+      http:
+        port: 3002
+
+secrets:
+  postgres:
+    forceRename: nextcloud-postgres
+    stringData:
+      password: {{ $secrets.nextcloud_postgres_password | quote }}
+  whiteboard:
+    forceRename: nextcloud-whiteboard
+    stringData:
+      jwt_secret: {{ $secrets.whiteboard_jwt_secret | quote }}
+  oidc:
+    forceRename: nextcloud-oidc
+    stringData:
+      client_id: {{ $app.external.oidc.client_id | quote }}
+      client_secret: {{ $app.external.oidc.client_secret | quote }}
+      discovery_uri: "{{ $app.external.oidc.issuer }}.well-known/openid-configuration"
+
+persistence:
+  postgres-data:
+    forceRename: nextcloud-postgres-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 10Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+  clamav-db:
+    forceRename: nextcloud-clamav-db
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 2Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # signature database, redownloadable
+      k8up.io/backup: "false"
+    advancedMounts:
+      clamav:
+        app:
+          # signature database survives restarts, ~300MB redownload otherwise
+          - path: /var/lib/clamav
+  elasticsearch-data:
+    forceRename: nextcloud-elasticsearch-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # search index, rebuildable with occ fulltextsearch:index
+      k8up.io/backup: "false"
+    advancedMounts:
+      elasticsearch:
+        app:
+          - path: /usr/share/elasticsearch/data
+
+networkpolicies:
+  namespace:
+    forceRename: namespace-ingress
+    # Anything other than the server can receive from anywhere in the namespace
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/component
+          operator: NotIn
+          values:
+            - app
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    forceRename: traefik-ingress
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - collabora
+            - nextcloud-whiteboard
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+  traefik-nextcloud:
+    forceRename: traefik-ingress-nextcloud
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - nextcloud
+        - key: app.kubernetes.io/component
+          operator: In
+          values:
+            - app
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        # Only traefik can talk to the HTTP ports, because we trust its IP as a trusted proxy
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+          ports:
+            - port: 80
+            - port: 7867
+        # notify-push sidecar reaches nextcloud through the Service, which hairpins to this pod
+        - from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/component: app
+          ports:
+            - port: 80
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: ai
+              podSelector:
+                matchLabels:
+                  app: nextcloud-mcp
+          ports:
+            - port: 80
+
+rawResources:
+  # claimed by the nextcloud chart release (persistence.existingClaim)
+  data:
+    forceRename: nextcloud-data
+    manifest:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          helm.sh/resource-policy: keep
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: proxmox-data-zfs
+        resources:
+          requests:
+            storage: 250Gi
+  # notify_push sidecar inside the chart's nextcloud pod
+  push:
+    forceRename: nextcloud-push
+    manifest:
+      apiVersion: v1
+      kind: Service
+      spec:
+        selector:
+          app.kubernetes.io/name: nextcloud
+          app.kubernetes.io/component: app
+        ports:
+          - port: 7867
+            targetPort: 7867
+  hsts:
+    forceRename: nextcloud-hsts
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      spec:
+        headers:
+          stsSeconds: 15552000
+          stsIncludeSubdomains: false
+  push-stripprefix:
+    forceRename: push-stripprefix
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      spec:
+        stripPrefix:
+          prefixes:
+            - /push
+  whiteboard-stripprefix:
+    forceRename: whiteboard-stripprefix
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      spec:
+        stripPrefix:
+          prefixes:
+            - /whiteboard
+  external:
+    forceRename: nextcloud-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+            priority: 10
+            middlewares:
+              - name: nextcloud-hsts
+{{- if eq $app.external.type "forward-auth" }}
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: nextcloud
+                port: 8080
+          # Collabora is under the same hostname
+          - match: Host(`{{ $app.external.dns_hostname }}`) && (PathPrefix(`/browser`) || PathPrefix(`/hosting/discovery`) || PathPrefix(`/hosting/capabilities`) || PathPrefix(`/cool`))
+            kind: Rule
+            priority: 20
+            services:
+              - name: nextcloud-collabora
+                port: 9980
+          # notify_push sidecar
+          - match: Host(`{{ $app.external.dns_hostname }}`) && PathPrefix(`/push`)
+            kind: Rule
+            priority: 20
+            services:
+              - name: nextcloud-push
+                port: 7867
+            middlewares:
+              - name: push-stripprefix
+          # Also whiteboard
+          - match: Host(`{{ $app.external.dns_hostname }}`) && PathPrefix(`/whiteboard`)
+            kind: Rule
+            priority: 20
+            services:
+              - name: nextcloud-whiteboard
+                port: 3002
+            middlewares:
+              - name: whiteboard-stripprefix
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "nextcloud" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

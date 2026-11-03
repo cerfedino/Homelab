@@ -1,2 +1,0 @@
-{{- $app := readFile "app.enc.yaml" | fromYaml }}
-{{ tpl (readFile "../_lib/route.yaml.gotmpl") (dict "name" "authentik-server" "app" $app "service" "authentik-server" "port" 80 "Values" .Values) }}

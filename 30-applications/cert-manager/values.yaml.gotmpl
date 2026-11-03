@@ -1,8 +1,2 @@
 crds:
   enabled: true
-
-extraObjects:
-{{- range tuple "extras/cloudflare-dns-token.yaml.k3ssecret.enc" }}
-  - |
-{{ tpl (readFile .) $ | nindent 4 }}
-{{- end }}

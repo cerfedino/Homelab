@@ -37,12 +37,3 @@ agent:
       memory: 64Mi
     limits:
       memory: "256Mi"
-
-additionalObjects:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}
-{{- end }}
-{{- end }}

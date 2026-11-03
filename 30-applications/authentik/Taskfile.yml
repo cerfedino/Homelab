@@ -14,6 +14,7 @@ tasks:
 
   helmfile-apply:
     cmds:
+      - cd .. && helmfile apply --skip-refresh -l name=authentik-extras
       - cd .. && helmfile apply --skip-refresh -l name=authentik
 
   tofu-apply:
