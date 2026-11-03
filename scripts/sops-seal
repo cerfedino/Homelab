@@ -20,7 +20,7 @@ if [ "$#" -gt 0 ]; then
 else
   cd "$(dirname "$0")/.."
   mapfile -t files < <(find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
-      -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*')
+      -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' -not -path '*/__pycache__/*')
 fi
 
 [ "${#files[@]}" -gt 0 ] || exit 0
