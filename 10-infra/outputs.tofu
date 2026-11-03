@@ -42,6 +42,11 @@ locals {
         ip_lan                       = local.machines[n].ip_lan
         ip_internal                  = local.machines[n].ip_internal
     } },
+    { for k, v in var.external_hosts : k => {
+        ansible_host                 = v.address
+        ansible_user                 = v.ansible_user
+        ansible_ssh_private_key_file = "${var.REPO_ROOT}/${v.ssh_private_key_path}"
+    } },
   )
 }
 
@@ -74,6 +79,9 @@ output "ansible_yaml_inventory" {
         }
         pve = {
           hosts = { for n in toset([for _, v in var.vms : v.node_name]) : n => null }
+        }
+        external = {
+          hosts = { for k, _ in var.external_hosts : k => null }
         }
       }
       vars = {

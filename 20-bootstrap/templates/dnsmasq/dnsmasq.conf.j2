@@ -1,4 +1,4 @@
-listen-address=127.0.0.1,{{ ip_internal }}
+listen-address=127.0.0.1{{ ',' ~ ip_internal if ip_internal is defined else '' }}
 bind-interfaces
 no-resolv
 {% for entry in dnsmasq_address_entries %}
