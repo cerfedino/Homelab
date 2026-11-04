@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec devbox run --quiet --recompute=false -- pre-commit run --hook-stage pre-commit
