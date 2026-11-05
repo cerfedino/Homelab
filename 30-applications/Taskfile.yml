@@ -69,6 +69,9 @@ includes:
   vaultwarden:
     taskfile: Applications/vaultwarden
     dir: Applications/vaultwarden
+  vps:
+    taskfile: vps
+    dir: vps
   whoami:
     taskfile: Applications/whoami
     dir: Applications/whoami
@@ -105,6 +108,7 @@ tasks:
       - syncthing:apply
       - tandoor:apply
       - vaultwarden:apply
+      - vps:apply
       - whoami:apply
       - windmill:apply
       - woodpecker:apply

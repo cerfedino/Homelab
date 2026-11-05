@@ -1,0 +1,38 @@
+---
+- name: Roll out the compose stacks
+  hosts: vps1
+  become: true
+  tasks:
+    - name: Find the stacks, every folder next to this playbook holding a compose.yaml
+      ansible.builtin.find:
+        paths: "{{ playbook_dir }}"
+        patterns: compose.yaml
+        recurse: true
+        depth: 2
+      delegate_to: localhost
+      become: false
+      run_once: true
+      register: _compose_files
+
+    - name: Create the stacks directory
+      ansible.builtin.file:
+        path: /opt/stacks
+        state: directory
+        mode: "0700"
+
+    - name: Copy the stacks
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/{{ item }}/"
+        dest: "/opt/stacks/{{ item }}/"
+      loop: "{{ _compose_files.files | map(attribute='path') | map('dirname') | map('basename') | sort }}"
+      register: _copied
+
+    # compose only recreates on a changed service definition, not on a changed mounted file
+    - name: Bring the stacks up
+      community.docker.docker_compose_v2:
+        project_src: "/opt/stacks/{{ item.item }}"
+        remove_orphans: true
+        recreate: "{{ 'always' if item.changed else 'auto' }}"
+      loop: "{{ _copied.results }}"
+      loop_control:
+        label: "{{ item.item }}"

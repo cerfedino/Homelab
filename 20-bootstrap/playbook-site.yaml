@@ -15,3 +15,6 @@
 
 # Deploy the Tailscale exit node
 - import_playbook: playbook-tailscale.yaml
+
+# Install Docker on the VPS
+- import_playbook: playbook-docker.yaml
