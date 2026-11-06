@@ -1,0 +1,51 @@
+---
+# One WireGuard network. network.key is the interface name
+- name: "Join {{ network.key }}"
+  when: inventory_hostname in network.value.peers
+  block:
+    - name: "Generate the private key ({{ network.key }})"
+      ansible.builtin.shell:
+        cmd: umask 077 && wg genkey > /etc/wireguard/{{ network.key }}.key
+        creates: /etc/wireguard/{{ network.key }}.key
+      register: _wireguard_key
+
+    - name: "Read the public key ({{ network.key }})"
+      ansible.builtin.shell:
+        cmd: wg pubkey < /etc/wireguard/{{ network.key }}.key
+      register: _wireguard_public_key
+      changed_when: false
+      check_mode: false
+
+    - name: "Remember the public key ({{ network.key }})"
+      ansible.builtin.set_fact:
+        _wireguard_public_keys: "{{ _wireguard_public_keys | default({}) | combine({network.key: _wireguard_public_key.stdout}) }}"
+
+    - name: "Write the interface config ({{ network.key }})"
+      ansible.builtin.template:
+        src: templates/wireguard/interface.conf.j2
+        dest: /etc/wireguard/{{ network.key }}.conf
+        owner: root
+        group: root
+        mode: "0600"
+      register: _wireguard_conf
+
+    - name: "Bring the hub up, now and at boot ({{ network.key }})"
+      ansible.builtin.systemd_service:
+        name: wg-quick@{{ network.key }}
+        enabled: true
+        state: "{{ 'restarted' if _wireguard_key.changed or _wireguard_conf.changed else 'started' }}"
+      when: inventory_hostname == network.value.hub
+      register: _wireguard_hub
+
+    - name: "Remember whether the hub restarted ({{ network.key }})"
+      ansible.builtin.set_fact:
+        _wireguard_hub_restarted: "{{ _wireguard_hub_restarted | default({}) | combine({network.key: _wireguard_hub.changed}) }}"
+      when: inventory_hostname == network.value.hub
+
+    # A restarted hub forgets its peers, and an idle peer takes about two minutes to notice
+    - name: "Bring the peers up, now and at boot ({{ network.key }})"
+      ansible.builtin.systemd_service:
+        name: wg-quick@{{ network.key }}
+        enabled: true
+        state: "{{ 'restarted' if _wireguard_key.changed or _wireguard_conf.changed or hostvars[network.value.hub]._wireguard_hub_restarted[network.key] else 'started' }}"
+      when: inventory_hostname != network.value.hub

@@ -22,8 +22,10 @@ table inet homelab {
     # SSH, only on the main LAN interface
     iifname "{{ ansible_facts.default_ipv4.interface }}" tcp dport 22 accept
 
-    # WireGuard backbone
-    udp dport {{ wireguard_backbone.port }} accept
+    # Allow WireGuard server ports
+{% for name, network in wireguard.items() if network.hub == inventory_hostname %}
+    udp dport {{ network.port }} accept
+{% endfor %}
   }
 }
 

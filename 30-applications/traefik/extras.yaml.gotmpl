@@ -101,6 +101,12 @@ networkpolicies:
           ports:
             - port: 80
             - port: 443
+        # public entrypoint is just the VPS, over the apps WireGuard network
+        - from:
+            - ipBlock:
+                cidr: {{ index .Values.wireguard.apps.peers .Values.wireguard.apps.hub }}/32
+          ports:
+            - port: 8444
 
 rawResources:
   # wildcard certificates for the homelab

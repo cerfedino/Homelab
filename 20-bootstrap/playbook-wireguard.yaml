@@ -1,0 +1,44 @@
+---
+- name: Join the WireGuard networks
+  hosts: wireguard
+  become: true
+  tasks:
+    - name: Install the WireGuard tools
+      ansible.builtin.apt:
+        name: wireguard-tools
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Create the service override folder
+      ansible.builtin.file:
+        path: /etc/systemd/system/wg-quick@.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # The firewall is the only thing limiting what a network may reach, so without it the interfaces stay down
+    - name: Make the interfaces depend on the firewall
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/wg-quick@.service.d/override.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Unit]
+          Requires=nftables.service
+          After=nftables.service
+      register: _wireguard_override
+
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+      when: _wireguard_override.changed
+
+    - name: Set up each network
+      ansible.builtin.include_tasks: tasks/wireguard.yaml
+      loop: "{{ wireguard | dict2items }}"
+      loop_control:
+        loop_var: network
+        label: "{{ network.key }}"

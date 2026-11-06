@@ -83,8 +83,8 @@ output "ansible_yaml_inventory" {
         external = {
           hosts = { for k, _ in var.external_hosts : k => null }
         }
-        backbone = {
-          hosts = { for k, _ in var.wireguard_backbone.peers : k => null }
+        wireguard = {
+          hosts = { for k in distinct(flatten([for _, n in var.wireguard : keys(n.peers)])) : k => null }
         }
       }
       vars = {
@@ -100,14 +100,15 @@ output "ansible_yaml_inventory" {
           bridge  = var.network_internal.bridge
           gateway = var.network_internal.gateway
         }
-        wireguard_backbone = var.wireguard_backbone
+        wireguard               = var.wireguard
+        traefik_public_nodeport = var.traefik_public_nodeport
       }
     }
   })
 
   precondition {
-    condition     = alltrue([for k, _ in var.wireguard_backbone.peers : contains(keys(local.ansible_hosts), k)])
-    error_message = "wireguard_backbone.peers must be hosts Ansible can reach (vms, PVE hosts or external_hosts)."
+    condition     = alltrue(flatten([for _, n in var.wireguard : [for k, _ in n.peers : contains(keys(local.ansible_hosts), k)]]))
+    error_message = "wireguard peers must be hosts Ansible can reach (vms, PVE hosts or external_hosts)."
   }
 
 
@@ -160,6 +161,8 @@ output "helmfile_values" {
   value = yamlencode({
     kube_vip_svc_address = var.kube_vip_svc_address
     pihole_svc_address   = var.pihole_svc_address
+    wireguard               = var.wireguard
+    traefik_public_nodeport = var.traefik_public_nodeport
     dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
     dnsmasq_address_entries  = local.dnsmasq_all_entries
     machines             = local.machines
