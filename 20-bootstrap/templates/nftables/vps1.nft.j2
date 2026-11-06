@@ -1,0 +1,43 @@
+table inet homelab
+delete table inet homelab
+
+table inet homelab {
+  chain input {
+    type filter hook input priority filter; policy drop;
+
+    # Replies to connections this machine opened
+    ct state established,related accept
+
+    # The machine talking to itself
+    iifname "lo" accept
+
+    # Ping
+    icmp type echo-request accept
+    icmpv6 type echo-request accept
+
+    # IPv6 shit
+    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert, mld-listener-query } accept
+    ip6 saddr fe80::/10 udp dport 546 accept
+
+    # SSH, only on the main LAN interface
+    iifname "{{ ansible_facts.default_ipv4.interface }}" tcp dport 22 accept
+
+    # WireGuard backbone
+    udp dport {{ wireguard_backbone.port }} accept
+  }
+}
+
+# Exceptions to Docker's default of dropping all forwarded traffic
+# DOCKER-USER is Docker's chain for it
+table ip filter {
+  chain DOCKER-USER {
+  }
+}
+flush chain ip filter DOCKER-USER
+
+table ip filter {
+  chain DOCKER-USER {
+    # Lets backbone peers reach each other through this host
+    iifname "backbone" oifname "backbone" accept
+  }
+}

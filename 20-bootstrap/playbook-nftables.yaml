@@ -1,0 +1,57 @@
+---
+- name: Configure nftables
+  hosts: k3s_cluster:tailscale_gw:generic_vms:vps1
+  become: true
+  tasks:
+    - name: Install nftables
+      ansible.builtin.apt:
+        name: nftables
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    # One file per kind of machine, named after the host or one of its groups
+    - name: Write the rules
+      ansible.builtin.template:
+        src: "{{ lookup('ansible.builtin.first_found', files=([inventory_hostname] + group_names) | map('regex_replace', '$', '.nft.j2'), paths=[playbook_dir ~ '/templates/nftables']) }}"
+        dest: /etc/nftables.conf
+        owner: root
+        group: root
+        mode: "0644"
+        validate: nft -c -f %s
+      notify: Reload nftables
+
+    - name: Create the service override folder
+      ansible.builtin.file:
+        path: /etc/systemd/system/nftables.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # The stock service flushes the whole ruleset on stop, other tools' tables included
+    - name: Make stopping the service remove only our table
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/nftables.service.d/override.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          ExecStop=
+          ExecStop=-/usr/sbin/nft delete table inet homelab
+      register: _nftables_override
+
+    - name: Load the rules at boot
+      ansible.builtin.systemd_service:
+        name: nftables
+        enabled: true
+        state: started
+        daemon_reload: "{{ _nftables_override.changed }}"
+
+  handlers:
+    # Reload only
+    - name: Reload nftables
+      ansible.builtin.systemd_service:
+        name: nftables
+        state: reloaded

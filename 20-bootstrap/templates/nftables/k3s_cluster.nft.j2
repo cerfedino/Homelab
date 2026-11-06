@@ -1,0 +1,26 @@
+table inet homelab
+delete table inet homelab
+
+table inet homelab {
+  chain ssh {
+    type filter hook input priority filter; policy accept;
+
+    # SSH, only on the main interface
+    tcp dport 22 iifname "{{ ansible_facts.default_ipv4.interface }}" accept
+    tcp dport 22 drop
+  }
+
+  # Prerouting for Wireguard
+  chain backbone {
+    type filter hook prerouting priority mangle; policy accept;
+
+    # Allows replies over the backbone to reach the peer
+    iifname "backbone" ct state established,related accept
+
+    # Allows other peers to ping this one
+    iifname "backbone" icmp type echo-request accept
+
+    # Doesn't allow anyone to initiate any other connection to the peer over the backbone
+    iifname "backbone" drop
+  }
+}
