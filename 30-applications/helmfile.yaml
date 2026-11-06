@@ -399,7 +399,7 @@ releases:
     namespace: media
     createNamespace: true
     chart: jellyfin/jellyfin
-    version: "3.2.0"
+    version: "3.6.0"
     wait: true
     values:
       - Applications/media/values-jellyfin.yaml
