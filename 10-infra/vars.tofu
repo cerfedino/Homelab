@@ -293,6 +293,45 @@ variable "external_hosts" {
   }
 }
 
+# WireGuard backbone
+variable "wireguard_backbone" {
+  type = object({
+    cidr  = string
+    port  = number      # UDP port the hub listens on
+    hub   = string      # name of the peer the others dial
+    peers = map(string) # host name => its backbone address
+  })
+
+  validation {
+    condition     = can(cidrhost(var.wireguard_backbone.cidr, 0))
+    error_message = "wireguard_backbone.cidr must be valid CIDR notation"
+  }
+
+  validation {
+    condition     = var.wireguard_backbone.port > 0 && var.wireguard_backbone.port < 65536
+    error_message = "wireguard_backbone.port must be a UDP port."
+  }
+
+  validation {
+    condition     = contains(keys(var.wireguard_backbone.peers), var.wireguard_backbone.hub)
+    error_message = "wireguard_backbone.hub must be one of wireguard_backbone.peers."
+  }
+
+  validation {
+    condition = alltrue([
+      for _, address in var.wireguard_backbone.peers :
+      can(cidrhost("${address}/${split("/", var.wireguard_backbone.cidr)[1]}", 0)) &&
+      try(cidrhost("${address}/${split("/", var.wireguard_backbone.cidr)[1]}", 0), "") == cidrhost(var.wireguard_backbone.cidr, 0)
+    ])
+    error_message = "wireguard_backbone.peers addresses must be inside wireguard_backbone.cidr."
+  }
+
+  validation {
+    condition     = length(distinct(values(var.wireguard_backbone.peers))) == length(var.wireguard_backbone.peers)
+    error_message = "wireguard_backbone.peers addresses must be unique."
+  }
+}
+
 # k3s pod and service networks (its cluster-cidr and service-cidr)
 variable "k3s_cluster_cidr" {
   type = string

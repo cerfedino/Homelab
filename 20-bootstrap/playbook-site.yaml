@@ -18,3 +18,9 @@
 
 # Install Docker on the VPS
 - import_playbook: playbook-docker.yaml
+
+# Load the firewall rules
+- import_playbook: playbook-nftables.yaml
+
+# Connect the VPS and the nodes over the WireGuard backbone
+- import_playbook: playbook-backbone.yaml

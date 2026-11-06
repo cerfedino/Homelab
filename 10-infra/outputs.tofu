@@ -83,6 +83,9 @@ output "ansible_yaml_inventory" {
         external = {
           hosts = { for k, _ in var.external_hosts : k => null }
         }
+        backbone = {
+          hosts = { for k, _ in var.wireguard_backbone.peers : k => null }
+        }
       }
       vars = {
         dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
@@ -97,9 +100,15 @@ output "ansible_yaml_inventory" {
           bridge  = var.network_internal.bridge
           gateway = var.network_internal.gateway
         }
+        wireguard_backbone = var.wireguard_backbone
       }
     }
   })
+
+  precondition {
+    condition     = alltrue([for k, _ in var.wireguard_backbone.peers : contains(keys(local.ansible_hosts), k)])
+    error_message = "wireguard_backbone.peers must be hosts Ansible can reach (vms, PVE hosts or external_hosts)."
+  }
 
 
   # The VIPs must live on the LAN subnet (so ARP works) ...
