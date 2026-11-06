@@ -23,4 +23,18 @@ table inet homelab {
     # Doesn't allow anyone to initiate any other connection to the peer over the backbone
     iifname "backbone" drop
   }
+
+  # Public apps can reach the Traefik public endpoint only over the apps WireGuard network
+  chain apps {
+    type filter hook prerouting priority mangle; policy accept;
+
+    # Allows replies to reach the node
+    iifname "apps" ct state established,related accept
+
+    # Allows the VPS to open connections to Traefik's public entrypoint
+    iifname "apps" ip saddr {{ wireguard.apps.peers[wireguard.apps.hub] }} tcp dport {{ traefik_public_nodeport }} accept
+
+    # Doesn't allow anything else in over this network
+    iifname "apps" drop
+  }
 }

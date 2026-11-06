@@ -1,0 +1,26 @@
+
+[Interface]
+Address = {{ network.value.peers[inventory_hostname] }}/{{ network.value.cidr.split('/')[1] }}
+PostUp = wg set %i private-key /etc/wireguard/%i.key
+{% if inventory_hostname == network.value.hub %}
+ListenPort = {{ network.value.port }}
+
+
+{% for name, address in network.value.peers.items() if name != network.value.hub %}
+# {{ name }}
+[Peer]
+PublicKey = {{ hostvars[name]._wireguard_public_keys[network.key] }}
+AllowedIPs = {{ address }}/32
+{% endfor %}
+
+
+{% else %}
+
+# {{ network.value.hub }}
+[Peer]
+PublicKey = {{ hostvars[network.value.hub]._wireguard_public_keys[network.key] }}
+Endpoint = {{ hostvars[network.value.hub].ansible_host }}:{{ network.value.port }}
+# Every peer is reachable through the server, each peer filters what it accepts
+AllowedIPs = {{ network.value.cidr }}
+PersistentKeepalive = 25
+{% endif %}

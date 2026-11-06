@@ -9,8 +9,11 @@ service:
     # prettier-ignore
     kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
   additionalServices:
-    cloudflared:
-      type: ClusterIP
+    # Answers on every node, reached only by the VPS over the apps WireGuard network
+    public:
+      spec:
+        type: NodePort
+        externalTrafficPolicy: Local
 
 deployment:
   kind: DaemonSet
@@ -69,18 +72,20 @@ ports:
     transport:
       respondingTimeouts:
         readTimeout: 0
-  cloudflared:
+  # Public entrypoint is only reachable by the VPS over the apps WireGuard network
+  public:
     port: 8444
+    nodePort: {{ .Values.traefik_public_nodeport }}
     expose:
       default: false
-      cloudflared: true
+      public: true
     http:
       tls:
         enabled: true
-    forwardedHeaders:
-      # trust any pod is fine because we are restricting it to just cloudflared with the traefik NetworkPolicy
+    # The VPS proxy passes the visitor's address
+    proxyProtocol:
       trustedIPs:
-        - {{ .Values.k3s_cluster_cidr }}
+        - {{ index .Values.wireguard.apps.peers .Values.wireguard.apps.hub }}
     transport:
       respondingTimeouts:
         readTimeout: 0

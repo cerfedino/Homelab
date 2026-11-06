@@ -14,6 +14,16 @@
       run_once: true
       register: _compose_files
 
+    - name: Find the templates in the stacks, every file ending in .j2
+      ansible.builtin.find:
+        paths: "{{ playbook_dir }}"
+        patterns: "*.j2"
+        recurse: true
+      delegate_to: localhost
+      become: false
+      run_once: true
+      register: _template_files
+
     - name: Create the stacks directory
       ansible.builtin.file:
         path: /opt/stacks
@@ -27,12 +37,22 @@
       loop: "{{ _compose_files.files | map(attribute='path') | map('dirname') | map('basename') | sort }}"
       register: _copied
 
+    - name: Render the templates next to their source, without the .j2
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "/opt/stacks/{{ item | relpath(playbook_dir) | regex_replace('\\.j2$', '') }}"
+        mode: "0644"
+      loop: "{{ _template_files.files | map(attribute='path') | sort }}"
+      loop_control:
+        label: "{{ item | relpath(playbook_dir) }}"
+      register: _rendered
+
     # compose only recreates on a changed service definition, not on a changed mounted file
     - name: Bring the stacks up
       community.docker.docker_compose_v2:
         project_src: "/opt/stacks/{{ item.item }}"
         remove_orphans: true
-        recreate: "{{ 'always' if item.changed else 'auto' }}"
+        recreate: "{{ 'always' if item.changed or _rendered.results | selectattr('changed') | map(attribute='item') | select('search', '/' ~ item.item ~ '/') | list | length > 0 else 'auto' }}"
       loop: "{{ _copied.results }}"
       loop_control:
         label: "{{ item.item }}"

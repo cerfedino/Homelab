@@ -293,42 +293,64 @@ variable "external_hosts" {
   }
 }
 
-# WireGuard backbone
-variable "wireguard_backbone" {
-  type = object({
+# WireGuard networks, keyed by interface name
+variable "wireguard" {
+  type = map(object({
     cidr  = string
     port  = number      # UDP port the hub listens on
-    hub   = string      # name of the peer the others dial
-    peers = map(string) # host name => its backbone address
-  })
+    hub   = string      # ansible name of the peer the others dial
+    peers = map(string) # host name => its address in this network
+  }))
 
   validation {
-    condition     = can(cidrhost(var.wireguard_backbone.cidr, 0))
-    error_message = "wireguard_backbone.cidr must be valid CIDR notation"
+    condition     = alltrue([for name, _ in var.wireguard : length(name) <= 15])
+    error_message = "wireguard network names are interface names, at most 15 characters."
   }
 
   validation {
-    condition     = var.wireguard_backbone.port > 0 && var.wireguard_backbone.port < 65536
-    error_message = "wireguard_backbone.port must be a UDP port."
+    condition     = alltrue([for _, n in var.wireguard : can(cidrhost(n.cidr, 0))])
+    error_message = "wireguard cidr must be valid CIDR notation"
   }
 
   validation {
-    condition     = contains(keys(var.wireguard_backbone.peers), var.wireguard_backbone.hub)
-    error_message = "wireguard_backbone.hub must be one of wireguard_backbone.peers."
+    condition     = alltrue([for _, n in var.wireguard : n.port > 0 && n.port < 65536])
+    error_message = "wireguard port must be a UDP port."
   }
 
   validation {
-    condition = alltrue([
-      for _, address in var.wireguard_backbone.peers :
-      can(cidrhost("${address}/${split("/", var.wireguard_backbone.cidr)[1]}", 0)) &&
-      try(cidrhost("${address}/${split("/", var.wireguard_backbone.cidr)[1]}", 0), "") == cidrhost(var.wireguard_backbone.cidr, 0)
-    ])
-    error_message = "wireguard_backbone.peers addresses must be inside wireguard_backbone.cidr."
+    condition     = alltrue([for _, n in var.wireguard : contains(keys(n.peers), n.hub)])
+    error_message = "wireguard hub must be one of the network's peers."
   }
 
   validation {
-    condition     = length(distinct(values(var.wireguard_backbone.peers))) == length(var.wireguard_backbone.peers)
-    error_message = "wireguard_backbone.peers addresses must be unique."
+    condition = alltrue(flatten([
+      for _, n in var.wireguard : [
+        for _, address in n.peers :
+        can(cidrhost("${address}/${split("/", n.cidr)[1]}", 0)) &&
+        try(cidrhost("${address}/${split("/", n.cidr)[1]}", 0), "") == try(cidrhost(n.cidr, 0), null)
+      ]
+    ]))
+    error_message = "wireguard peers addresses must be inside the network's cidr."
+  }
+
+  validation {
+    condition     = alltrue([for _, n in var.wireguard : length(distinct(values(n.peers))) == length(n.peers)])
+    error_message = "wireguard peers addresses must be unique within a network."
+  }
+
+  validation {
+    condition     = length(distinct([for _, n in var.wireguard : "${n.hub}:${n.port}"])) == length(var.wireguard)
+    error_message = "two wireguard networks with the same hub need different ports."
+  }
+}
+
+# Port on every k3s node where Traefik's public entrypoint answers, reached only over the apps WireGuard network
+variable "traefik_public_nodeport" {
+  type = number
+
+  validation {
+    condition     = var.traefik_public_nodeport >= 30000 && var.traefik_public_nodeport <= 32767
+    error_message = "traefik_public_nodeport must be in the Kubernetes NodePort range 30000-32767."
   }
 }
 
