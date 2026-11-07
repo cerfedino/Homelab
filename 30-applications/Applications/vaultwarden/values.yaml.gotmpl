@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 controllers:
   vaultwarden:
     pod:
@@ -21,7 +22,7 @@ controllers:
           tag: 1.37.4
         env:
           - name: DOMAIN
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: IP_HEADER
             value: X-Forwarded-For
           - name: SIGNUPS_ALLOWED
@@ -56,9 +57,9 @@ controllers:
           - name: SSO_ONLY
             value: "true"
           - name: SSO_AUTHORITY
-            value: {{ $app.external.oidc.issuer | quote }}
+            value: {{ $app.authentik.oidc.issuer | quote }}
           - name: SSO_CLIENT_ID
-            value: {{ $app.external.oidc.client_id | quote }}
+            value: {{ $app.authentik.oidc.client_id | quote }}
           - name: SSO_CLIENT_SECRET
             valueFrom:
               secretKeyRef:
@@ -97,7 +98,7 @@ secrets:
   sso:
     forceRename: vaultwarden-sso
     stringData:
-      client_secret: {{ $app.external.oidc.client_secret | quote }}
+      client_secret: {{ $app.authentik.oidc.client_secret | quote }}
 
 persistence:
   data:
@@ -130,19 +131,16 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  external:
+  vaultwarden:
+    forceRename: vaultwarden
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
-{{- if eq $app.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: vaultwarden
                 port: 80

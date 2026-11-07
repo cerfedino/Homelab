@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $secrets := fromYaml (readFile "secrets.enc.yaml") }}
 # renovate: datasource=docker depName=nextcloud
 {{- $ncTag := "35.0.2-apache@sha256:786c102155d2717ba0f53a62b3fdd7a1354edc48e800b94dbe32294d9a5752a2" }}
@@ -7,7 +8,7 @@ image:
   tag: {{ $ncTag }}
 
 nextcloud:
-  host: {{ $app.external.dns_hostname }}
+  host: {{ $host }}
   username: admin
   password: {{ $secrets.nextcloud_admin_password | quote }}
 
@@ -27,8 +28,8 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
-        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ $app.external.dns_hostname }}'),
-        'overwrite.cli.url' => 'https://{{ $app.external.dns_hostname }}',
+        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ $host }}'),
+        'overwrite.cli.url' => 'https://{{ $host }}',
         'overwriteprotocol' => 'https',
         'allow_local_remote_servers' => true,
         'default_phone_region' => 'CH',
@@ -56,14 +57,14 @@ nextcloud:
 
   extraEnv:
     - name: WHITEBOARD_URL
-      value: https://{{ $app.external.dns_hostname }}/whiteboard
+      value: https://{{ $host }}/whiteboard
     - name: WHITEBOARD_JWT_SECRET
       valueFrom:
         secretKeyRef:
           name: nextcloud-whiteboard
           key: jwt_secret
     - name: COLLABORA_WOPI_URL
-      value: https://{{ $app.external.dns_hostname }}
+      value: https://{{ $host }}
     - name: OIDC_CLIENT_ID
       valueFrom:
         secretKeyRef:
@@ -138,9 +139,9 @@ collabora:
   enabled: true
   collabora:
     # Collabora is under the same hostname
-    server_name: {{ $app.external.dns_hostname }}
+    server_name: {{ $host }}
     aliasgroups:
-      - host: "https://{{ $app.external.dns_hostname }}:443"
+      - host: "https://{{ $host }}:443"
     username: admin
     password: {{ $secrets.collabora_admin_password | quote }}
     # TLS terminates at traefik

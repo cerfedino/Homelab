@@ -167,8 +167,8 @@ secrets:
       LITELLM_MASTER_KEY: {{ $secrets.litellm_master_key | quote }}
       ANTHROPIC_API_KEY: {{ $secrets.anthropic_api_key | quote }}
       MISTRAL_API_KEY: {{ $secrets.mistral_api_key | quote }}
-      GENERIC_CLIENT_ID: {{ $litellm.external.oidc.client_id | quote }}
-      GENERIC_CLIENT_SECRET: {{ $litellm.external.oidc.client_secret | quote }}
+      GENERIC_CLIENT_ID: {{ $litellm.authentik.oidc.client_id | quote }}
+      GENERIC_CLIENT_SECRET: {{ $litellm.authentik.oidc.client_secret | quote }}
   nextcloud-mcp-ghcr:
     forceRename: nextcloud-mcp-ghcr
     type: kubernetes.io/dockerconfigjson
@@ -255,54 +255,46 @@ rawResources:
         resources:
           requests:
             storage: 1Gi
-  litellm-external:
-    forceRename: litellm-external
+  litellm:
+    forceRename: litellm
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $litellm.external.dns_hostname }}`)
+          - match: Host(`{{ index $litellm.hosts 0 }}`)
             kind: Rule
-{{- if eq $litellm.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: litellm
                 port: 4000
-  claudecode-internal:
-    forceRename: claudecode-internal
+  claudecode:
+    forceRename: claudecode
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $claudecode.internal.dns_hostname }}`)
+          - match: Host(`{{ index $claudecode.hosts 0 }}`)
             kind: Rule
-{{- if eq $claudecode.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: claudecode
                 port: 8000
-  nextcloud-mcp-internal:
-    forceRename: nextcloud-mcp-internal
+  nextcloudmcp:
+    forceRename: nextcloudmcp
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $nextcloudmcp.internal.dns_hostname }}`)
+          - match: Host(`{{ index $nextcloudmcp.hosts 0 }}`)
             kind: Rule
-{{- if eq $nextcloudmcp.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: nextcloud-mcp
                 port: 8001

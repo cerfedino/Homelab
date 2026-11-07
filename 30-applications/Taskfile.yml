@@ -115,10 +115,8 @@ tasks:
 
   check:
     desc: validate every app*.enc.yaml against the schema
-    dir: _lib/apps
     cmds:
-      - tofu init -input=false
-      - tofu plan -input=false
+      - cd _lib/apps && tofu init -input=false && tofu plan -input=false
 
   setup-helmfile-repos:
     run: once

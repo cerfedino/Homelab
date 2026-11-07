@@ -14,9 +14,9 @@ auth:
   oidc:
     - provider_name: authentik
       display_name: Authentik
-      base_url: {{ app.external.oidc.issuer }}
-      client_id: {{ app.external.oidc.client_id }}
-      client_secret: {{ app.external.oidc.client_secret }}
+      base_url: {{ app.authentik.oidc.issuer }}
+      client_id: {{ app.authentik.oidc.client_id }}
+      client_secret: {{ app.authentik.oidc.client_secret }}
       extra_scopes:
         - profile
         - email
@@ -31,7 +31,7 @@ auth:
 
 web:
   listening_address: :8888
-  external_url: https://{{ app.external.dns_hostname }}
+  external_url: https://{{ app.hosts[0] }}
   site_title: VPN
   session_secret: {{ secrets.session_secret }}
   csrf_secret: {{ secrets.csrf_secret }}

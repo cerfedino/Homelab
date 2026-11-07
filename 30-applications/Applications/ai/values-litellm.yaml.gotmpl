@@ -1,13 +1,14 @@
 {{- $app := readFile "app-litellm.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 masterkeySecretName: litellm-secrets
 masterkeySecretKey: LITELLM_MASTER_KEY
 
 environmentSecrets:
   - litellm-secrets
 
-{{- $akBase := regexReplaceAll "application/o/.+$" $app.external.oidc.issuer "application/o" }}
+{{- $akBase := regexReplaceAll "application/o/.+$" $app.authentik.oidc.issuer "application/o" }}
 envVars:
-  PROXY_BASE_URL: https://{{ $app.external.dns_hostname }}
+  PROXY_BASE_URL: https://{{ $host }}
   # authentik's endpoints are global; only discovery is per-application
   GENERIC_AUTHORIZATION_ENDPOINT: {{ $akBase }}/authorize/
   GENERIC_TOKEN_ENDPOINT: {{ $akBase }}/token/

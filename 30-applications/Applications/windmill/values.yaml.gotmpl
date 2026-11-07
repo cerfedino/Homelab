@@ -1,10 +1,11 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 postgresql:
   enabled: false
 
 windmill:
   databaseUrlSecretName: windmill-database
-  baseDomain: {{ $app.external.dns_hostname }}
+  baseDomain: {{ $host }}
   baseProtocol: https
   appReplicas: 1
   # LSP/multiplayer sidecar deployment, heavy image
@@ -13,13 +14,13 @@ windmill:
   indexer:
     enabled: false
 
-  {{- $oidc := $app.external.oidc }}
+  {{- $oidc := $app.authentik.oidc }}
   {{- $akBase := regexReplaceAll "application/o/.+$" $oidc.issuer "application/o" }}
   operator:
     enabled: true
     instanceSpec:
       global_settings:
-        base_url: https://{{ $app.external.dns_hostname }}
+        base_url: https://{{ $host }}
         oauths:
           authentik:
             id: {{ $oidc.client_id | quote }}

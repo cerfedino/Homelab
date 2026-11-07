@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
 controllers:
   postgres:
@@ -144,7 +145,7 @@ controllers:
           tag: v2.0.0-beta.1
         env:
           - name: NEXTCLOUD_URL
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: JWT_SECRET_KEY
             valueFrom:
               secretKeyRef:
@@ -202,9 +203,9 @@ secrets:
   oidc:
     forceRename: nextcloud-oidc
     stringData:
-      client_id: {{ $app.external.oidc.client_id | quote }}
-      client_secret: {{ $app.external.oidc.client_secret | quote }}
-      discovery_uri: "{{ $app.external.oidc.issuer }}.well-known/openid-configuration"
+      client_id: {{ $app.authentik.oidc.client_id | quote }}
+      client_secret: {{ $app.authentik.oidc.client_secret | quote }}
+      discovery_uri: "{{ $app.authentik.oidc.issuer }}.well-known/openid-configuration"
 
 persistence:
   postgres-data:
@@ -387,26 +388,23 @@ rawResources:
       spec:
         entryPoints: [lan-https, wg-private]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
             priority: 10
             middlewares:
               - name: nextcloud-hsts
-{{- if eq $app.external.type "forward-auth" }}
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: nextcloud
                 port: 8080
           # Collabora is under the same hostname
-          - match: Host(`{{ $app.external.dns_hostname }}`) && (PathPrefix(`/browser`) || PathPrefix(`/hosting/discovery`) || PathPrefix(`/hosting/capabilities`) || PathPrefix(`/cool`))
+          - match: Host(`{{ $host }}`) && (PathPrefix(`/browser`) || PathPrefix(`/hosting/discovery`) || PathPrefix(`/hosting/capabilities`) || PathPrefix(`/cool`))
             kind: Rule
             priority: 20
             services:
               - name: nextcloud-collabora
                 port: 9980
           # notify_push sidecar
-          - match: Host(`{{ $app.external.dns_hostname }}`) && PathPrefix(`/push`)
+          - match: Host(`{{ $host }}`) && PathPrefix(`/push`)
             kind: Rule
             priority: 20
             services:
@@ -415,7 +413,7 @@ rawResources:
             middlewares:
               - name: push-stripprefix
           # Also whiteboard
-          - match: Host(`{{ $app.external.dns_hostname }}`) && PathPrefix(`/whiteboard`)
+          - match: Host(`{{ $host }}`) && PathPrefix(`/whiteboard`)
             kind: Rule
             priority: 20
             services:

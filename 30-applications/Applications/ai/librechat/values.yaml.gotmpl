@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
 controllers:
   librechat:
@@ -18,9 +19,9 @@ controllers:
           - name: MONGO_URI
             value: mongodb://librechat-mongo:27017/LibreChat
           - name: DOMAIN_CLIENT
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: DOMAIN_SERVER
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: SEARCH
             value: "true"
           - name: MEILI_HOST
@@ -38,7 +39,7 @@ controllers:
           - name: ALLOW_REGISTRATION
             value: "false"
           - name: OPENID_ISSUER
-            value: {{ $app.external.oidc.issuer | quote }}
+            value: {{ $app.authentik.oidc.issuer | quote }}
           - name: OPENID_SCOPE
             value: openid profile email
           - name: OPENID_CALLBACK_URL
@@ -274,8 +275,8 @@ secrets:
       CREDS_KEY: {{ $secrets.creds_key | quote }}
       CREDS_IV: {{ $secrets.creds_iv | quote }}
       OPENID_SESSION_SECRET: {{ $secrets.openid_session_secret | quote }}
-      OPENID_CLIENT_ID: {{ $app.external.oidc.client_id | quote }}
-      OPENID_CLIENT_SECRET: {{ $app.external.oidc.client_secret | quote }}
+      OPENID_CLIENT_ID: {{ $app.authentik.oidc.client_id | quote }}
+      OPENID_CLIENT_SECRET: {{ $app.authentik.oidc.client_secret | quote }}
       MEILI_MASTER_KEY: {{ $secrets.meili_master_key | quote }}
       LITELLM_API_KEY: {{ $secrets.litellm_api_key | quote }}
   vectordb:
@@ -368,19 +369,16 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  external:
+  librechat:
+    forceRename: librechat
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
-{{- if eq $app.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: librechat
                 port: 3080
