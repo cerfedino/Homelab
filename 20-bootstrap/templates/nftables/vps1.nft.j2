@@ -55,6 +55,6 @@ flush chain ip filter DOCKER-USER
 table ip filter {
   chain DOCKER-USER {
     # Lets backbone peers reach each other through this host
-    iifname "backbone" oifname "backbone" accept
+    iifname "wg-backbone" oifname "wg-backbone" accept
   }
 }
