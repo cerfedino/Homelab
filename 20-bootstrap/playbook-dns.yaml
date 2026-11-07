@@ -16,7 +16,7 @@
       ansible.builtin.assert:
         that:
           - item.domain | length > 0
-          - item.address | length > 0
+          - item.address is not defined or item.address | length > 0
       loop: "{{ dnsmasq_address_entries }}"
       loop_control:
         label: "{{ item.domain }}"
@@ -140,6 +140,7 @@
       register: dnsmasq_address_query
       changed_when: false
       failed_when: dnsmasq_address_query.rc != 0 or item.address not in dnsmasq_address_query.stdout
+      when: item.address is defined
       loop: "{{ dnsmasq_address_entries }}"
       loop_control:
         label: "{{ item.domain }}"

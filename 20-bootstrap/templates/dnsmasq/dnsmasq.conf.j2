@@ -5,7 +5,9 @@ bind-dynamic
 no-resolv
 {% for entry in dnsmasq_address_entries %}
 local=/{{ entry.domain }}/
+{% if entry.address is defined %}
 address=/{{ entry.domain }}/{{ entry.address }}
+{% endif %}
 {% endfor %}
 {% for server in dnsmasq_upstream_servers %}
 server={{ server }}
