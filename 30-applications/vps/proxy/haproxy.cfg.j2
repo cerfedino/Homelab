@@ -1,5 +1,10 @@
+{% set wg_public = wireguard['wg-public'] %}
+{% set wg_private = wireguard['wg-private'] %}
 global
     log stdout format raw local0
+    user haproxy
+    group haproxy
+    chroot auto
 
 defaults
     log global
@@ -15,11 +20,19 @@ frontend http
 frontend https
     mode tcp
     bind :443
-    default_backend nodes
+    # VPN users get the private entrypoint, everyone else the public one
+    use_backend wg-private if { src {{ wg_private.cidr }} }
+    default_backend wg-public
 
 # send-proxy-v2 tells Traefik the visitor's address
-backend nodes
+backend wg-public
     mode tcp
-{% for name, address in wireguard.apps.peers.items() if name != wireguard.apps.hub %}
+{% for name, address in wg_public.peers.items() if name != wg_public.hub %}
     server {{ name }} {{ address }}:{{ traefik_public_nodeport }} send-proxy-v2 check
+{% endfor %}
+
+backend wg-private
+    mode tcp
+{% for name, address in wg_private.peers.items() if name != wg_private.hub %}
+    server {{ name }} {{ address }}:{{ traefik_private_nodeport }} send-proxy-v2 check
 {% endfor %}

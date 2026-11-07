@@ -296,10 +296,11 @@ variable "external_hosts" {
 # WireGuard networks, keyed by interface name
 variable "wireguard" {
   type = map(object({
-    cidr  = string
-    port  = number      # UDP port the hub listens on
-    hub   = string      # ansible name of the peer the others dial
-    peers = map(string) # host name => its address in this network
+    cidr   = string
+    port   = number                # UDP port the hub listens on
+    hub    = string                # ansible name of the peer the others dial
+    peers  = map(string)           # host name => its address in this network
+    portal = optional(bool, false) # the hub runs wg-portal, which owns the interface and takes further peers (people) at runtime
   }))
 
   validation {
@@ -344,13 +345,23 @@ variable "wireguard" {
   }
 }
 
-# Port on every k3s node where Traefik's public entrypoint answers, reached only over the apps WireGuard network
+# Port on every k3s node where Traefik's wg-public entrypoint answers, reached only over the wg-public WireGuard network
 variable "traefik_public_nodeport" {
   type = number
 
   validation {
     condition     = var.traefik_public_nodeport >= 30000 && var.traefik_public_nodeport <= 32767
     error_message = "traefik_public_nodeport must be in the Kubernetes NodePort range 30000-32767."
+  }
+}
+
+# Port on every k3s node where Traefik's wg-private entrypoint answers, reached only over the wg-private WireGuard network
+variable "traefik_private_nodeport" {
+  type = number
+
+  validation {
+    condition     = var.traefik_private_nodeport >= 30000 && var.traefik_private_nodeport <= 32767
+    error_message = "traefik_private_nodeport must be in the Kubernetes NodePort range 30000-32767."
   }
 }
 

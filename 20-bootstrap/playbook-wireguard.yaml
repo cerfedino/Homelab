@@ -36,9 +36,10 @@
         daemon_reload: true
       when: _wireguard_override.changed
 
+    # The networks wg-portal runs come later, with the VPS stacks
     - name: Set up each network
       ansible.builtin.include_tasks: tasks/wireguard.yaml
-      loop: "{{ wireguard | dict2items }}"
+      loop: "{{ wireguard | dict2items | rejectattr('value.portal') | list }}"
       loop_control:
         loop_var: network
         label: "{{ network.key }}"
