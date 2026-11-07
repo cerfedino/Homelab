@@ -186,156 +186,132 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  autobrr-internal:
-    forceRename: autobrr-internal
+  autobrr:
+    forceRename: autobrr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $autobrr.internal.dns_hostname }}`)
+          - match: Host(`{{ index $autobrr.hosts 0 }}`)
             kind: Rule
-{{- if eq $autobrr.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: autobrr
                 port: 7474
-  bazarr-internal:
-    forceRename: bazarr-internal
+  bazarr:
+    forceRename: bazarr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $bazarr.internal.dns_hostname }}`)
+          - match: Host(`{{ index $bazarr.hosts 0 }}`)
             kind: Rule
-{{- if eq $bazarr.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: bazarr
                 port: 6767
-  grimmory-external:
-    forceRename: grimmory-external
+  books:
+    forceRename: books
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $grimmory.external.dns_hostname }}`)
+          - match: Host(`{{ index $grimmory.hosts 0 }}`)
             kind: Rule
-{{- if eq $grimmory.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: grimmory
                 port: 6060
-  jellyfin-external:
-    forceRename: jellyfin-external
+  jellyfin:
+    forceRename: jellyfin
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https, wg-private]
         routes:
-          - match: Host(`{{ $jellyfin.external.dns_hostname }}`)
+          - match: Host(`{{ index $jellyfin.hosts 0 }}`)
             kind: Rule
-{{- if eq $jellyfin.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: jellyfin
                 port: 8096
-  prowlarr-internal:
-    forceRename: prowlarr-internal
+  prowlarr:
+    forceRename: prowlarr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $prowlarr.internal.dns_hostname }}`)
+          - match: Host(`{{ index $prowlarr.hosts 0 }}`)
             kind: Rule
-{{- if eq $prowlarr.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: prowlarr
                 port: 9696
-  qbittorrent-internal:
-    forceRename: qbittorrent-internal
+  qbittorrent:
+    forceRename: qbittorrent
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $qbittorrent.internal.dns_hostname }}`)
+          - match: Host(`{{ index $qbittorrent.hosts 0 }}`)
             kind: Rule
-{{- if eq $qbittorrent.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: qbittorrent
                 port: 8080
-  radarr-internal:
-    forceRename: radarr-internal
+  radarr:
+    forceRename: radarr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $radarr.internal.dns_hostname }}`)
+          - match: Host(`{{ index $radarr.hosts 0 }}`)
             kind: Rule
-{{- if eq $radarr.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: radarr
                 port: 7878
-  seerr-external:
-    forceRename: seerr-external
+  seerr:
+    forceRename: seerr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $seerr.external.dns_hostname }}`)
+          - match: Host(`{{ index $seerr.hosts 0 }}`)
             kind: Rule
-{{- if eq $seerr.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: seerr
                 port: 80
-  sonarr-internal:
-    forceRename: sonarr-internal
+  sonarr:
+    forceRename: sonarr
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $sonarr.internal.dns_hostname }}`)
+          - match: Host(`{{ index $sonarr.hosts 0 }}`)
             kind: Rule
-{{- if eq $sonarr.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: sonarr
                 port: 8989

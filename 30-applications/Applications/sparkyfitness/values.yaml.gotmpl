@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
 controllers:
   sparkyfitness:
@@ -9,7 +10,7 @@ controllers:
           tag: v1.8.0
         env:
           - name: SPARKY_FITNESS_FRONTEND_URL
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: SPARKY_FITNESS_SERVER_HOST
             value: sparkyfitness-server.sparkyfitness.svc.cluster.local
           - name: SPARKY_FITNESS_SERVER_PORT
@@ -38,7 +39,7 @@ controllers:
           - name: TZ
             value: Europe/Zurich
           - name: SPARKY_FITNESS_FRONTEND_URL
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: SPARKY_FITNESS_DB_HOST
             value: sparkyfitness-postgres
           - name: SPARKY_FITNESS_DB_NAME
@@ -71,7 +72,7 @@ controllers:
           - name: SPARKY_FITNESS_OIDC_PROVIDER_NAME
             value: Authentik
           - name: SPARKY_FITNESS_OIDC_ISSUER_URL
-            value: {{ $app.external.oidc.issuer }}
+            value: {{ $app.authentik.oidc.issuer }}
           - name: SPARKY_FITNESS_OIDC_CLIENT_ID
             valueFrom:
               secretKeyRef:
@@ -168,8 +169,8 @@ secrets:
     stringData:
       api_encryption_key: {{ $secrets.sparkyfitness_api_encryption_key | quote }}
       better_auth_secret: {{ $secrets.sparkyfitness_better_auth_secret | quote }}
-      oidc_client_id: {{ $app.external.oidc.client_id | quote }}
-      oidc_client_secret: {{ $app.external.oidc.client_secret | quote }}
+      oidc_client_id: {{ $app.authentik.oidc.client_id | quote }}
+      oidc_client_secret: {{ $app.authentik.oidc.client_secret | quote }}
   postgres:
     forceRename: sparkyfitness-postgres
     stringData:
@@ -227,19 +228,16 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  external:
+  sparkyfitness:
+    forceRename: sparkyfitness
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
-{{- if eq $app.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: sparkyfitness
                 port: 80

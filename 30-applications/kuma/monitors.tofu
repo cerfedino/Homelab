@@ -1,13 +1,6 @@
 locals {
   monitored = merge([
-    for base, variants in local.apps : {
-      for variant, v in variants :
-      "${base}_${variant}" => {
-        name    = v.display_name
-        url     = v.uptime_url
-        variant = variant
-      } if try(v.uptime_url, null) != null
-    }
+    for name, app in local.apps : { for m in app.monitors : "${name}/${m.name}" => m }
   ]...)
 }
 
@@ -18,28 +11,15 @@ resource "uptimekuma_monitor_http" "apps" {
   interval = 60
 }
 
-resource "uptimekuma_status_page" "internal" {
-  slug      = "internal"
-  title     = "Homelab (internal)"
-  published = true
-  public_group_list = [{
-    name   = "Applications"
-    weight = 1
-    monitor_list = [
-      for k, m in local.monitored : { id = uptimekuma_monitor_http.apps[k].id } if m.variant == "internal"
-    ]
-  }]
-}
-
-resource "uptimekuma_status_page" "external" {
-  slug      = "external"
+resource "uptimekuma_status_page" "homelab" {
+  slug      = "homelab"
   title     = "Homelab"
   published = true
   public_group_list = [{
     name   = "Applications"
     weight = 1
     monitor_list = [
-      for k, m in local.monitored : { id = uptimekuma_monitor_http.apps[k].id } if m.variant == "external"
+      for k in sort(keys(local.monitored)) : { id = uptimekuma_monitor_http.apps[k].id }
     ]
   }]
 }

@@ -19,21 +19,21 @@ terraform {
 }
 
 locals {
-  applications = module.apps.applications
+  apps    = module.apps.apps
   secrets      = sensitive(yamldecode(file("secrets.enc.yaml")))
 }
 
 provider "prowlarr" {
-  url     = "https://${local.applications["prowlarr_internal"].dns_hostname}"
+  url     = local.secrets.arr.prowlarr_url
   api_key = local.secrets.arr.prowlarr_api_key
 }
 
 provider "sonarr" {
-  url     = "https://${local.applications["sonarr_internal"].dns_hostname}"
+  url     = local.secrets.arr.sonarr_url
   api_key = local.secrets.arr.sonarr_api_key
 }
 
 provider "radarr" {
-  url     = "https://${local.applications["radarr_internal"].dns_hostname}"
+  url     = local.secrets.arr.radarr_url
   api_key = local.secrets.arr.radarr_api_key
 }

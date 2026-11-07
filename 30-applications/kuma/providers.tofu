@@ -15,7 +15,7 @@ locals {
 }
 
 provider "uptimekuma" {
-  endpoint = "https://${local.apps["kuma-api"].internal.dns_hostname}"
+  endpoint = var.kuma_endpoint
   username = var.kuma_username
   password = var.kuma_password
 }

@@ -16,6 +16,6 @@ locals {
 }
 
 provider "authentik" {
-  url   = "https://${local.applications["authentik_internal"].dns_hostname}"
+  url   = local.authentik_host
   token = local.values.authentik.bootstrap_token
 }

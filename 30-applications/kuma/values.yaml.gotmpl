@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $api := readFile "app-kuma-api.enc.yaml" | fromYaml }}
 controllers:
   uptime-kuma:
@@ -66,49 +67,30 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  internal:
-    forceRename: uptime-kuma-internal
+  kuma:
+    forceRename: kuma
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.internal.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
-{{- if eq $app.internal.type "forward-auth" }}
             middlewares:
-              - name: authentik-forward-auth-local@file
-{{- end }}
+              - name: authentik-forward-auth@file
             services:
               - name: uptime-kuma
                 port: 3001
-  external:
-    forceRename: uptime-kuma-external
+  kuma-api:
+    forceRename: kuma-api
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
-            kind: Rule
-{{- if eq $app.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
-            services:
-              - name: uptime-kuma
-                port: 3001
-  api:
-    forceRename: uptime-kuma-api
-    manifest:
-      apiVersion: traefik.io/v1alpha1
-      kind: IngressRoute
-      spec:
-        entryPoints: [lan-https]
-        routes:
-          - match: Host(`{{ $api.internal.dns_hostname }}`)
+          - match: Host(`{{ index $api.hosts 0 }}`)
             kind: Rule
             services:
               - name: uptime-kuma

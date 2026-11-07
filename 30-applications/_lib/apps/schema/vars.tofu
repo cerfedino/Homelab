@@ -1,37 +1,27 @@
-variable "applications" {
-    type = list(object({
-      name    = string
-      variant = string
+variable "apps" {
+  type = list(object({
+    name = string
 
-      display_name = string
+    authentik = optional(object({
+      name               = string
+      group              = string
+      meta_launch_url    = string
+      meta_icon          = optional(string, "")
+      meta_description   = optional(string, "")
+      meta_publisher     = optional(string, "")
+      policy_engine_mode = optional(string, "any")
+      allowed_users      = optional(list(string), [])
+      allowed_groups     = optional(list(string), [])
 
+      # [forward-auth, oidc, bookmark]
+      # for forward auth, it creates a proxy provider in Authentik.
       type = string
 
-      # Whether to hide it from the Authentik dashboard
-      hidden = optional(bool, false)
-
-      # Setting this creates a DNS entry pointing the hostname at the homelab:
-      # _internal keys under <domain_lan>. _external keys under <domain>
-      dns_hostname = optional(string)
-
-      # Launch target on the Authentik dashboard. required unless hidden.
-      href_url = optional(string)
-
-      # Probe target for uptime monitoring. apps without one are not monitored.
-      uptime_url = optional(string)
-
-      allowed_users = optional(list(string), [])
-      allowed_groups = optional(list(string), [])
-
-      # forward-auth: bypass authentication for paths matching regex
-      skip_path_regex = optional(string)
-
-      group = string
-      policy_engine_mode = optional(string, "any")
-
-      meta_description = optional(string, "")
-      meta_publisher = optional(string, "")
-      meta_icon = optional(string, "")
+      # for type = "forward-auth": the proxy provider, in Authentik's field names
+      forward_auth = optional(object({
+        external_host   = string           # https://<host>, where Authentik sends the browser after login
+        skip_path_regex = optional(string) # paths the proxy lets through unauthenticated
+      }))
 
       # for type = "oidc"
       oidc = optional(object({
@@ -43,8 +33,8 @@ variable "applications" {
           url           = string
           matching_mode = optional(string, "strict")
         }))
-        scopes                     = optional(list(string), ["openid", "email", "profile"])
-        # groups claim rewrite. replace groups named <key> with <value>
+        scopes = optional(list(string), ["openid", "email", "profile"])
+        # groups claim rewrite. replace groups named <from> with <to>
         group_map                  = optional(list(object({ from = string, to = string })))
         grant_types                = optional(list(string), ["authorization_code", "refresh_token"])
         signing                    = optional(bool, true)
@@ -70,67 +60,64 @@ variable "applications" {
       }))
     }))
 
-    validation {
-      condition     = alltrue([for app in var.applications : contains(["forward-auth", "bookmark", "oidc", "ldap"], app.type)])
-      error_message = "applications[*].type must be \"forward-auth\", \"bookmark\", \"oidc\" or \"ldap\"."
-    }
+    # The hostnames the app answers on, read by the release template for its routes
+    hosts = optional(list(string), [])
 
-    validation {
-      condition     = alltrue([for app in var.applications : (app.type == "oidc") == (app.oidc != null)])
-      error_message = "the oidc attribute must be set on applications of type \"oidc\"."
-    }
+    # Uptime Kuma monitors
+    monitors = optional(list(object({
+      name = string
+      url  = string
+    })), [])
+  }))
 
-    validation {
-      condition     = alltrue([for app in var.applications : (app.type == "ldap") == (app.ldap != null)])
-      error_message = "the ldap attribute must be set on applications of type \"ldap\"."
-    }
+  validation {
+    condition     = alltrue([for app in var.apps : app.authentik == null || contains(["forward-auth", "bookmark", "oidc", "ldap"], app.authentik.type)])
+    error_message = "authentik.type must be \"forward-auth\", \"bookmark\", \"oidc\" or \"ldap\"."
+  }
 
-    validation {
-      condition = alltrue([
-        for app in var.applications : app.ldap == null || try(
-          contains(["direct", "cached"], app.ldap.bind_mode) && contains(["direct", "cached"], app.ldap.search_mode),
-        false)
-      ])
-      error_message = "ldap.bind_mode and ldap.search_mode must be \"direct\" or \"cached\"."
-    }
+  validation {
+    condition     = alltrue([for app in var.apps : app.authentik == null || (app.authentik.type == "oidc") == (app.authentik.oidc != null)])
+    error_message = "authentik.oidc must be set on, and only on, apps of type \"oidc\"."
+  }
 
-    validation {
-      condition     = alltrue([for app in var.applications : app.oidc == null || try(contains(["confidential", "public"], app.oidc.client_type), false)])
-      error_message = "oidc.client_type must be \"confidential\" or \"public\"."
-    }
+  validation {
+    condition     = alltrue([for app in var.apps : app.authentik == null || (app.authentik.type == "ldap") == (app.authentik.ldap != null)])
+    error_message = "authentik.ldap must be set on, and only on, apps of type \"ldap\"."
+  }
 
-    validation {
-      condition = alltrue(flatten([
-        for app in var.applications : app.oidc == null ? [] : [
-          for r in app.oidc.redirect_uris : contains(["strict", "regex"], r.matching_mode)
-        ]
-      ]))
-      error_message = "oidc.redirect_uris[*].matching_mode must be \"strict\" or \"regex\"."
-    }
+  validation {
+    condition     = alltrue([for app in var.apps : app.authentik == null || (app.authentik.type == "forward-auth") == (app.authentik.forward_auth != null)])
+    error_message = "authentik.forward_auth must be set on, and only on, apps of type \"forward-auth\"."
+  }
 
-    validation {
-      condition     = alltrue([for app in var.applications : app.hidden || app.href_url != null])
-      error_message = "applications shown on the dashboard must set href_url."
-    }
 
-    validation {
-      condition     = alltrue([for app in var.applications : contains(["internal", "external"], app.variant)])
-      error_message = "applications[*].variant must be \"internal\" or \"external\"."
-    }
+  validation {
+    condition = alltrue([
+      for app in var.apps : app.authentik == null || app.authentik.ldap == null || try(
+        contains(["direct", "cached"], app.authentik.ldap.bind_mode) && contains(["direct", "cached"], app.authentik.ldap.search_mode),
+      false)
+    ])
+    error_message = "ldap.bind_mode and ldap.search_mode must be \"direct\" or \"cached\"."
+  }
 
-    validation {
-      condition = alltrue([
-        for app in var.applications : app.dns_hostname == null || (
-          app.variant == "internal"
-            ? endswith(app.dns_hostname, ".${var.domain_lan}")
-            : endswith(app.dns_hostname, ".${var.domain}") && !endswith(app.dns_hostname, ".${var.domain_lan}")
-        )
-      ])
-      error_message = "dns_hostname must end in .<domain_lan> for _internal apps and .<domain> for _external apps."
-    }
+  validation {
+    condition     = alltrue([for app in var.apps : app.authentik == null || app.authentik.oidc == null || try(contains(["confidential", "public"], app.authentik.oidc.client_type), false)])
+    error_message = "oidc.client_type must be \"confidential\" or \"public\"."
+  }
 
-    validation {
-      condition     = length(distinct([for app in var.applications : "${app.name}_${app.variant}"])) == length(var.applications)
-      error_message = "applications must not declare the same name and variant twice."
-    }
+  validation {
+    condition = alltrue(flatten([
+      for app in var.apps : app.authentik == null || app.authentik.oidc == null ? [] : [
+        for r in app.authentik.oidc.redirect_uris : contains(["strict", "regex"], r.matching_mode)
+      ]
+    ]))
+    error_message = "oidc.redirect_uris[*].matching_mode must be \"strict\" or \"regex\"."
+  }
+
+
+  validation {
+    condition     = alltrue(flatten([for app in var.apps : [for h in app.hosts : endswith(h, ".${var.domain}")]]))
+    error_message = "hosts must end in .<domain>."
+  }
+
 }

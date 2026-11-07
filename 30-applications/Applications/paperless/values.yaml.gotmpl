@@ -1,4 +1,5 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $host := index $app.hosts 0 }}
 {{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
 controllers:
   paperless:
@@ -21,7 +22,7 @@ controllers:
           tag: 3.2.1
         env:
           - name: PAPERLESS_URL
-            value: https://{{ $app.external.dns_hostname }}
+            value: https://{{ $host }}
           - name: PAPERLESS_REDIS
             value: redis://paperless-redis:6379
           - name: PAPERLESS_TIME_ZONE
@@ -114,7 +115,7 @@ secrets:
     stringData:
       secret_key: {{ $secrets.paperless_secret_key | quote }}
       socialaccount_providers: |
-        {"openid_connect": {"APPS": [{"provider_id": "authentik", "name": "Authentik", "client_id": {{ $app.external.oidc.client_id | quote }}, "secret": {{ $app.external.oidc.client_secret | quote }}, "settings": {"server_url": "{{ $app.external.oidc.issuer }}.well-known/openid-configuration"}}]}}
+        {"openid_connect": {"APPS": [{"provider_id": "authentik", "name": "Authentik", "client_id": {{ $app.authentik.oidc.client_id | quote }}, "secret": {{ $app.authentik.oidc.client_secret | quote }}, "settings": {"server_url": "{{ $app.authentik.oidc.issuer }}.well-known/openid-configuration"}}]}}
 
 networkpolicies:
   namespace:
@@ -135,19 +136,16 @@ networkpolicies:
                   kubernetes.io/metadata.name: traefik
 
 rawResources:
-  external:
+  paperless:
+    forceRename: paperless
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
         entryPoints: [lan-https]
         routes:
-          - match: Host(`{{ $app.external.dns_hostname }}`)
+          - match: Host(`{{ $host }}`)
             kind: Rule
-{{- if eq $app.external.type "forward-auth" }}
-            middlewares:
-              - name: authentik-forward-auth-external@file
-{{- end }}
             services:
               - name: paperless
                 port: 8000

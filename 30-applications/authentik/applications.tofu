@@ -9,17 +9,15 @@ import {
   id = data.authentik_outpost.embedded.id
 }
 
-# Outpost for applications reachable only from the local LAN
+# Kept imported with no providers: every proxy provider is on the external outpost
 resource "authentik_outpost" "embedded" {
   name               = "authentik Embedded Outpost"
   type               = "proxy"
-  protocol_providers = [
-    for k in sort(keys(local.proxy_apps_local)) : tonumber(authentik_provider_proxy.proxies[k].id)
-  ]
+  protocol_providers = []
   config = jsonencode({
     log_level                        = "info"
     docker_labels                    = null
-    authentik_host                   = "https://${local.applications["authentik_internal"].dns_hostname}"
+    authentik_host                   = local.authentik_host
     docker_network                   = null
     container_image                  = null
     docker_map_ports                 = true
@@ -45,18 +43,14 @@ resource "authentik_outpost" "embedded" {
 
 
 locals {
-    applications = module.apps.applications
+    apps         = module.apps.apps
+    applications = {for name, app in local.apps : name => app.authentik if app.authentik != null}
 
-    fwauth_variants = {
-        for k, app in local.applications : k => merge(app, {
-            variant = endswith(k, "_external") ? "external" : "internal"
-        }) if app.type == "forward-auth" && app.dns_hostname != null
-    }
-    proxy_apps_local    = {for k, v in local.fwauth_variants : k => v if v.variant == "internal"}
-    proxy_apps_external = {for k, v in local.fwauth_variants : k => v if v.variant == "external"}
+    proxy_apps = {for k, app in local.applications : k => app if app.type == "forward-auth"}
+    oidc_apps  = {for k, app in local.applications : k => app if app.type == "oidc"}
+    ldap_apps  = {for k, app in local.applications : k => app if app.type == "ldap"}
 
-    oidc_apps = {for k, app in local.applications : k => app if app.type == "oidc"}
-    ldap_apps = {for k, app in local.applications : k => app if app.type == "ldap"}
+    authentik_host = local.values.authentik.url
 }
 
 data "authentik_flow" "default-authorization-flow" {
@@ -67,11 +61,11 @@ data "authentik_flow" "default-invalidation-flow" {
 }
 
 resource "authentik_provider_proxy" "proxies" {
-  for_each = local.fwauth_variants
+  for_each = local.proxy_apps
   mode               = "forward_single"
   name               = each.key
-  external_host      = "https://${each.value.dns_hostname}"
-  skip_path_regex    = each.value.skip_path_regex
+  external_host      = each.value.forward_auth.external_host
+  skip_path_regex    = each.value.forward_auth.skip_path_regex
   authorization_flow = data.authentik_flow.default-authorization-flow.id
   authentication_flow = authentik_flow.homelab_login.uuid
   invalidation_flow = data.authentik_flow.default-invalidation-flow.id
@@ -199,10 +193,10 @@ resource "terraform_data" "app_revision" {
 
 resource "authentik_application" "apps" {
   for_each = local.applications
-  name              = each.value.display_name
+  name              = each.value.name
   slug              = each.key
   protocol_provider = (
-    each.value.type == "forward-auth" && each.value.dns_hostname != null ? tonumber(authentik_provider_proxy.proxies[each.key].id) :
+    each.value.type == "forward-auth" ? tonumber(authentik_provider_proxy.proxies[each.key].id) :
     each.value.type == "oidc" ? tonumber(authentik_provider_oauth2.oidc[each.key].id) :
     each.value.type == "ldap" ? tonumber(authentik_provider_ldap.ldap[each.key].id) :
     null
@@ -210,12 +204,11 @@ resource "authentik_application" "apps" {
 
   group = each.value.group
   policy_engine_mode= each.value.policy_engine_mode
-  meta_hide = each.value.hidden
 
   meta_description = each.value.meta_description
   meta_publisher = each.value.meta_publisher
   meta_icon = each.value.meta_icon
-  meta_launch_url = each.value.href_url
+  meta_launch_url = each.value.meta_launch_url
 
   lifecycle {
     replace_triggered_by = [terraform_data.app_revision[each.key]]
@@ -227,20 +220,20 @@ data "authentik_service_connection_kubernetes" "local" {
   name = "Local Kubernetes Cluster"
 }
 
-# Outpost for applications reachable from the outside.
+# The outpost behind Traefik's authentik-forward-auth middleware
 resource "authentik_outpost" "external" {
-  count              = length(local.proxy_apps_external) > 0 ? 1 : 0
+  count              = length(local.proxy_apps) > 0 ? 1 : 0
   name               = "external"
   type               = "proxy"
   service_connection = data.authentik_service_connection_kubernetes.local.id
   protocol_providers = [
-    for k in sort(keys(local.proxy_apps_external)) : tonumber(authentik_provider_proxy.proxies[k].id)
+    for k in sort(keys(local.proxy_apps)) : tonumber(authentik_provider_proxy.proxies[k].id)
   ]
   config = jsonencode({
     log_level               = "info"
     refresh_interval        = "minutes=5"
     authentik_host          = "http://authentik-server.authentik.svc.cluster.local"
-    authentik_host_browser  = "https://${local.applications["authentik_external"].dns_hostname}"
+    authentik_host_browser  = local.authentik_host
     authentik_host_insecure = false
     object_naming_template  = "ak-outpost-%(name)s"
     kubernetes_namespace    = "authentik"

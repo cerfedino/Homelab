@@ -1,6 +1,9 @@
 {{- $wgPublic := index .Values.wireguard "wg-public" }}
 {{- $wgPrivate := index .Values.wireguard "wg-private" }}
-{{- $wgPortal := readFile "../vps/wg-portal/app.enc.yaml" | fromYaml }}
+{{- $pve1 := readFile "app-pve1.enc.yaml" | fromYaml }}
+{{- $pbs1 := readFile "app-pbs1.enc.yaml" | fromYaml }}
+{{- $haos := readFile "app-haos.enc.yaml" | fromYaml }}
+{{- $wgportal := readFile "../vps/wg-portal/app.enc.yaml" | fromYaml }}
 configMaps:
   dynamic:
     forceRename: traefik-dynamic
@@ -12,12 +15,11 @@ configMaps:
               insecureSkipVerify: true
 
           middlewares:
-            authentik-forward-auth-local:
+            authentik-forward-auth:
               forwardAuth:
-                # Forward to the Authentik outpost specifically responsible for applications exposed to the local network
-                address: http://authentik-server.authentik.svc.cluster.local/outpost.goauthentik.io/auth/traefik
+                address: http://ak-outpost-external.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik
                 trustForwardHeader: true
-                authResponseHeaders: &authentikResponseHeaders
+                authResponseHeaders:
                   - X-authentik-username
                   - X-authentik-groups
                   - X-authentik-entitlements
@@ -30,41 +32,31 @@ configMaps:
                   - X-authentik-meta-provider
                   - X-authentik-meta-app
                   - X-authentik-meta-version
-            authentik-forward-auth-external:
-              forwardAuth:
-                # Forward to the Authentik outpost specifically responsible for applications exposed to the open internet
-                address: http://ak-outpost-external.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik
-                trustForwardHeader: true
-                authResponseHeaders: *authentikResponseHeaders
 
           routers:
-{{- range $f := tuple "app-pve1.enc.yaml" "app-pbs1.enc.yaml" "app-haos.enc.yaml" }}
-{{- $app := readFile $f | fromYaml }}
-{{- range $variant, $v := omit $app "name" }}
-{{- if $v.dns_hostname }}
-            {{ $app.name }}-{{ $variant }}:
-              rule: Host(`{{ $v.dns_hostname }}`)
-              entryPoints:
-                #- {{ eq $variant "internal" | ternary "lan-https" "cloudflared" }}
-                - lan-https
-{{- if eq $v.type "forward-auth" }}
+            pve1:
+              rule: Host(`{{ index $pve1.hosts 0 }}`)
+              entryPoints: [lan-https]
               middlewares:
-                - authentik-forward-auth-{{ eq $variant "internal" | ternary "local" "external" }}
-{{- end }}
-              service: {{ $app.name }}
-{{- end }}
-{{- end }}
-{{- end }}
-
-            # The VPN enrollment page, only for people already on the VPN
+                - authentik-forward-auth
+              service: pve1
+            pbs1:
+              rule: Host(`{{ index $pbs1.hosts 0 }}`)
+              entryPoints: [lan-https]
+              middlewares:
+                - authentik-forward-auth
+              service: pbs1
+            haos:
+              rule: Host(`{{ index $haos.hosts 0 }}`)
+              entryPoints: [lan-https]
+              service: haos
             wg-portal:
-              rule: Host(`{{ $wgPortal.external.dns_hostname }}`)
-              entryPoints:
-                - wg-private
+              rule: Host(`{{ index $wgportal.hosts 0 }}`)
+              entryPoints: [wg-private]
               service: wg-portal
 
           services:
-            # wg-portal on the VPS, over the wg-private WireGuard network
+            # The VPN enrollment page on the VPS, over the wg-private WireGuard network. Its route lists wg-private only
             wg-portal:
               loadBalancer:
                 servers:

@@ -7,3 +7,7 @@ variable "kuma_password" {
   type      = string
   sensitive = true
 }
+
+variable "kuma_endpoint" {
+  type = string
+}
