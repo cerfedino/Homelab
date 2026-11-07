@@ -22,9 +22,24 @@ table inet homelab {
     # SSH, only on the main LAN interface
     iifname "{{ ansible_facts.default_ipv4.interface }}" tcp dport 22 accept
 
-    # Allow WireGuard server ports
+    # The reverse proxy, for the internet
+    iifname "{{ ansible_facts.default_ipv4.interface }}" tcp dport { 80, 443 } accept
+
+    # WireGuard server ports
 {% for name, network in wireguard.items() if network.hub == inventory_hostname %}
     udp dport {{ network.port }} accept
+{% endfor %}
+
+{% for name, network in wireguard.items() if network.hub == inventory_hostname and network.portal %}
+    # The reverse proxy, for VPN users
+    iifname "{{ name }}" tcp dport { 80, 443 } accept
+
+    # VPN users resolve names here
+    iifname "{{ name }}" meta l4proto { tcp, udp } th dport 53 accept
+
+    # wg-portal's page, reached through Traefik on the nodes
+    iifname "{{ name }}" ip saddr { {{ network.peers | dict2items | rejectattr('key', 'eq', network.hub) | map(attribute='value') | join(', ') }} } tcp dport 8888 accept
+
 {% endfor %}
   }
 }

@@ -2,8 +2,9 @@ services:
   haproxy:
     image: haproxy:3.4.7-alpine
     restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
+    # On the host's network so that connections from the VPN keep their source address
+    network_mode: host
+    # Ports 80 and 443 need root there, the config drops to the haproxy user right after
+    user: root
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro

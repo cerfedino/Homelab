@@ -100,8 +100,9 @@ output "ansible_yaml_inventory" {
           bridge  = var.network_internal.bridge
           gateway = var.network_internal.gateway
         }
-        wireguard               = var.wireguard
-        traefik_public_nodeport = var.traefik_public_nodeport
+        wireguard                = var.wireguard
+        traefik_public_nodeport  = var.traefik_public_nodeport
+        traefik_private_nodeport = var.traefik_private_nodeport
       }
     }
   })
@@ -161,8 +162,9 @@ output "helmfile_values" {
   value = yamlencode({
     kube_vip_svc_address = var.kube_vip_svc_address
     pihole_svc_address   = var.pihole_svc_address
-    wireguard               = var.wireguard
-    traefik_public_nodeport = var.traefik_public_nodeport
+    wireguard                = var.wireguard
+    traefik_public_nodeport  = var.traefik_public_nodeport
+    traefik_private_nodeport = var.traefik_private_nodeport
     dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
     dnsmasq_address_entries  = local.dnsmasq_all_entries
     machines             = local.machines

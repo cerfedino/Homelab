@@ -1,5 +1,7 @@
-listen-address=127.0.0.1{{ ',' ~ ip_internal if ip_internal is defined else '' }}
-bind-interfaces
+listen-address=127.0.0.1{{ ',' ~ ip_internal if ip_internal is defined else '' }}{% for name, network in (wireguard | default({})).items() if network.portal and network.hub == inventory_hostname %},{{ network.peers[inventory_hostname] }}{% endfor %}
+
+# wg-portal creates its interface after boot
+bind-dynamic
 no-resolv
 {% for entry in dnsmasq_address_entries %}
 local=/{{ entry.domain }}/

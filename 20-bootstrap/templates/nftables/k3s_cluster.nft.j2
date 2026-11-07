@@ -24,17 +24,31 @@ table inet homelab {
     iifname "backbone" drop
   }
 
-  # Public apps can reach the Traefik public endpoint only over the apps WireGuard network
-  chain apps {
+  # The VPS proxy reaches Traefik's wg-public entrypoint over the wg-public WireGuard network, nothing else comes in
+  chain wg-public {
     type filter hook prerouting priority mangle; policy accept;
 
     # Allows replies to reach the node
-    iifname "apps" ct state established,related accept
+    iifname "wg-public" ct state established,related accept
 
-    # Allows the VPS to open connections to Traefik's public entrypoint
-    iifname "apps" ip saddr {{ wireguard.apps.peers[wireguard.apps.hub] }} tcp dport {{ traefik_public_nodeport }} accept
+    # Allows the VPS to open connections to Traefik's wg-public entrypoint
+    iifname "wg-public" ip saddr {{ wireguard['wg-public'].peers[wireguard['wg-public'].hub] }} tcp dport {{ traefik_public_nodeport }} accept
 
     # Doesn't allow anything else in over this network
-    iifname "apps" drop
+    iifname "wg-public" drop
+  }
+
+  # Same for VPN users, over the wg-private WireGuard network
+  chain wg-private {
+    type filter hook prerouting priority mangle; policy accept;
+
+    # Allows replies to reach the node
+    iifname "wg-private" ct state established,related accept
+
+    # Allows the VPS to open connections to Traefik's wg-private entrypoint
+    iifname "wg-private" ip saddr {{ wireguard['wg-private'].peers[wireguard['wg-private'].hub] }} tcp dport {{ traefik_private_nodeport }} accept
+
+    # Doesn't allow anything else in over this network
+    iifname "wg-private" drop
   }
 }

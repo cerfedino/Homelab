@@ -1,0 +1,37 @@
+{% set app = lookup('ansible.builtin.file', playbook_dir ~ '/wg-portal/app.enc.yaml') | from_yaml %}
+{% set secrets = lookup('ansible.builtin.file', playbook_dir ~ '/wg-portal/secrets.enc.yaml') | from_yaml %}
+core:
+  admin_user: admin@wgportal.local
+  admin_password: {{ secrets.admin_password }}
+  # The playbook creates the interface and the node peers through the API
+  admin_api_token: {{ secrets.admin_api_token }}
+  # People add their own devices once they are on the VPN
+  self_provisioning_allowed: true
+  import_existing: false
+  restore_state: true
+
+auth:
+  oidc:
+    - provider_name: authentik
+      display_name: Authentik
+      base_url: {{ app.external.oidc.issuer }}
+      client_id: {{ app.external.oidc.client_id }}
+      client_secret: {{ app.external.oidc.client_secret }}
+      extra_scopes:
+        - profile
+        - email
+      field_map:
+        user_identifier: preferred_username
+        email: email
+        firstname: name
+        user_groups: groups
+      admin_mapping:
+        admin_group_regex: ^admin$
+      registration_enabled: true
+
+web:
+  listening_address: :8888
+  external_url: https://{{ app.external.dns_hostname }}
+  site_title: VPN
+  session_secret: {{ secrets.session_secret }}
+  csrf_secret: {{ secrets.csrf_secret }}

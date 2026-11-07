@@ -1,3 +1,6 @@
+{{- $wgPublic := index .Values.wireguard "wg-public" }}
+{{- $wgPrivate := index .Values.wireguard "wg-private" }}
+{{- $wgPortal := readFile "../vps/wg-portal/app.enc.yaml" | fromYaml }}
 configMaps:
   dynamic:
     forceRename: traefik-dynamic
@@ -53,7 +56,19 @@ configMaps:
 {{- end }}
 {{- end }}
 
+            # The VPN enrollment page, only for people already on the VPN
+            wg-portal:
+              rule: Host(`{{ $wgPortal.external.dns_hostname }}`)
+              entryPoints:
+                - wg-private
+              service: wg-portal
+
           services:
+            # wg-portal on the VPS, over the wg-private WireGuard network
+            wg-portal:
+              loadBalancer:
+                servers:
+                  - url: "http://{{ index $wgPrivate.peers $wgPrivate.hub }}:8888"
             pve1:
               loadBalancer:
                 servers:
@@ -101,12 +116,18 @@ networkpolicies:
           ports:
             - port: 80
             - port: 443
-        # public entrypoint is just the VPS, over the apps WireGuard network
+        # wg-public entrypoint is just the VPS, over the wg-public WireGuard network
         - from:
             - ipBlock:
-                cidr: {{ index .Values.wireguard.apps.peers .Values.wireguard.apps.hub }}/32
+                cidr: {{ index $wgPublic.peers $wgPublic.hub }}/32
           ports:
             - port: 8444
+        # wg-private entrypoint is just the VPS, over the wg-private WireGuard network
+        - from:
+            - ipBlock:
+                cidr: {{ index $wgPrivate.peers $wgPrivate.hub }}/32
+          ports:
+            - port: 8445
 
 rawResources:
   # wildcard certificates for the homelab
