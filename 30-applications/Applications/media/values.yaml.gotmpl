@@ -222,7 +222,7 @@ rawResources:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
-        entryPoints: [lan-https]
+        entryPoints: [lan-https, wg-private]
         routes:
           - match: Host(`{{ index $grimmory.hosts 0 }}`)
             kind: Rule
@@ -293,7 +293,7 @@ rawResources:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
-        entryPoints: [lan-https]
+        entryPoints: [lan-https, wg-private]
         routes:
           - match: Host(`{{ index $seerr.hosts 0 }}`)
             kind: Rule

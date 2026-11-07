@@ -35,7 +35,7 @@ rawResources:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
-        entryPoints: [lan-https, wg-private, wg-public]
+        entryPoints: [lan-https, wg-private]
         routes:
           - match: Host(`{{ $host }}`)
             kind: Rule
