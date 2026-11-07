@@ -11,17 +11,17 @@ table inet homelab {
   }
 
   # Prerouting for Wireguard
-  chain backbone {
+  chain wg-backbone {
     type filter hook prerouting priority mangle; policy accept;
 
     # Allows replies over the backbone to reach the peer
-    iifname "backbone" ct state established,related accept
+    iifname "wg-backbone" ct state established,related accept
 
     # Allows other peers to ping this one
-    iifname "backbone" icmp type echo-request accept
+    iifname "wg-backbone" icmp type echo-request accept
 
     # Doesn't allow anyone to initiate any other connection to the peer over the backbone
-    iifname "backbone" drop
+    iifname "wg-backbone" drop
   }
 
   # The VPS proxy reaches Traefik's wg-public entrypoint over the wg-public WireGuard network, nothing else comes in
