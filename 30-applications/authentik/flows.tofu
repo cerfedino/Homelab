@@ -98,20 +98,12 @@ resource "authentik_flow_stage_binding" "user_settings_write" {
   order  = 30
 }
 
-resource "authentik_brand" "homelab_lan" {
+# One brand per hostname Authentik answers on
+resource "authentik_brand" "homelab" {
+  for_each            = toset(local.apps["authentik"].hosts)
   branding_favicon    = "/static/dist/assets/icons/icon.png"
   branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
-  domain              = local.applications["authentik_internal"].dns_hostname
-  default             = false
-  flow_authentication = authentik_flow.homelab_login.uuid
-  flow_recovery       = authentik_flow.homelab-recovery.uuid
-  flow_user_settings  = authentik_flow.user_settings.uuid
-}
-
-resource "authentik_brand" "homelab_external" {
-  branding_favicon    = "/static/dist/assets/icons/icon.png"
-  branding_logo       = "/static/dist/assets/icons/icon_left_brand.svg"
-  domain              = local.applications["authentik_external"].dns_hostname
+  domain              = each.value
   default             = false
   flow_authentication = authentik_flow.homelab_login.uuid
   flow_recovery       = authentik_flow.homelab-recovery.uuid
