@@ -52,7 +52,7 @@ configMaps:
               service: haos
             wg-portal:
               rule: Host(`{{ index $wgportal.hosts 0 }}`)
-              entryPoints: [wg-private]
+              entryPoints: [lan-https, wg-private]
               service: wg-portal
 
           services:
