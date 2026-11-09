@@ -68,19 +68,6 @@ rawResources:
             services:
               - name: authentik-server
                 port: 80
-  authentik-local:
-    forceRename: authentik-local
-    manifest:
-      apiVersion: traefik.io/v1alpha1
-      kind: IngressRoute
-      spec:
-        entryPoints: [lan-https]
-        routes:
-          - match: Host(`{{ index $app.hosts 1 }}`)
-            kind: Rule
-            services:
-              - name: authentik-server
-                port: 80
   backup:
     forceRename: backup
     manifest:
