@@ -1,5 +1,5 @@
 {{- $wgPublic := index .Values.wireguard "wg-public" }}
-{{- $wgPrivate := index .Values.wireguard "wg-private" }}
+{{- $wgBackbone := index .Values.wireguard "wg-backbone" }}
 {{- $pve1 := readFile "app-pve1.enc.yaml" | fromYaml }}
 {{- $pbs1 := readFile "app-pbs1.enc.yaml" | fromYaml }}
 {{- $haos := readFile "app-haos.enc.yaml" | fromYaml }}
@@ -56,11 +56,11 @@ configMaps:
               service: wg-portal
 
           services:
-            # The VPN enrollment page on the VPS, over the wg-private WireGuard network. Its route lists wg-private only
+            # The VPN enrollment page on the VPS, over the wg-backbone WireGuard network
             wg-portal:
               loadBalancer:
                 servers:
-                  - url: "http://{{ index $wgPrivate.peers $wgPrivate.hub }}:8888"
+                  - url: "http://{{ index $wgBackbone.peers $wgBackbone.hub }}:8888"
             pve1:
               loadBalancer:
                 servers:
@@ -114,10 +114,10 @@ networkpolicies:
                 cidr: {{ index $wgPublic.peers $wgPublic.hub }}/32
           ports:
             - port: 8444
-        # wg-private entrypoint is just the VPS, over the wg-private WireGuard network
+        # wg-private entrypoint is just the VPS, over the wg-backbone WireGuard network
         - from:
             - ipBlock:
-                cidr: {{ index $wgPrivate.peers $wgPrivate.hub }}/32
+                cidr: {{ index $wgBackbone.peers $wgBackbone.hub }}/32
           ports:
             - port: 8445
 

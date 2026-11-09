@@ -1,0 +1,49 @@
+---
+# One WireGuard network whose hub is wg-portal: the interface and its key live in wg-portal's database. network.key is the interface name
+- name: "Wait for wg-portal's API ({{ network.key }})"
+  ansible.builtin.wait_for:
+    host: "{{ wg_portal_api | urlsplit('hostname') }}"
+    port: "{{ wg_portal_api | urlsplit('port') }}"
+    timeout: 60
+
+- name: "Ask wg-portal for the interface ({{ network.key }})"
+  ansible.builtin.uri:
+    url: "{{ wg_portal_api }}/interface/by-id/{{ network.key }}"
+    url_username: "{{ wg_portal_api_user }}"
+    url_password: "{{ wg_portal_api_token }}"
+    force_basic_auth: true
+    status_code: [200, 404]
+  register: _wireguard_portal_interface
+
+- name: "Let wg-portal prepare an interface ({{ network.key }})"
+  ansible.builtin.uri:
+    url: "{{ wg_portal_api }}/interface/prepare"
+    url_username: "{{ wg_portal_api_user }}"
+    url_password: "{{ wg_portal_api_token }}"
+    force_basic_auth: true
+  register: _wireguard_portal_prepared
+  when: _wireguard_portal_interface.status == 404
+
+- name: "Create the interface in wg-portal ({{ network.key }})"
+  ansible.builtin.uri:
+    url: "{{ wg_portal_api }}/interface/new"
+    method: POST
+    url_username: "{{ wg_portal_api_user }}"
+    url_password: "{{ wg_portal_api_token }}"
+    force_basic_auth: true
+    body_format: json
+    body: >-
+      {{ _wireguard_portal_prepared.json | combine({
+        'Identifier': network.key,
+        'DisplayName': network.key,
+        'Mode': 'server',
+        'ListenPort': network.value.port,
+        'Addresses': [network.value.peers[inventory_hostname] ~ '/' ~ network.value.cidr.split('/')[1]],
+        'PeerDefNetwork': [network.value.cidr],
+        'PeerDefAllowedIPs': [network.value.peers[inventory_hostname] ~ '/32'],
+        'PeerDefDns': [network.value.peers[inventory_hostname]],
+        'PeerDefEndpoint': ansible_host ~ ':' ~ network.value.port,
+        'PeerDefPersistentKeepalive': 25,
+      }) }}
+  changed_when: true
+  when: _wireguard_portal_interface.status == 404

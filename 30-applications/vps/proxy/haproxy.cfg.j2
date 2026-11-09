@@ -1,5 +1,6 @@
 {% set wg_public = wireguard['wg-public'] %}
 {% set wg_private = wireguard['wg-private'] %}
+{% set wg_backbone = wireguard['wg-backbone'] %}
 global
     log stdout format raw local0
     user haproxy
@@ -31,8 +32,9 @@ backend wg-public
     server {{ name }} {{ address }}:{{ traefik_public_nodeport }} send-proxy-v2 check
 {% endfor %}
 
+# The nodes are not on wg-private, the proxy reaches them over wg-backbone
 backend wg-private
     mode tcp
-{% for name, address in wg_private.peers.items() if name != wg_private.hub %}
+{% for name, address in wg_backbone.peers.items() if name in groups['k3s_cluster'] %}
     server {{ name }} {{ address }}:{{ traefik_private_nodeport }} send-proxy-v2 check
 {% endfor %}

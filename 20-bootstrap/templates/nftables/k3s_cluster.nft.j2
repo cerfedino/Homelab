@@ -20,6 +20,9 @@ table inet homelab {
     # Allows other peers to ping this one
     iifname "wg-backbone" icmp type echo-request accept
 
+    # Allows the VPS to open connections to Traefik's wg-private entrypoint, for VPN users
+    iifname "wg-backbone" ip saddr {{ wireguard['wg-backbone'].peers[wireguard['wg-backbone'].hub] }} tcp dport {{ traefik_private_nodeport }} accept
+
     # Doesn't allow anyone to initiate any other connection to the peer over the backbone
     iifname "wg-backbone" drop
   }
@@ -36,19 +39,5 @@ table inet homelab {
 
     # Doesn't allow anything else in over this network
     iifname "wg-public" drop
-  }
-
-  # Same for VPN users, over the wg-private WireGuard network
-  chain wg-private {
-    type filter hook prerouting priority mangle; policy accept;
-
-    # Allows replies to reach the node
-    iifname "wg-private" ct state established,related accept
-
-    # Allows the VPS to open connections to Traefik's wg-private entrypoint
-    iifname "wg-private" ip saddr {{ wireguard['wg-private'].peers[wireguard['wg-private'].hub] }} tcp dport {{ traefik_private_nodeport }} accept
-
-    # Doesn't allow anything else in over this network
-    iifname "wg-private" drop
   }
 }

@@ -37,10 +37,9 @@ table inet homelab {
     # VPN users resolve names here
     iifname "{{ name }}" meta l4proto { tcp, udp } th dport 53 accept
 
-    # wg-portal's page, reached through Traefik on the nodes
-    iifname "{{ name }}" ip saddr { {{ network.peers | dict2items | rejectattr('key', 'eq', network.hub) | map(attribute='value') | join(', ') }} } tcp dport 8888 accept
-
 {% endfor %}
+    # wg-portal's page, reached through Traefik on the nodes
+    iifname "wg-backbone" ip saddr { {{ wireguard['wg-backbone'].peers | dict2items | selectattr('key', 'in', groups['k3s_cluster']) | map(attribute='value') | join(', ') }} } tcp dport 8888 accept
   }
 }
 

@@ -1,83 +1,13 @@
 ---
-# One WireGuard network. network.key is the interface name
+# One wg-quick WireGuard network. network.key is the interface name
 - name: "Join {{ network.key }}"
   when: inventory_hostname in network.value.peers
   block:
-    # The hub of a portal network is wg-portal: the interface and its key live in its database
-    - name: "Wait for wg-portal's API ({{ network.key }})"
-      ansible.builtin.wait_for:
-        host: "{{ wg_portal_api | urlsplit('hostname') }}"
-        port: "{{ wg_portal_api | urlsplit('port') }}"
-        timeout: 60
-      when: network.value.portal and inventory_hostname == network.value.hub
-
-    - name: "Ask wg-portal for the interface ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/interface/by-id/{{ network.key }}"
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-        status_code: [200, 404]
-      register: _wireguard_portal_interface
-      when: network.value.portal and inventory_hostname == network.value.hub
-
-    - name: "Let wg-portal prepare an interface ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/interface/prepare"
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-      register: _wireguard_portal_prepared
-      when: network.value.portal and inventory_hostname == network.value.hub and _wireguard_portal_interface.status == 404
-
-    - name: "Create the interface in wg-portal ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/interface/new"
-        method: POST
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-        body_format: json
-        body: >-
-          {{ _wireguard_portal_prepared.json | combine({
-            'Identifier': network.key,
-            'DisplayName': network.key,
-            'Mode': 'server',
-            'ListenPort': network.value.port,
-            'Addresses': [network.value.peers[inventory_hostname] ~ '/' ~ network.value.cidr.split('/')[1]],
-            'PeerDefNetwork': [network.value.cidr],
-            'PeerDefAllowedIPs': [network.value.cidr],
-            'PeerDefDns': [network.value.peers[inventory_hostname]],
-            'PeerDefEndpoint': ansible_host ~ ':' ~ network.value.port,
-            'PeerDefPersistentKeepalive': 25,
-          }) }}
-      register: _wireguard_portal_created
-      changed_when: true
-      when: network.value.portal and inventory_hostname == network.value.hub and _wireguard_portal_interface.status == 404
-
-    - name: "Remember wg-portal's public key ({{ network.key }})"
-      ansible.builtin.set_fact:
-        _wireguard_public_keys: "{{ _wireguard_public_keys | default({}) | combine({network.key: (_wireguard_portal_created.json if _wireguard_portal_created is not skipped else _wireguard_portal_interface.json).PublicKey}) }}"
-        _wireguard_hub_restarted: "{{ _wireguard_hub_restarted | default({}) | combine({network.key: false}) }}"
-      when: network.value.portal and inventory_hostname == network.value.hub
-
-
-
-
-
-
-
-
-
-
-    # not wg-portal enabled network
-      
     - name: "Generate the private key ({{ network.key }})"
       ansible.builtin.shell:
         cmd: umask 077 && wg genkey > /etc/wireguard/{{ network.key }}.key
         creates: /etc/wireguard/{{ network.key }}.key
       register: _wireguard_key
-      when: not (network.value.portal and inventory_hostname == network.value.hub)
 
     - name: "Read the public key ({{ network.key }})"
       ansible.builtin.shell:
@@ -85,12 +15,10 @@
       register: _wireguard_public_key
       changed_when: false
       check_mode: false
-      when: not (network.value.portal and inventory_hostname == network.value.hub)
 
     - name: "Remember the public key ({{ network.key }})"
       ansible.builtin.set_fact:
         _wireguard_public_keys: "{{ _wireguard_public_keys | default({}) | combine({network.key: _wireguard_public_key.stdout}) }}"
-      when: not (network.value.portal and inventory_hostname == network.value.hub)
 
     - name: "Write the interface config ({{ network.key }})"
       ansible.builtin.template:
@@ -100,64 +28,19 @@
         group: root
         mode: "0600"
       register: _wireguard_conf
-      when: not (network.value.portal and inventory_hostname == network.value.hub)
 
     - name: "Bring the hub up, now and at boot ({{ network.key }})"
       ansible.builtin.systemd_service:
         name: wg-quick@{{ network.key }}
         enabled: true
         state: "{{ 'restarted' if _wireguard_key.changed or _wireguard_conf.changed else 'started' }}"
-      when: inventory_hostname == network.value.hub and not network.value.portal
+      when: inventory_hostname == network.value.hub
       register: _wireguard_hub
 
     - name: "Remember whether the hub restarted ({{ network.key }})"
       ansible.builtin.set_fact:
         _wireguard_hub_restarted: "{{ _wireguard_hub_restarted | default({}) | combine({network.key: _wireguard_hub.changed}) }}"
-      when: inventory_hostname == network.value.hub and not network.value.portal
-
-    - name: "Ask wg-portal for this peer ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/peer/by-id/{{ _wireguard_public_key.stdout | urlencode | replace('/', '%2F') }}"
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-        status_code: [200, 404]
-      register: _wireguard_portal_peer
-      delegate_to: "{{ network.value.hub }}"
-      when: network.value.portal and inventory_hostname != network.value.hub
-
-    - name: "Let wg-portal prepare a peer ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/peer/prepare/{{ network.key }}"
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-      register: _wireguard_portal_prepared_peer
-      delegate_to: "{{ network.value.hub }}"
-      when: network.value.portal and inventory_hostname != network.value.hub and _wireguard_portal_peer.status == 404
-
-    # The key stays on this machine, so wg-portal only gets the public half and no preshared key
-    - name: "Register this peer in wg-portal ({{ network.key }})"
-      ansible.builtin.uri:
-        url: "{{ wg_portal_api }}/peer/new"
-        method: POST
-        url_username: "{{ wg_portal_api_user }}"
-        url_password: "{{ wg_portal_api_token }}"
-        force_basic_auth: true
-        body_format: json
-        body: >-
-          {{ _wireguard_portal_prepared_peer.json | combine({
-            'Identifier': _wireguard_public_key.stdout,
-            'PublicKey': _wireguard_public_key.stdout,
-            'PrivateKey': '',
-            'PresharedKey': '',
-            'DisplayName': inventory_hostname,
-            'UserIdentifier': '',
-            'Addresses': [network.value.peers[inventory_hostname] ~ '/32'],
-          }) }}
-      changed_when: true
-      delegate_to: "{{ network.value.hub }}"
-      when: network.value.portal and inventory_hostname != network.value.hub and _wireguard_portal_peer.status == 404
+      when: inventory_hostname == network.value.hub
 
     # A restarted hub forgets its peers, and an idle peer takes about two minutes to notice
     - name: "Bring the peers up, now and at boot ({{ network.key }})"

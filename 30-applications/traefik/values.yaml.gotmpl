@@ -1,7 +1,7 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
 {{- $host := index $app.hosts 0 }}
 {{- $wgPublic := index .Values.wireguard "wg-public" }}
-{{- $wgPrivate := index .Values.wireguard "wg-private" }}
+{{- $wgBackbone := index .Values.wireguard "wg-backbone" }}
 # Note to self: In order to have the actual LAN ip of a local client show up, I have to make sure that a traefik pod is guaranteed to run on the same node that is reached through the LAN kube-VIP, because otherwise kube-proxy would rewrite the source IP when forwarding the traffic to a node that has a traefik pod running. That's why we make Traefik a DaemonSet.
 
 service:
@@ -17,7 +17,7 @@ service:
       spec:
         type: NodePort
         externalTrafficPolicy: Local
-    # Same, over the wg-private WireGuard network
+    # Same for the wg-private entrypoint, over the wg-backbone WireGuard network
     wg-private:
       spec:
         type: NodePort
@@ -97,7 +97,7 @@ ports:
     transport:
       respondingTimeouts:
         readTimeout: 0
-  # VPN users, only reachable by the VPS over the wg-private WireGuard network
+  # VPN users, only reachable by the VPS over the wg-backbone WireGuard network
   wg-private:
     port: 8445
     nodePort: {{ .Values.traefik_private_nodeport }}
@@ -110,7 +110,7 @@ ports:
     # The VPS proxy passes the VPN user's address
     proxyProtocol:
       trustedIPs:
-        - {{ index $wgPrivate.peers $wgPrivate.hub }}
+        - {{ index $wgBackbone.peers $wgBackbone.hub }}
     transport:
       respondingTimeouts:
         readTimeout: 0

@@ -300,7 +300,7 @@ variable "wireguard" {
     port   = number                # UDP port the hub listens on
     hub    = string                # ansible name of the peer the others dial
     peers  = map(string)           # host name => its address in this network
-    portal = optional(bool, false) # the hub runs wg-portal, which owns the interface and takes further peers (people) at runtime
+    portal = optional(bool, false) # the hub runs wg-portal, which owns the interface and takes its peers at runtime
   }))
 
   validation {
@@ -340,6 +340,11 @@ variable "wireguard" {
   }
 
   validation {
+    condition     = alltrue([for _, n in var.wireguard : length(n.peers) == 1 if n.portal])
+    error_message = "a wireguard network with portal = true lists only its hub, machines join a network without it."
+  }
+
+  validation {
     condition     = length(distinct([for _, n in var.wireguard : "${n.hub}:${n.port}"])) == length(var.wireguard)
     error_message = "two wireguard networks with the same hub need different ports."
   }
@@ -355,7 +360,7 @@ variable "traefik_public_nodeport" {
   }
 }
 
-# Port on every k3s node where Traefik's wg-private entrypoint answers, reached only over the wg-private WireGuard network
+# Port on every k3s node where Traefik's wg-private entrypoint answers, reached only over the wg-backbone WireGuard network
 variable "traefik_private_nodeport" {
   type = number
 
