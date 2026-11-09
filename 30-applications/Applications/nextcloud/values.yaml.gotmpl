@@ -1,7 +1,7 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
 {{- $secrets := fromYaml (readFile "secrets.enc.yaml") }}
 # renovate: datasource=docker depName=nextcloud
-{{- $ncTag := "35.0.2-apache@sha256:3f05f4d5eded9d3d029e617926500645cca6344710364737a374088f6811095a" }}
+{{- $ncTag := "35.0.2-apache@sha256:786c102155d2717ba0f53a62b3fdd7a1354edc48e800b94dbe32294d9a5752a2" }}
 
 image:
   tag: {{ $ncTag }}
