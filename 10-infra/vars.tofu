@@ -278,6 +278,21 @@ variable "vms" {
   }
 }
 
+# The VPS that proxies the internet and the VPN users to the cluster
+variable "proxy_vps" {
+  type = object({
+    name                 = string # its Ansible host name
+    address              = string # public IPv4
+    ansible_user         = string
+    ssh_private_key_path = string # relative to REPO_ROOT, like vms
+  })
+
+  validation {
+    condition     = can(cidrhost("${var.proxy_vps.address}/32", 0))
+    error_message = "proxy_vps.address must be an IPv4 address."
+  }
+}
+
 # Additional hosts to add to Ansible
 variable "external_hosts" {
   type = map(object({

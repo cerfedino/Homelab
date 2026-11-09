@@ -130,3 +130,17 @@ rawResources:
             services:
               - name: psitransfer
                 port: 3000
+  psitransfer-public:
+    manifest:
+      apiVersion: traefik.io/v1alpha1      
+      kind: IngressRoute
+      spec:
+        entryPoints: [wg-public]
+        routes:
+          - match: Host(`{{ $host }}`) && !Path(`/files`) && !Path(`/`)
+            kind: Rule
+            middlewares:
+              - name: authentik-forward-auth@file
+            services:
+              - name: psitransfer
+                port: 3000
