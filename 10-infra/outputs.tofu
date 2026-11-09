@@ -42,6 +42,11 @@ locals {
         ip_lan                       = local.machines[n].ip_lan
         ip_internal                  = local.machines[n].ip_internal
     } },
+    { (var.proxy_vps.name) = {
+        ansible_host                 = var.proxy_vps.address
+        ansible_user                 = var.proxy_vps.ansible_user
+        ansible_ssh_private_key_file = "${var.REPO_ROOT}/${var.proxy_vps.ssh_private_key_path}"
+    } },
     { for k, v in var.external_hosts : k => {
         ansible_host                 = v.address
         ansible_user                 = v.ansible_user
@@ -109,7 +114,7 @@ output "ansible_yaml_inventory" {
 
   precondition {
     condition     = alltrue(flatten([for _, n in var.wireguard : [for k, _ in n.peers : contains(keys(local.ansible_hosts), k)]]))
-    error_message = "wireguard peers must be hosts Ansible can reach (vms, PVE hosts or external_hosts)."
+    error_message = "wireguard peers must be hosts Ansible can reach (vms, PVE hosts, the proxy VPS or external_hosts)."
   }
 
 
@@ -168,6 +173,7 @@ output "helmfile_values" {
     dnsmasq_upstream_servers = var.dnsmasq_upstream_servers
     dnsmasq_address_entries  = local.dnsmasq_all_entries
     machines             = local.machines
+    proxy_vps            = var.proxy_vps
     backup = {
       s3_endpoint     = "https://${var.hetzner_s3.endpoint}"
       s3_bucket       = minio_s3_bucket.backups.bucket

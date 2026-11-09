@@ -63,6 +63,9 @@ variable "apps" {
     # The hostnames the app answers on, read by the release template for its routes
     hosts = optional(list(string), [])
 
+    # The hosts that get a public DNS record pointing at the proxy VPS
+    public_vps_dns = optional(list(string), [])
+
     # Uptime Kuma monitors
     monitors = optional(list(object({
       name = string
@@ -118,6 +121,11 @@ variable "apps" {
   validation {
     condition     = alltrue(flatten([for app in var.apps : [for h in app.hosts : endswith(h, ".${var.domain}")]]))
     error_message = "hosts must end in .<domain>."
+  }
+
+  validation {
+    condition     = alltrue(flatten([for app in var.apps : [for h in app.public_vps_dns : contains(app.hosts, h)]]))
+    error_message = "public_vps_dns must list hosts of the same entry."
   }
 
 }

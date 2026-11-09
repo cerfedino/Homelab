@@ -1,0 +1,13 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: apply
+
+  apply:
+    run: once
+    interactive: true
+    cmds:
+      - tofu init
+      - tofu apply

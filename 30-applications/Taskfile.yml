@@ -33,6 +33,9 @@ includes:
   cilium:
     taskfile: cilium
     dir: cilium
+  dns:
+    taskfile: dns
+    dir: dns
   immich:
     taskfile: Applications/immich
     dir: Applications/immich
@@ -112,6 +115,8 @@ tasks:
       - whoami:apply
       - windmill:apply
       - woodpecker:apply
+    cmds:
+      - task: dns:apply
 
   check:
     desc: validate every app*.enc.yaml against the schema
