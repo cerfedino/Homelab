@@ -49,7 +49,7 @@ releases:
     namespace: csi-proxmox
     createNamespace: true
     chart: oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
-    version: "0.5.13"
+    version: "0.5.15"
     wait: true
     values:
       - csi-proxmox/values.yaml.gotmpl
