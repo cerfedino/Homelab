@@ -10,7 +10,7 @@ table inet homelab {
     tcp dport 22 drop
   }
 
-  # Prerouting for Wireguard
+  # The WireGuard chains hook prerouting: kube-proxy rewrites a NodePort to the pod's address and port right after, so later hooks no longer see it
   chain wg-backbone {
     type filter hook prerouting priority mangle; policy accept;
 

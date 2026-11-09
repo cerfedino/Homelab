@@ -1,8 +1,0 @@
-name: "whoami"
-
-services:
-  whoami:
-    image: traefik/whoami:v1.12.0
-    restart: unless-stopped
-    ports:
-      - 127.0.0.1:8080:80
