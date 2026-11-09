@@ -38,7 +38,6 @@ controllers:
 
 service:
   app:
-    forceRename: psitransfer
     controller: psitransfer
     ports:
       http:
@@ -46,7 +45,6 @@ service:
 
 secrets:
   app:
-    forceRename: psitransfer
     stringData:
       admin_pass: {{ $secrets.psitransfer_admin_pass | quote }}
 
@@ -116,7 +114,6 @@ networkpolicies:
 
 rawResources:
   psitransfer:
-    forceRename: psitransfer
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute

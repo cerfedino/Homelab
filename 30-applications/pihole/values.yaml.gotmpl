@@ -49,13 +49,11 @@ controllers:
 
 service:
   web:
-    forceRename: pihole-web
     controller: pihole
     ports:
       http:
         port: 80
   dns:
-    forceRename: pihole-dns
     controller: pihole
     type: LoadBalancer
     externalTrafficPolicy: Local
@@ -128,7 +126,6 @@ networkpolicies:
 
 rawResources:
   pihole:
-    forceRename: pihole
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute

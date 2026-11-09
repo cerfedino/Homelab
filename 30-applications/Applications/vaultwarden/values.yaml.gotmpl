@@ -84,7 +84,6 @@ controllers:
 
 service:
   app:
-    forceRename: vaultwarden
     controller: vaultwarden
     ports:
       http:
@@ -92,11 +91,9 @@ service:
 
 secrets:
   smtp:
-    forceRename: vaultwarden-smtp
     stringData:
       password: {{ .Values.smtp.password | quote }}
   sso:
-    forceRename: vaultwarden-sso
     stringData:
       client_secret: {{ $app.authentik.oidc.client_secret | quote }}
 
@@ -132,7 +129,6 @@ networkpolicies:
 
 rawResources:
   vaultwarden:
-    forceRename: vaultwarden
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute

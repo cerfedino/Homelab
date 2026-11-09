@@ -160,7 +160,6 @@ service:
       http:
         port: 80
   postgres:
-    forceRename: tandoor-postgres
     controller: postgres
     ports:
       postgres:
@@ -202,14 +201,12 @@ persistence:
 
 secrets:
   secrets:
-    forceRename: tandoor-secrets
     stringData:
       secret_key: {{ $secrets.tandoor_secret_key | quote }}
       fdc_api_key: {{ $secrets.tandoor_fdc_api_key | quote }}
       socialaccount_providers: |
         {"openid_connect": {"APPS": [{"provider_id": "authentik", "name": "Authentik", "client_id": {{ $app.authentik.oidc.client_id | quote }}, "secret": {{ $app.authentik.oidc.client_secret | quote }}, "settings": {"server_url": "{{ $app.authentik.oidc.issuer }}.well-known/openid-configuration"}}]}}
   postgres:
-    forceRename: tandoor-postgres
     stringData:
       password: {{ $secrets.tandoor_postgres_password | quote }}
 
@@ -245,7 +242,6 @@ networkpolicies:
 
 rawResources:
   tandoor:
-    forceRename: tandoor
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
