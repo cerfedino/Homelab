@@ -47,15 +47,20 @@
         label: "{{ item | relpath(playbook_dir) }}"
       register: _rendered
 
+    - name: Remember the stacks whose files changed
+      ansible.builtin.set_fact:
+        _changed_stacks: >-
+          {{ (_copied.results | selectattr('changed') | map(attribute='item') | list)
+             + (_rendered.results | selectattr('changed') | map(attribute='item')
+                | map('relpath', playbook_dir) | map('split', '/') | map('first') | list) }}
+
     # compose only recreates on a changed service definition, not on a changed mounted file
     - name: Bring the stacks up
       community.docker.docker_compose_v2:
-        project_src: "/opt/stacks/{{ item.item }}"
+        project_src: "/opt/stacks/{{ item }}"
         remove_orphans: true
-        recreate: "{{ 'always' if item.changed or _rendered.results | selectattr('changed') | map(attribute='item') | select('search', '/' ~ item.item ~ '/') | list | length > 0 else 'auto' }}"
-      loop: "{{ _copied.results }}"
-      loop_control:
-        label: "{{ item.item }}"
+        recreate: "{{ 'always' if item in _changed_stacks else 'auto' }}"
+      loop: "{{ _copied.results | map(attribute='item') | list }}"
 
 # wg-portal owns these interfaces, so they can only be created once its stack is up
 - name: Create the WireGuard networks wg-portal runs
