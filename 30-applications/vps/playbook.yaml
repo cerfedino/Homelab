@@ -57,9 +57,9 @@
       loop_control:
         label: "{{ item.item }}"
 
-# wg-portal is the hub of these networks, so the nodes can only join once its stack is up
-- name: Join the WireGuard networks wg-portal runs
-  hosts: wireguard
+# wg-portal owns these interfaces, so they can only be created once its stack is up
+- name: Create the WireGuard networks wg-portal runs
+  hosts: vps1
   become: true
   vars_files:
     - wg-portal/secrets.enc.yaml
@@ -69,8 +69,8 @@
     wg_portal_api_token: "{{ admin_api_token }}"
   tasks:
     - name: Set up each network
-      ansible.builtin.include_tasks: ../../20-bootstrap/tasks/wireguard.yaml
-      loop: "{{ wireguard | dict2items | selectattr('value.portal') | list }}"
+      ansible.builtin.include_tasks: ../../20-bootstrap/tasks/wireguard-portal.yaml
+      loop: "{{ wireguard | dict2items | selectattr('value.portal') | selectattr('value.hub', 'eq', inventory_hostname) | list }}"
       loop_control:
         loop_var: network
         label: "{{ network.key }}"
