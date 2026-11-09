@@ -1,6 +1,6 @@
 ---
 - name: Install Docker and the compose plugin
-  hosts: vps1
+  hosts: proxy_vps
   become: true
   tasks:
     - name: Install what the apt repository module needs
