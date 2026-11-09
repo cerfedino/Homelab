@@ -1,0 +1,96 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+        - from:
+            # Allow for Jellyfin LDAP access
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: media
+              podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: jellyfin
+          ports:
+            - port: 3389
+            - port: 6636
+  traefik-server:
+    # the authentik chart's server pods, deployed by the authentik release
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - authentik
+        - key: app.kubernetes.io/component
+          operator: In
+          values:
+            - server
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+  traefik-outpost-proxy:
+    # the external outpost pods, created by authentik itself
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - authentik-outpost-proxy
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  internal:
+    forceRename: authentik-server-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: authentik-server
+                port: 80
+  external:
+    forceRename: authentik-server-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: authentik-server
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../_lib/schedule.yaml.gotmpl") (dict "bucket" "authentik" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

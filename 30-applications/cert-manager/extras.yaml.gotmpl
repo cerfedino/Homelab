@@ -1,0 +1,6 @@
+{{- $token := readFile "cloudflare-dns-token.yaml.k3ssecret.enc" | fromYaml }}
+secrets:
+  cloudflare-dns-token:
+    forceRename: cloudflare-dns-token
+    type: Opaque
+    stringData: {{ $token.stringData | toYaml | nindent 6 }}

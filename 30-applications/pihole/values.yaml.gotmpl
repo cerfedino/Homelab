@@ -1,9 +1,150 @@
-{{- $vals := merge (readFile "values.enc.yaml" | fromYaml) .Values }}
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) (dict "Values" $vals)) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  pihole:
+    pod:
+      annotations:
+        # force a rollout when dnsmasq entries change
+        checksum/dnsmasq: {{ .Values.dnsmasq_address_entries | toYaml | sha256sum }}
+    containers:
+      app:
+        image:
+          repository: pihole/pihole
+          tag: 2026.07.2
+        env:
+          - name: TZ
+            value: "Europe/Zurich"
+          - name: FTLCONF_webserver_api_password
+            valueFrom:
+              secretKeyRef:
+                name: pihole-admin
+                key: password
+          - name: FTLCONF_dns_upstreams
+            value: {{ .Values.dnsmasq_upstream_servers | join ";" | quote }}
+          - name: FTLCONF_dns_listeningMode
+            value: "all"
+          - name: FTLCONF_misc_etc_dnsmasq_d
+            value: "true"
+        ports:
+          - name: dns-udp
+            containerPort: 53
+            protocol: UDP
+          - name: dns-tcp
+            containerPort: 53
+            protocol: TCP
+          - name: web
+            containerPort: 80
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 53
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 512Mi
+
+service:
+  web:
+    forceRename: pihole-web
+    controller: pihole
+    ports:
+      http:
+        port: 80
+  dns:
+    forceRename: pihole-dns
+    controller: pihole
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    annotations:
+      kube-vip.io/loadbalancerIPs: {{ .Values.pihole_svc_address | quote }}
+    ports:
+      dns-udp:
+        port: 53
+        protocol: UDP
+      dns-tcp:
+        port: 53
+        protocol: TCP
+
+secrets:
+  admin:
+    forceRename: pihole-admin
+    stringData:
+      password: {{ $secrets.pihole_admin_password | quote }}
+
+configMaps:
+  dnsmasq:
+    forceRename: pihole-dnsmasq
+    data:
+      02-lan-addresses.conf: |
+{{- range .Values.dnsmasq_address_entries }}
+        local=/{{ .domain }}/
+        address=/{{ .domain }}/{{ .address }}
 {{- end }}
+
+persistence:
+  data:
+    forceRename: pihole-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    globalMounts:
+      - path: /etc/pihole
+  dnsmasq:
+    type: configMap
+    identifier: dnsmasq
+    globalMounts:
+      - path: /etc/dnsmasq.d
+        readOnly: true
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+  traefik:
+    controller: pihole
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  internal:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
-{{- end }}
+            services:
+              - name: pihole-web
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../_lib/schedule.yaml.gotmpl") (dict "bucket" "pihole" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

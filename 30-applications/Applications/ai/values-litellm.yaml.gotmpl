@@ -1,12 +1,13 @@
+{{- $app := readFile "app-litellm.enc.yaml" | fromYaml }}
 masterkeySecretName: litellm-secrets
 masterkeySecretKey: LITELLM_MASTER_KEY
 
 environmentSecrets:
   - litellm-secrets
 
-{{- $akBase := regexReplaceAll "application/o/.+$" .Values.oidc.litellm_external.issuer "application/o" }}
+{{- $akBase := regexReplaceAll "application/o/.+$" $app.external.oidc.issuer "application/o" }}
 envVars:
-  PROXY_BASE_URL: https://{{ .Values.apps.litellm.external.dns_hostname }}
+  PROXY_BASE_URL: https://{{ $app.external.dns_hostname }}
   # authentik's endpoints are global; only discovery is per-application
   GENERIC_AUTHORIZATION_ENDPOINT: {{ $akBase }}/authorize/
   GENERIC_TOKEN_ENDPOINT: {{ $akBase }}/token/
@@ -84,6 +85,26 @@ proxy_config:
         model: openai/claude-haiku-4-5
         api_base: http://claudecode:8000/v1
         api_key: dummy
+    - model_name: mistral-large-latest
+      litellm_params:
+        model: mistral/mistral-large-latest
+        api_key: os.environ/MISTRAL_API_KEY
+        drop_params: true
+    - model_name: mistral-medium-latest
+      litellm_params:
+        model: mistral/mistral-medium-latest
+        api_key: os.environ/MISTRAL_API_KEY
+        drop_params: true
+    - model_name: mistral-small-latest
+      litellm_params:
+        model: mistral/mistral-small-latest
+        api_key: os.environ/MISTRAL_API_KEY
+        drop_params: true
+    - model_name: codestral-latest
+      litellm_params:
+        model: mistral/codestral-latest
+        api_key: os.environ/MISTRAL_API_KEY
+        drop_params: true
   router_settings:
     num_retries: 0
     disable_cooldowns: true

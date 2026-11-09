@@ -1,8 +1,8 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- $issuer := readFile "cluster-issuer.enc.yaml" | fromYaml }}
+rawResources:
+  letsencrypt:
+    forceRename: letsencrypt
+    manifest:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      spec: {{ $issuer.spec | toYaml | nindent 8 }}

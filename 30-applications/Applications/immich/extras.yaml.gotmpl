@@ -1,8 +1,148 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  postgres:
+    forceRename: immich-postgres
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        image:
+          repository: ghcr.io/immich-app/postgres
+          tag: 16-vectorchord0.4.3-pgvectors0.2.0
+        env:
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: immich
+          - name: POSTGRES_DB
+            value: immich
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: immich-postgres
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "immich"]
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 1Gi
+
+service:
+  postgres:
+    forceRename: immich-postgres
+    controller: postgres
+    ports:
+      postgres:
+        port: 5432
+
+persistence:
+  library:
+    forceRename: immich-library
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 500Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    # claimed by the immich release's pods, not mounted here
+    advancedMounts:
+      postgres: {}
+  postgres-data:
+    forceRename: immich-postgres-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 8Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+
+secrets:
+  postgres:
+    forceRename: immich-postgres
+    stringData:
+      password: {{ $secrets.immich_postgres_password | quote }}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    # the immich chart's server pods, deployed by the immich release
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - server
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  internal:
+    forceRename: immich-internal
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
 {{- end }}
+            services:
+              - name: immich-server
+                port: 2283
+  external:
+    forceRename: immich-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
+            services:
+              - name: immich-server
+                port: 2283
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "immich" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

@@ -1,12 +1,13 @@
-{{- $secrets := fromYaml (readFile "values.enc.yaml") }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := fromYaml (readFile "secrets.enc.yaml") }}
 # renovate: datasource=docker depName=nextcloud
-{{- $ncTag := "35.0.1-apache" }}
+{{- $ncTag := "35.0.2-apache@sha256:786c102155d2717ba0f53a62b3fdd7a1354edc48e800b94dbe32294d9a5752a2" }}
 
 image:
   tag: {{ $ncTag }}
 
 nextcloud:
-  host: {{ .Values.apps.filecloud.external.dns_hostname }}
+  host: {{ $app.external.dns_hostname }}
   username: admin
   password: {{ $secrets.nextcloud_admin_password | quote }}
 
@@ -26,9 +27,10 @@ nextcloud:
     custom.config.php: |-
       <?php
       $CONFIG = array(
-        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ .Values.apps.filecloud.external.dns_hostname }}'),
-        'overwrite.cli.url' => 'https://{{ .Values.apps.filecloud.external.dns_hostname }}',
+        'trusted_domains' => array('localhost', 'nextcloud', 'nextcloud.nextcloud.svc.cluster.local', '{{ $app.external.dns_hostname }}'),
+        'overwrite.cli.url' => 'https://{{ $app.external.dns_hostname }}',
         'overwriteprotocol' => 'https',
+        'allow_local_remote_servers' => true,
         'default_phone_region' => 'CH',
         'maintenance_window_start' => 1,
         // trust the pod network such that we can read the X-Forwarded-For IP
@@ -54,14 +56,14 @@ nextcloud:
 
   extraEnv:
     - name: WHITEBOARD_URL
-      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}/whiteboard
+      value: https://{{ $app.external.dns_hostname }}/whiteboard
     - name: WHITEBOARD_JWT_SECRET
       valueFrom:
         secretKeyRef:
           name: nextcloud-whiteboard
           key: jwt_secret
     - name: COLLABORA_WOPI_URL
-      value: https://{{ .Values.apps.filecloud.external.dns_hostname }}
+      value: https://{{ $app.external.dns_hostname }}
     - name: OIDC_CLIENT_ID
       valueFrom:
         secretKeyRef:
@@ -136,9 +138,9 @@ collabora:
   enabled: true
   collabora:
     # Collabora is under the same hostname
-    server_name: {{ .Values.apps.filecloud.external.dns_hostname }}
+    server_name: {{ $app.external.dns_hostname }}
     aliasgroups:
-      - host: "https://{{ .Values.apps.filecloud.external.dns_hostname }}:443"
+      - host: "https://{{ $app.external.dns_hostname }}:443"
     username: admin
     password: {{ $secrets.collabora_admin_password | quote }}
     # TLS terminates at traefik
@@ -166,12 +168,3 @@ resources:
 persistence:
   enabled: true
   existingClaim: nextcloud-data
-
-extraManifests:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}
-{{- end }}
-{{- end }}

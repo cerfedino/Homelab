@@ -19,8 +19,8 @@ terraform {
 }
 
 locals {
-  applications = yamldecode(file("../../app-registry/generated/generated.applications.yaml"))
-  secrets      = sensitive(yamldecode(file("values.enc.yaml")))
+  applications = module.apps.applications
+  secrets      = sensitive(yamldecode(file("secrets.enc.yaml")))
 }
 
 provider "prowlarr" {

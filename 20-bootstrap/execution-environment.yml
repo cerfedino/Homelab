@@ -23,6 +23,7 @@ dependencies:
   galaxy:
     collections:
       - name: artis3n.tailscale
+      - name: community.docker
       - name: https://github.com/k3s-io/k3s-ansible.git
         type: git
         version: de30fcd

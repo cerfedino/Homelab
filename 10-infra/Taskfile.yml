@@ -22,7 +22,9 @@ tasks:
     generates:
       - generated/generated.inventory.yaml
       - generated/generated.infra.yaml
+      - generated/generated.ssh_config
     cmds:
       - mkdir -p generated
       - tofu output -show-sensitive -raw ansible_yaml_inventory > generated/generated.inventory.yaml
       - tofu output -show-sensitive -raw helmfile_values > generated/generated.infra.yaml
+      - tofu output -show-sensitive -raw ssh_config > generated/generated.ssh_config

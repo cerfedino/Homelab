@@ -1,8 +1,267 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  tandoor:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/tandoorrecipes/recipes
+          tag: 2.6.15
+        env:
+          - name: ALLOWED_HOSTS
+            value: {{ $app.external.dns_hostname }},tandoor.tandoor.svc.cluster.local
+          - name: TZ
+            value: Europe/Zurich
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-secrets
+                key: secret_key
+          - name: DB_ENGINE
+            value: django.db.backends.postgresql
+          - name: POSTGRES_HOST
+            value: tandoor-postgres
+          - name: POSTGRES_PORT
+            value: "5432"
+          - name: POSTGRES_USER
+            value: tandoor
+          - name: POSTGRES_DB
+            value: tandoor
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-postgres
+                key: password
+          - name: SOCIAL_PROVIDERS
+            value: allauth.socialaccount.providers.openid_connect
+          - name: SOCIALACCOUNT_PROVIDERS
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-secrets
+                key: socialaccount_providers
+          - name: HIDE_LOGIN_FORM
+            value: "1"
+          - name: SOCIAL_DEFAULT_ACCESS
+            value: "1"
+          - name: SOCIAL_DEFAULT_GROUP
+            value: user
+          - name: AI_ALLOWED_URLS
+            value: http://litellm.ai.svc.cluster.local:4000/v1
+          - name: FDC_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-secrets
+                key: fdc_api_key
+        ports:
+          - containerPort: 80
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 80
+                httpHeaders:
+                  - name: Host
+                    value: {{ $app.external.dns_hostname }}
+              initialDelaySeconds: 20
+        resources:
+          limits:
+            memory: 1Gi
+  postgres:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        image:
+          repository: postgres
+          tag: "18.6"
+        env:
+          # subdirectory: initdb refuses the mount point itself (lost+found)
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: tandoor
+          - name: POSTGRES_DB
+            value: tandoor
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-postgres
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "tandoor", "-d", "tandoor"]
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+  # Tandoor MCP allows LLMs to override recipe-level nutrition info, so in a cron job we clear them every 5 minutes.
+  clear-nutrition:
+    forceRename: clear-nutrition
+    type: cronjob
+    cronjob:
+      schedule: "*/5 * * * *"
+      concurrencyPolicy: Forbid
+      successfulJobsHistory: 1
+      failedJobsHistory: 2
+    pod:
+      restartPolicy: OnFailure
+    containers:
+      psql:
+        image:
+          repository: postgres
+          tag: "18.6"
+        env:
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: tandoor-postgres
+                key: password
+        command:
+          - psql
+          - -h
+          - tandoor-postgres
+          - -U
+          - tandoor
+          - -d
+          - tandoor
+          - -v
+          - ON_ERROR_STOP=1
+          - -c
+          - |
+            UPDATE cookbook_recipe SET nutrition_id = NULL WHERE nutrition_id IS NOT NULL;
+            DELETE FROM cookbook_nutritioninformation;
+        resources:
+          requests:
+            memory: 32Mi
+          limits:
+            memory: 64Mi
+
+service:
+  app:
+    forceRename: tandoor
+    controller: tandoor
+    ports:
+      http:
+        port: 80
+  postgres:
+    forceRename: tandoor-postgres
+    controller: postgres
+    ports:
+      postgres:
+        port: 5432
+
+persistence:
+  media:
+    forceRename: tandoor-media
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 10Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      tandoor:
+        app:
+          - path: /opt/recipes/mediafiles
+  static:
+    type: emptyDir
+    advancedMounts:
+      tandoor:
+        app:
+          - path: /opt/recipes/staticfiles
+  postgres-data:
+    forceRename: tandoor-postgres-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+
+secrets:
+  secrets:
+    forceRename: tandoor-secrets
+    stringData:
+      secret_key: {{ $secrets.tandoor_secret_key | quote }}
+      fdc_api_key: {{ $secrets.tandoor_fdc_api_key | quote }}
+      socialaccount_providers: |
+        {"openid_connect": {"APPS": [{"provider_id": "authentik", "name": "Authentik", "client_id": {{ $app.external.oidc.client_id | quote }}, "secret": {{ $app.external.oidc.client_secret | quote }}, "settings": {"server_url": "{{ $app.external.oidc.issuer }}.well-known/openid-configuration"}}]}}
+  postgres:
+    forceRename: tandoor-postgres
+    stringData:
+      password: {{ $secrets.tandoor_postgres_password | quote }}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: librechat
+          ports:
+            - port: 80
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: sparkyfitness
+          ports:
+            - port: 80
+  traefik:
+    controller: tandoor
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: tandoor
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "tandoor" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

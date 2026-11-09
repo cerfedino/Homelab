@@ -1,6 +1,6 @@
 variable "proxmox" {
   type = object({
-    endpoint_lan  = string
+    endpoint_lan      = string
     endpoint_internal = string
     insecure          = bool
 
@@ -15,11 +15,11 @@ variable "proxmox" {
 
 # Root of the cloned repository. Variable set by the devbox environment
 variable "REPO_ROOT" {
-    type = string
+  type = string
 }
 
 variable "proxmox_cluster_name" {
-  type      = string
+  type = string
 }
 
 # data of the PVE ACME DNS plugin
@@ -32,15 +32,15 @@ variable "acme_cloudflare" {
 }
 
 variable "proxmox_node_name" {
-  type      = string
+  type = string
 }
 
 variable "proxmox_storage_name" {
-  type      = string
+  type = string
 }
 
 variable "proxmox_pool_name" {
-  type      = string
+  type = string
 }
 
 variable "proxmox_datastores" {
@@ -53,7 +53,7 @@ variable "proxmox_datastores" {
 
 # Operator account cloud-init creates on every VM
 variable "vm_username" {
-  type      = string
+  type = string
 }
 
 variable "CSI_user_password" {
@@ -63,9 +63,9 @@ variable "CSI_user_password" {
 
 variable "network_lan" {
   type = object({
-    cidr    = string # e.g. "192.168.1.0/24"
-    bridge  = string # e.g. "vmbr0"
-    gateway = string
+    cidr         = string # e.g. "192.168.1.0/24"
+    bridge       = string # e.g. "vmbr0"
+    gateway      = string
     bridge_ports = list(string)
   })
 
@@ -231,90 +231,66 @@ variable "backup_restic_password" {
   }
 }
 
-# VMs to create
-variable "vm_k3s" {
+# VMs to create. 
+# 'role' must be one of k3s, tailscale if the VM fits a specific purpose, or blank if it doesn't.
+variable "vms" {
   type = map(object({
-    vm_id        = number
-    display_name = string
-    node_name    = string
-    cores       = number
-    memory      = number
-    ballooning  = optional(bool, false)
-    disk_size   = number
-    # Paths relative to REPO_ROOT
-    ssh_public_key_paths = list(string)
-    ssh_private_key_paths = list(string)
+    role       = optional(string, "") # k3s | tailscale | haos | blank
+    vm_id      = number
+    node_name  = string
+    cores      = number
+    memory     = number
+    ballooning = optional(bool, false)
+    disk_size  = number
+    # cloud-init roles. Paths relative to REPO_ROOT
+    ssh_public_key_paths  = optional(list(string), [])
+    ssh_private_key_paths = optional(list(string), [])
+    # haos
+    datastore    = optional(string)
+    mac_lan      = optional(string)
+    mac_internal = optional(string)
+    usb_host     = optional(string)
   }))
 
   validation {
-    condition     = length([for k, v in var.vm_k3s : 1 if length(v.ssh_public_key_paths) < 1]) == 0
-    error_message = "At least one SSH pubkey for each VM such that Ansible can connect to the VM"
+    condition     = alltrue([for _, v in var.vms : contains(["k3s", "tailscale", "haos", ""], v.role)])
+    error_message = "vms role must be one of k3s, tailscale, haos or blank"
   }
 
   validation {
-    condition     = length([for k, v in var.vm_k3s : 1 if length(v.ssh_private_key_paths) < 1]) == 0
-    error_message = "At least one SSH pubkey for each VM such that Ansible can connect to the VM"
-  }
-
-  validation {
-    condition     = length([for k, v in var.vm_k3s : 1 if v.vm_id <=0 || v.vm_id >= 255 ]) == 0
+    condition     = alltrue([for _, v in var.vms : v.vm_id > 0 && v.vm_id < 255])
     error_message = "VM ID has to be in range [1, 254]"
   }
 
   validation {
-    condition     = length(distinct([for k, v in var.vm_k3s : v.vm_id])) == length(var.vm_k3s)
-    error_message = "vm_k3s VM IDs must be unique"
+    condition     = length(distinct([for _, v in var.vms : v.vm_id])) == length(var.vms)
+    error_message = "VM IDs must be unique"
+  }
+
+  validation {
+    condition     = alltrue([for _, v in var.vms : length(v.ssh_public_key_paths) > 0 && length(v.ssh_private_key_paths) > 0 if v.role != "haos"])
+    error_message = "cloud-init VMs need at least one SSH public and private key such that Ansible can connect"
+  }
+
+  validation {
+    condition     = alltrue([for _, v in var.vms : v.datastore != null && v.mac_lan != null && v.mac_internal != null && v.usb_host != null if v.role == "haos"])
+    error_message = "haos VMs need datastore, mac_lan, mac_internal and usb_host"
   }
 }
 
-variable "vm_tailscale" {
-  type = object({
-    vm_id        = number
-    display_name = string
-    node_name    = string
-    cores       = number
-    memory      = number
-    ballooning  = optional(bool, false)
-    disk_size   = number
-    # Paths relative to REPO_ROOT
-    ssh_public_key_paths = list(string)
-    ssh_private_key_paths = list(string)
-  })
+# Additional hosts to add to Ansible
+variable "external_hosts" {
+  type = map(object({
+    address              = string
+    ansible_user         = string
+    ssh_private_key_path = string # relative to REPO_ROOT, like vms
+  }))
+  default = {}
 
   validation {
-    condition     = length(var.vm_tailscale.ssh_public_key_paths) > 0
-    error_message = "At least one SSH pubkey for each VM such that Ansible can connect to the VM"
+    condition     = alltrue([for _, v in var.external_hosts : can(cidrhost("${v.address}/32", 0))])
+    error_message = "external_hosts addresses must be IPv4 addresses."
   }
-
-  validation {
-    condition     = length(var.vm_tailscale.ssh_private_key_paths) > 0
-    error_message = "At least one SSH private key for each VM such that Ansible can connect to the VM"
-  }
-
-  validation {
-    condition     = var.vm_tailscale.vm_id > 0 && var.vm_tailscale.vm_id < 255
-    error_message = "VM ID has to be in range [1, 254]"
-  }
-
-  validation {
-    condition     = !contains([for k, v in var.vm_k3s : v.vm_id], var.vm_tailscale.vm_id)
-    error_message = "vm_tailscale.vm_id collides with a vm_k3s VM ID"
-  }
-}
-
-variable "vm_haos" {
-  type = object({
-    vm_id        = number
-    display_name = string
-    node_name    = string
-    cores        = number
-    memory       = number
-    disk_size    = number
-    datastore    = string
-    mac_lan      = string
-    mac_internal = string
-    usb_host     = string
-  })
 }
 
 # k3s pod and service networks (its cluster-cidr and service-cidr)

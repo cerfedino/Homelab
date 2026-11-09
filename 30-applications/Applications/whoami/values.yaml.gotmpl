@@ -1,0 +1,80 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+controllers:
+  whoami:
+    containers:
+      app:
+        image:
+          repository: traefik/whoami
+          tag: v1.12.0
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: 80
+        resources:
+          requests:
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+
+service:
+  app:
+    controller: whoami
+    ports:
+      http:
+        port: 80
+
+rawResources:
+  internal:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.internal.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.internal.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-local@file
+{{- end }}
+            services:
+              - name: whoami
+                port: 80
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: whoami
+                port: 80
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: whoami
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik

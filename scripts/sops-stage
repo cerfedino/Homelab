@@ -68,7 +68,7 @@ records="$(mktemp)"
 trap 'rm -f "$records"' EXIT
 
 find . -type f \( -name '*.enc' -o -name '*.enc.*' \) \
-    -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' -print0 |
+    -not -path './.git/*' -not -path './.devbox/*' -not -path '*/.terraform/*' -not -path '*/__pycache__/*' -print0 |
   xargs -0 -P "$(nproc)" -I{} "$self" --worker {} "$records"
 
 # skip-worktree keeps unencrypted secrets out of git status so we can avoid making the tree unnecessarily dirty

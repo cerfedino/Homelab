@@ -133,10 +133,7 @@ locals {
   internal_prefix = split("/", var.network_internal.cidr)[1]
 
   # Every VM's LAN IP. Used to guarantee the kube-vip VIP doesn't collide with a VM.
-  vm_lan_ips = concat(
-    [for _, v in var.vm_k3s : cidrhost(var.network_lan.cidr, v.vm_id)],
-    [cidrhost(var.network_lan.cidr, var.vm_tailscale.vm_id)],
-  )
+  vm_lan_ips = [for _, v in var.vms : cidrhost(var.network_lan.cidr, v.vm_id)]
 }
 resource "proxmox_download_file" "ubuntu_resolute_cloudinit" {
   content_type = "import"

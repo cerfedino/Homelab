@@ -1,9 +1,10 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
 postgresql:
   enabled: false
 
 windmill:
   databaseUrlSecretName: windmill-database
-  baseDomain: {{ .Values.apps.windmill.external.dns_hostname }}
+  baseDomain: {{ $app.external.dns_hostname }}
   baseProtocol: https
   appReplicas: 1
   # LSP/multiplayer sidecar deployment, heavy image
@@ -12,13 +13,13 @@ windmill:
   indexer:
     enabled: false
 
-  {{- $oidc := .Values.oidc.windmill_external }}
+  {{- $oidc := $app.external.oidc }}
   {{- $akBase := regexReplaceAll "application/o/.+$" $oidc.issuer "application/o" }}
   operator:
     enabled: true
     instanceSpec:
       global_settings:
-        base_url: https://{{ .Values.apps.windmill.external.dns_hostname }}
+        base_url: https://{{ $app.external.dns_hostname }}
         oauths:
           authentik:
             id: {{ $oidc.client_id | quote }}
@@ -38,7 +39,7 @@ windmill:
       replicas: 1
       extraEnv:
         - name: WORKER_TAGS
-          value: "deno,python3,go,bash,powershell,bun,php,rust,ansible,csharp,nu,java,ruby,rlang,duckdb,dbt,dependency,flow,other"
+          value: "deno,python3,go,bash,powershell,bun,rust,ansible,csharp,nu,java,ruby,rlang,duckdb,dbt,dependency,flow,other"
       resources:
         requests:
           memory: 512Mi

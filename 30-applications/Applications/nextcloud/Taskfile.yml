@@ -15,6 +15,7 @@ tasks:
 
   helmfile-apply:
     cmds:
+      - cd ../.. && helmfile apply --skip-refresh -l name=nextcloud-extras
       - cd ../.. && helmfile apply --skip-refresh -l name=nextcloud
 
   oidc-config:

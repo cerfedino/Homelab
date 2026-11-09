@@ -1,8 +1,251 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  sparkyfitness:
+    containers:
+      app:
+        image:
+          repository: codewithcj/sparkyfitness
+          tag: v1.8.0
+        env:
+          - name: SPARKY_FITNESS_FRONTEND_URL
+            value: https://{{ $app.external.dns_hostname }}
+          - name: SPARKY_FITNESS_SERVER_HOST
+            value: sparkyfitness-server.sparkyfitness.svc.cluster.local
+          - name: SPARKY_FITNESS_SERVER_PORT
+            value: "3010"
+        ports:
+          - containerPort: 80
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 80
+        resources:
+          limits:
+            memory: 256Mi
+
+  server:
+    containers:
+      app:
+        image:
+          repository: codewithcj/sparkyfitness_server
+          tag: v1.8.0
+        env:
+          - name: TZ
+            value: Europe/Zurich
+          - name: SPARKY_FITNESS_FRONTEND_URL
+            value: https://{{ $app.external.dns_hostname }}
+          - name: SPARKY_FITNESS_DB_HOST
+            value: sparkyfitness-postgres
+          - name: SPARKY_FITNESS_DB_NAME
+            value: sparkyfitness
+          - name: SPARKY_FITNESS_DB_USER
+            value: sparkyfitness
+          - name: SPARKY_FITNESS_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-postgres
+                key: password
+          - name: SPARKY_FITNESS_API_ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-secrets
+                key: api_encryption_key
+          - name: BETTER_AUTH_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-secrets
+                key: better_auth_secret
+          - name: SPARKY_FITNESS_DISABLE_EMAIL_LOGIN
+            value: "true"
+          - name: SPARKY_FITNESS_OIDC_AUTH_ENABLED
+            value: "true"
+          - name: SPARKY_FITNESS_OIDC_AUTO_REDIRECT
+            value: "true"
+          - name: SPARKY_FITNESS_OIDC_PROVIDER_SLUG
+            value: authentik
+          - name: SPARKY_FITNESS_OIDC_PROVIDER_NAME
+            value: Authentik
+          - name: SPARKY_FITNESS_OIDC_ISSUER_URL
+            value: {{ $app.external.oidc.issuer }}
+          - name: SPARKY_FITNESS_OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-secrets
+                key: oidc_client_id
+          - name: SPARKY_FITNESS_OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-secrets
+                key: oidc_client_secret
+          - name: SPARKY_FITNESS_OIDC_SCOPE
+            value: openid email profile groups
+          - name: SPARKY_FITNESS_OIDC_ADMIN_GROUP
+            value: admin
+        ports:
+          - containerPort: 3010
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/health
+                port: 3010
+              initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 1Gi
+
+  postgres:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        image:
+          repository: postgres
+          tag: "18.6"
+        env:
+          # subdirectory: initdb refuses the mount point itself (lost+found)
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: sparkyfitness
+          - name: POSTGRES_DB
+            value: sparkyfitness
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sparkyfitness-postgres
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "sparkyfitness", "-d", "sparkyfitness"]
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  sparkyfitness:
+    forceRename: sparkyfitness
+    controller: sparkyfitness
+    ports:
+      http:
+        port: 80
+  server:
+    forceRename: sparkyfitness-server
+    controller: server
+    ports:
+      http:
+        port: 3010
+  postgres:
+    forceRename: sparkyfitness-postgres
+    controller: postgres
+    ports:
+      postgres:
+        port: 5432
+
+secrets:
+  secrets:
+    forceRename: sparkyfitness-secrets
+    stringData:
+      api_encryption_key: {{ $secrets.sparkyfitness_api_encryption_key | quote }}
+      better_auth_secret: {{ $secrets.sparkyfitness_better_auth_secret | quote }}
+      oidc_client_id: {{ $app.external.oidc.client_id | quote }}
+      oidc_client_secret: {{ $app.external.oidc.client_secret | quote }}
+  postgres:
+    forceRename: sparkyfitness-postgres
+    stringData:
+      password: {{ $secrets.sparkyfitness_postgres_password | quote }}
+
+persistence:
+  uploads:
+    forceRename: sparkyfitness-uploads
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      server:
+        app:
+          - path: /app/SparkyFitnessServer/uploads
+  postgres-data:
+    forceRename: sparkyfitness-postgres-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      k8up.io/backup: "false"
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: librechat
+          ports:
+            - port: 3010
+  traefik:
+    controller: sparkyfitness
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: sparkyfitness
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "sparkyfitness" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

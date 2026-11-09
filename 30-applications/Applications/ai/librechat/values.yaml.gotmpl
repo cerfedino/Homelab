@@ -1,8 +1,392 @@
-resources:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+controllers:
+  librechat:
+    pod:
+      securityContext:
+        fsGroup: 1000
+    containers:
+      app:
+        image:
+          repository: ghcr.io/danny-avila/librechat
+          tag: v0.8.7
+        env:
+          - name: HOST
+            value: 0.0.0.0
+          - name: PORT
+            value: "3080"
+          - name: MONGO_URI
+            value: mongodb://librechat-mongo:27017/LibreChat
+          - name: DOMAIN_CLIENT
+            value: https://{{ $app.external.dns_hostname }}
+          - name: DOMAIN_SERVER
+            value: https://{{ $app.external.dns_hostname }}
+          - name: SEARCH
+            value: "true"
+          - name: MEILI_HOST
+            value: http://librechat-meili:7700
+          - name: MEILI_NO_ANALYTICS
+            value: "true"
+          - name: RAG_API_URL
+            value: http://librechat-rag:8000
+          - name: ALLOW_SOCIAL_LOGIN
+            value: "true"
+          - name: ALLOW_SOCIAL_REGISTRATION
+            value: "true"
+          - name: ALLOW_EMAIL_LOGIN
+            value: "false"
+          - name: ALLOW_REGISTRATION
+            value: "false"
+          - name: OPENID_ISSUER
+            value: {{ $app.external.oidc.issuer | quote }}
+          - name: OPENID_SCOPE
+            value: openid profile email
+          - name: OPENID_CALLBACK_URL
+            value: /oauth/openid/callback
+          - name: OPENID_BUTTON_LABEL
+            value: Login with Authentik
+          - name: OPENID_ADMIN_ROLE
+            value: librechat_admins
+          - name: OPENID_ADMIN_ROLE_PARAMETER_PATH
+            value: groups
+          - name: OPENID_ADMIN_ROLE_TOKEN_KIND
+            value: userinfo
+        envFrom:
+          - secretRef:
+              name: librechat-env
+        ports:
+          - containerPort: 3080
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: 3080
+              initialDelaySeconds: 15
+              periodSeconds: 10
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+
+  meili:
+    containers:
+      app:
+        image:
+          repository: getmeili/meilisearch
+          tag: v1.53.3
+        env:
+          - name: MEILI_MASTER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: librechat-env
+                key: MEILI_MASTER_KEY
+          - name: MEILI_NO_ANALYTICS
+            value: "true"
+          - name: MEILI_UPGRADE_DB
+            value: "true"
+        ports:
+          - containerPort: 7700
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: 7700
+              initialDelaySeconds: 5
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 1Gi
+
+  mongo:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'mongodump --archive --quiet'
+        k8up.io/file-extension: .archive
+    containers:
+      app:
+        image:
+          # Every 8.3.x refuses to start on kernel >= 6.19 (SERVER-121912); the check will be dropped in 8.3.9
+          repository: mongo
+          tag: 8.2.12
+        env:
+          - name: MONGO_TCMALLOC_PER_CPU_CACHE_SIZE_BYTES
+            value: "0"
+        ports:
+          - containerPort: 27017
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 27017
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+  rag:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/danny-avila/librechat-rag-api-dev
+          tag: v0.9.0
+        env:
+          - name: DB_HOST
+            value: librechat-vectordb
+          - name: DB_PORT
+            value: "5432"
+          - name: POSTGRES_DB
+            value: librechat
+          - name: POSTGRES_USER
+            value: librechat
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: librechat-vectordb
+                key: password
+          - name: VECTOR_DB_TYPE
+            value: pgvector
+          - name: EMBEDDINGS_PROVIDER
+            value: openai
+          - name: EMBEDDINGS_MODEL
+            value: nomic-embed-text
+          - name: RAG_OPENAI_BASEURL
+            value: http://litellm.ai.svc.cluster.local:4000/v1
+          - name: RAG_OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: librechat-env
+                key: LITELLM_API_KEY
+          - name: RAG_PORT
+            value: "8000"
+        ports:
+          - containerPort: 8000
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8000
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+  vectordb:
+    pod:
+      annotations:
+        k8up.io/backupcommand: sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall --clean -U "$POSTGRES_USER"'
+        k8up.io/file-extension: .sql
+    containers:
+      app:
+        image:
+          repository: pgvector/pgvector
+          tag: 0.8.7-pg18
+        env:
+          # subdirectory: initdb refuses the mount point itself (lost+found)
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_USER
+            value: librechat
+          - name: POSTGRES_DB
+            value: librechat
+          - name: POSTGRES_INITDB_ARGS
+            value: "--data-checksums"
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: librechat-vectordb
+                key: password
+        ports:
+          - containerPort: 5432
+        probes:
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: ["pg_isready", "-U", "librechat", "-d", "librechat"]
+              initialDelaySeconds: 10
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+service:
+  librechat:
+    forceRename: librechat
+    controller: librechat
+    ports:
+      http:
+        port: 3080
+  meili:
+    forceRename: librechat-meili
+    controller: meili
+    ports:
+      http:
+        port: 7700
+  mongo:
+    forceRename: librechat-mongo
+    controller: mongo
+    ports:
+      mongo:
+        port: 27017
+  rag:
+    forceRename: librechat-rag
+    controller: rag
+    ports:
+      http:
+        port: 8000
+  vectordb:
+    forceRename: librechat-vectordb
+    controller: vectordb
+    ports:
+      postgres:
+        port: 5432
+
+configMaps:
+  config:
+    forceRename: librechat-config
+    data:
+      librechat.yaml: {{ readFile "librechat.yaml" | toYaml | indent 8 | trim }}
+
+secrets:
+  env:
+    forceRename: librechat-env
+    stringData:
+      JWT_SECRET: {{ $secrets.jwt_secret | quote }}
+      JWT_REFRESH_SECRET: {{ $secrets.jwt_refresh_secret | quote }}
+      CREDS_KEY: {{ $secrets.creds_key | quote }}
+      CREDS_IV: {{ $secrets.creds_iv | quote }}
+      OPENID_SESSION_SECRET: {{ $secrets.openid_session_secret | quote }}
+      OPENID_CLIENT_ID: {{ $app.external.oidc.client_id | quote }}
+      OPENID_CLIENT_SECRET: {{ $app.external.oidc.client_secret | quote }}
+      MEILI_MASTER_KEY: {{ $secrets.meili_master_key | quote }}
+      LITELLM_API_KEY: {{ $secrets.litellm_api_key | quote }}
+  vectordb:
+    forceRename: librechat-vectordb
+    stringData:
+      password: {{ $secrets.vectordb_postgres_password | quote }}
+
+persistence:
+  config:
+    type: configMap
+    identifier: config
+    advancedMounts:
+      librechat:
+        app:
+          - path: /app/librechat.yaml
+            subPath: librechat.yaml
+            readOnly: true
+  uploads:
+    forceRename: librechat-uploads
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+    advancedMounts:
+      librechat:
+        app:
+          - path: /app/uploads
+            subPath: uploads
+          - path: /app/client/public/images
+            subPath: images
+  meili-data:
+    forceRename: librechat-meili-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: local-path-ephemeral
+    size: 2Gi
+    annotations:
+      k8up.io/backup: "false"
+    advancedMounts:
+      meili:
+        app:
+          - path: /meili_data
+  mongo-data:
+    forceRename: librechat-mongo-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      mongo:
+        app:
+          - path: /data/db
+  vectordb-data:
+    forceRename: librechat-vectordb-data
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    storageClass: proxmox-data-zfs
+    size: 5Gi
+    annotations:
+      helm.sh/resource-policy: keep
+      # the pod's backupcommand dump covers it
+      k8up.io/backup: "false"
+    advancedMounts:
+      vectordb:
+        app:
+          - path: /var/lib/postgresql/data
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    controller: librechat
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
 {{- end }}
-{{- end }}
-{{- end }}
+            services:
+              - name: librechat
+                port: 3080
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      spec: {{ (tpl (readFile "../../../_lib/schedule.yaml.gotmpl") (dict "bucket" "librechat" "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}

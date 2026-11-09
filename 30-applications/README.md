@@ -2,7 +2,7 @@
 
 # 30-applications
 
-In this stage we deploy everything that runs on the cluster. Each app is a [helmfile](https://helmfile.readthedocs.io) release, optionally paired with a [tofu](https://opentofu.org) root for the configuration that lives inside other systems (Authentik objects, DNS records, tunnel routes, uptime monitors).
+In this stage we deploy everything that runs on the cluster. Each app is a [helmfile](https://helmfile.readthedocs.io) release, optionally paired with a [tofu](https://opentofu.org) root for the configuration that lives inside other systems (Authentik objects, uptime monitors, arr settings).
 
 - [csi-proxmox](https://github.com/sergelogvinov/proxmox-csi-plugin) for having PVs as Proxmox disks that can move across nodes
 - [Cilium](https://cilium.io) for networking and observability
@@ -10,23 +10,21 @@ In this stage we deploy everything that runs on the cluster. Each app is a [helm
 - [Traefik](https://traefik.io) as ingress
 - [Authentik](https://goauthentik.io) for SSO and access control
 - [Uptime Kuma](https://github.com/louislam/uptime-kuma) for monitoring
-- [Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) to expose selected apps to the internet
 - [Pi-hole](https://pi-hole.net) as the user-facing DNS server
 - all other apps
 
-## The app registry
+## App entries
 
-I declare applications in a single global "registry" file. One entry defines an app's hostnames, auth mode, dashboard appearance, ACLs and uptime probe.
+Each app directory carries a SOPS-encrypted `app.enc.yaml` (`app-<release>.enc.yaml` where a directory holds several). One entry per hostname variant defines the app's hostnames, auth mode, dashboard appearance, ACLs and uptime probe.
 
 ```mermaid
 flowchart LR
-    registry[("app registry<br/>one entry per app")] --> traefik["Traefik routes"]
-    registry --> authentik["Authentik apps + ACLs"]
-    registry --> tunnel["Cloudflare tunnel routes + DNS"]
-    registry --> kuma["Uptime monitors"]
+    entry[("app.enc.yaml<br/>one per app directory")] --> traefik["Traefik routes"]
+    entry --> authentik["Authentik apps + ACLs"]
+    entry --> kuma["Uptime monitors"]
 ```
 
-Adding an app means writing one registry entry and its release directory.
+Each release template reads its own entry, and the tofu roots that need all of them (Authentik, Kuma) read the same files through the [`_lib/apps`](_lib/apps) module, which also applies the schema defaults and validations. Adding an app means writing its directory with an `app.enc.yaml` and its release.
 
 ## Backups
 

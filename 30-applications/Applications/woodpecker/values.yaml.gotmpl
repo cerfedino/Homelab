@@ -1,8 +1,9 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
 server:
   # the shared agent secret comes from our Secret instead
   createAgentSecret: false
   env:
-    WOODPECKER_HOST: https://{{ .Values.apps.ci.external.dns_hostname }}
+    WOODPECKER_HOST: https://{{ $app.external.dns_hostname }}
     WOODPECKER_ADMIN: cerfedino
     # nobody self-registers; repos are enabled by the admin
     WOODPECKER_OPEN: "false"
@@ -36,12 +37,3 @@ agent:
       memory: 64Mi
     limits:
       memory: "256Mi"
-
-additionalObjects:
-{{- range $f := readDirEntries "extras" }}
-{{- if not (hasPrefix "." $f.Name) }}
-{{- range $doc := splitList "\n---\n" (tpl (readFile (printf "extras/%s" $f.Name)) $) }}
-  - {{ $doc | fromYaml | toYaml | nindent 4 | trim }}
-{{- end }}
-{{- end }}
-{{- end }}

@@ -1,3 +1,4 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
 controllers:
   main:
     containers:
@@ -22,15 +23,15 @@ immich:
   configurationKind: Secret
   configuration:
     server:
-      externalDomain: https://{{ .Values.apps.immich.external.dns_hostname }}
+      externalDomain: https://{{ $app.external.dns_hostname }}
     oauth:
       enabled: true
       #prettier-ignore
-      issuerUrl: {{ .Values.oidc.immich_external.issuer | quote }}
+      issuerUrl: {{ $app.external.oidc.issuer | quote }}
       #prettier-ignore
-      clientId: {{ .Values.oidc.immich_external.client_id | quote }}
+      clientId: {{ $app.external.oidc.client_id | quote }}
       #prettier-ignore
-      clientSecret: {{ .Values.oidc.immich_external.client_secret | quote }}
+      clientSecret: {{ $app.external.oidc.client_secret | quote }}
       scope: openid email profile
       buttonText: Login with Authentik
       autoRegister: true

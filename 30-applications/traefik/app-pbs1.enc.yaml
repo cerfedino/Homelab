@@ -1,0 +1,26 @@
+name: ENC[AES256_GCM,data:7YoksA==,iv:bZOMyUdzeeHl750LZb9epGHUaRMjIaa6/KU+1h3cqz4=,tag:cMtimUBdLjf+3sAMOjU6qg==,type:str]
+internal:
+    display_name: ENC[AES256_GCM,data:Nco+fAxi+eMMHw==,iv:2leavghQYikkBhcUkYA4Lj3ZRLO+aL2dzL1suP8bSiU=,tag:Piv5pGMb3SSNRzOzo6+qsQ==,type:str]
+    type: ENC[AES256_GCM,data:GjXuPPWACzBO/DoQ,iv:KPrt7GQty7YLc8ALD2/915Zlwx1AXiLlrkRitKd0AAo=,tag:kS4wPXMIpZxPb6EYrZ4eUA==,type:str]
+    dns_hostname: ENC[AES256_GCM,data:EnlkW1ZoKT7O+e+R9qmXlTTcOoY=,iv:WOXwe80Ijha2OTT09R9dIMAm6XFKg1mNDmHeljCjD4w=,tag:qNPW4Sm6KHfpVj4jAoG3gw==,type:str]
+    href_url: ENC[AES256_GCM,data:8CNvZKpESk1eZozNOkul7uQyTMiYyW93pZ99pQ==,iv:9vqKzgWKQt16SIAW/diNfMP54Y0KR/tsBX7GK3zTvrg=,tag:MqWKVZSV3dOgENd1RmZ03w==,type:str]
+    uptime_url: ENC[AES256_GCM,data:P1RgyySG0+JzHBcnhnXvMZ4foyA3ctq29NFhxg==,iv:rWJKnIdfRAohYvSr5OB2MCdvrvcgH90v0OcESJ7wZho=,tag:37lAwb6qmiZcJUCzAoG40w==,type:str]
+    group: ENC[AES256_GCM,data:hyDDDP8=,iv:XA5RTRBGM04fa1V4/EJZm20JkJim/wvwhSSHZomj2k4=,tag:Cs0namaM5KX3KBJ1DydRRw==,type:str]
+    allowed_users:
+        - ENC[AES256_GCM,data:S+5ztZE=,iv:nUx+kmfXco/lrcG9/ULaF1eysLIgPpg0f0QSijhiAkw=,tag:bPX+NoKz7XWOFgMe4JsYIQ==,type:str]
+    meta_icon: ENC[AES256_GCM,data:paDvdGketPW7Ov9mCMcOIjNiEZK1+PsMh0SsC1nvwjnQ8LsJveiFFCo2yLS8rLv17b5QVy/pFsKf7sPC1+vfdblGqkCu9bTtEOgdtBD2Eggial+rKw==,iv:gR2/tCVMj9QGLlYs1lLez8El3obWTq0V9KKDzjfKF94=,tag:+zzORkhxilrr0XbXAYYWCw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBLb2FndWJvNWRFZEVPY1pp
+            emZJOEk5UmY3Q1FRMSt2c0JYMUxmV1BhTFJjCk85VEh2UG4ySTVGSDY5cVNjdE1F
+            bU82ZkxMTDVRNlJFcm9oaVlzaXNnYWsKLS0tIDZFbmRVM2Jvb0x2amhPL1g5Q2dx
+            cWZTUldVK1cxeklEZnlOcWpHS1UySlUKN3Banpc56q2KpD2li80GqoOsTZeDfCxV
+            txnGNlS7tWFjJ+qssKc6RdeHHEDPYmZROgpeNyir+m/s4BsRlY9+wA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-11-03T00:44:53Z"
+    mac: ENC[AES256_GCM,data:Y1FPn0mOWJZNsS/RPIF4qznl6POdhtbO9roFfZlEkcK1jpXXptRO/i0vxOoKqEkiKcNVkf0ium6rZn6xDyzv7F5aL7Y6C/dZRKOoPdOj+EX3gyIj8ejzPqufes7Gaddo/YMcnCQIUYDCg5ZxfzFub4V51fALisjSyOAQ/uukNcM=,iv:99x64RuoYqSEmMuYI1r93LHjG0XiKTwhoULMbuFdx44=,tag:iSiZLWynsXsX/tW/Z5JpeQ==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3

@@ -11,7 +11,7 @@ terraform {
 }
 
 locals {
-  apps = yamldecode(file("../app-registry/generated/generated.apps-summary.yaml")).apps
+  apps = module.apps.apps
 }
 
 provider "uptimekuma" {

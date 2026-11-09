@@ -1,0 +1,41 @@
+name: ENC[AES256_GCM,data:RXzrsef85eKH,iv:qp0tJ7Rgy2fjQgIGSF+BUZtHGDcZfoAkliiWvg1kXSs=,tag:zoYFdmkRZ2NoR5R2yNB5Og==,type:str]
+external:
+    display_name: ENC[AES256_GCM,data:B+u7MQbQo7Eg,iv:uUmn5gtTBR+rVHQYfpTv7zRXYNihV3YIX8KMF8akiYg=,tag:x5w4dmLeAdAVrUeuGUHkRA==,type:str]
+    type: ENC[AES256_GCM,data:j/4I8Q==,iv:ViTUcuN58l+zkUo/SCvKKgKsV7L5ukh8D+KmA86jkKE=,tag:C+h6vwPQWYy64Ew6w1K4Jw==,type:str]
+    dns_hostname: ENC[AES256_GCM,data:8FwmzU2qTB9dkRljwJdUFCq6Gg==,iv:G9wSiNIkBCrg8DiAQgZVSUGzpnmZahWrEmAxjSLHd54=,tag:zpBVDv3IGr8xpF2tbxzhKg==,type:str]
+    href_url: ENC[AES256_GCM,data:tF+DDaDp1ebENCi6ckQzNYDI4hf4S+5bVz6p,iv:+i7INPhL9snA3WDvFJRmNSEyh5mojQ2I66OuW/l4S54=,tag:vorNAOSdXUOx70HrTOct8g==,type:str]
+    uptime_url: ENC[AES256_GCM,data:dxAvkKaCCi5mlye0wJFrL9hv+X4hAY74ak2zm74aIOfRvJxgSGc=,iv:I/dfsvtvhNUCf6TWv4lphR1uTEyfGhBqhEZOdSZtbcg=,tag:wqP1nFJYB/ME6nYKx+bowA==,type:str]
+    group: ENC[AES256_GCM,data:0gNTtcxBa2gZxVpuGQ0=,iv:fzJ0NG5+Vq40F2c+sNVM/AvCHYI1FSkeOmWDEWnCGXM=,tag:x0ndu8T0wt+qNj1xP8kyyA==,type:str]
+    allowed_groups:
+        - ENC[AES256_GCM,data:QcpBjfCnfwbFJ+YzULgf,iv:zDH1SWdcMY3/QxDg1z5xQPGweAplMjMFnNiMlCBUrL0=,tag:KH2aB56+uEXXvhvN7+FQAA==,type:str]
+        - ENC[AES256_GCM,data:aA4wbaluuMcaMwoktOSP8g==,iv:VlH/TjXjdIbVWTMPW8PpVjlTPzUnB98rqIOSSDpK4Gc=,tag:+UcIfF8U253j7ncOJ2HiLA==,type:str]
+    meta_icon: ENC[AES256_GCM,data:NSBZeFWqsU1z8esqlDvMsgIZ4gvMiPT6/rHMxw/MlZdTeH4HQbz/azgGv5MMgGSa88b/VjvbBs5UyGtkxpcU3V7wWej23ADZnQ==,iv:RcvRtopB2zQuEFJ7DoJGCfoBgrRK7JBzGLM9lZc93+Q=,tag:cytknteEipItA/7yvSEDYw==,type:str]
+    oidc:
+        client_id: ENC[AES256_GCM,data:R1iwPYHPogVi,iv:E9Z8Gf3hEVjYeTQKZSN713pfDh39dMcZOHmwWStXoBc=,tag:0qIMmGiMor2ij2FbnRvMpg==,type:str]
+        client_secret: ENC[AES256_GCM,data:cF6+CT5urEvbmoq5il9RnmMpmKmHTswO6JO119s2XVCUb7UNG6jnnw==,iv:5Y+GenX9on0cMT20ct8rQHXxz+MCh66wa29WTeB0n8Y=,tag:A6nO+bOlaQCrs3m5AD22Eg==,type:str]
+        issuer: ENC[AES256_GCM,data:HkWxfSn83d1rDZcmzMX//mXnXfNB/Hi4uJuMgdRzbgOYusmFG5yJrqJpjffdapGHaSXl8T6zQP8=,iv:XguCVMB/V6N/+tA5XwowRPGidw4Q7JBoiYny2647QoA=,tag:O4UL7g8UWqIdHYiTLVIspg==,type:str]
+        redirect_uris:
+            - url: ENC[AES256_GCM,data:CriVxaoDKsr8apzQSeIs2oVl4s/aRSMNqgeEA+UIXWP0b13h8mD3HV24QkXyST8=,iv:qOikWwZhzB8669ij/uU47eKC1bneVmzNkzlQyYXO2bo=,tag:QvjY+6IRae0wnEUrD5WKKA==,type:str]
+        scopes:
+            - ENC[AES256_GCM,data:yjiH3LOi,iv:CgNXGdCa2YN4PCX8yNbc+jKs5k6zrg9VG52U0/kPUVc=,tag:3DONGRmaRWZOzwCRz8qSzg==,type:str]
+            - ENC[AES256_GCM,data:L3oAwkI=,iv:cMbZ7g5UiAjZhg5dCpHWyStc3QGD1pwXGpz2DCymiE4=,tag:NQEBpd3Z2Z8NBbyULNgRcg==,type:str]
+            - ENC[AES256_GCM,data:VQhUbtq3zg==,iv:MV1DpAA4eLSVjg891ahhPoUViSnLRj7ZI/ufbn2aOto=,tag:rju9zsFFym5VCPWTkKkfuQ==,type:str]
+            - ENC[AES256_GCM,data:jm4+oAXA,iv:Zb5+tlWm+SI6xyDJyamDLiBjLlpsyPPamF42Ue/p9qc=,tag:jm/taEkFCg1oze5hBhKzoA==,type:str]
+        group_map:
+            - from: ENC[AES256_GCM,data:+UGYo+iHAaV7A8hNlsnq9Q==,iv:cwhM+6FK8ro/CezuaUlaf65zUpm5ghG0RTjkTaMrDCA=,tag:0CaMUjHSf4dwP0lDJLdNVw==,type:str]
+              to: ENC[AES256_GCM,data:i30dVt4=,iv:yEibtX2Bf0RMaSJ8i8sXFRB9YHijfEWJ1zQEg7vNiEI=,tag:WWkE6wTr6HVoZU4M1ufOvA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA4cURwZHA3RE5MTmJ6V2tL
+            eEowOURXSDk3cUs4bnM1czd2Ums5NzNaTEIwCmNsMFdGWUhualI3K0wrcnZpZDF2
+            bGhGZGR5cjl1b3ByZTRodWxoM2ZaeDQKLS0tIE8vOGYvemtsMmEzVWZ2MFFCdklN
+            L29xVjhnMkgvMGJva1poTDVHRGpaLzgK1Pwnb62ocBPZPobQJWisD6f/SzaDnwgr
+            eMgjaYJ7N6HFG7MYltOWbV0zMyn1csrCsTF4mf2phRgTCQjSKZA43A==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1uwg50n262c6qukmr58yvfp9jetq235m2f3r74hgyyzwd0cxs8u8s77dsvh
+    lastmodified: "2026-11-03T00:44:51Z"
+    mac: ENC[AES256_GCM,data:1RrJEQP34aQ3zTfMsLEibNvYjV/H/rxfOyUgiZkUxKfaTd6tNSUzeFAV6L9m4/8/KbuvISY3l1XpUeMYmcJynpHE/TP1wUxGSbR93dMDv1T7yHjjLC7txgFRKW9HMBu/5we/OxLq9sO/nDGT+VlRmz6kwDDfHbUMZbm3EOL3qVA=,iv:WbRgLSieyWFXT7Vnd1L914OnqAEGm2+4zZAVm0k4njU=,tag:ZfMi1rdMZzwAyb6c+oJGFw==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3

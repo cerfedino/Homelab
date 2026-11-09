@@ -1,0 +1,63 @@
+{{- $app := readFile "app.enc.yaml" | fromYaml }}
+{{- $secrets := readFile "secrets.enc.yaml" | fromYaml }}
+secrets:
+  secrets:
+    forceRename: woodpecker-secrets
+    stringData:
+      WOODPECKER_GITHUB_CLIENT: {{ $secrets.woodpecker_github_client_id | trim | quote }}
+      WOODPECKER_GITHUB_SECRET: {{ $secrets.woodpecker_github_client_secret | trim | quote }}
+      WOODPECKER_AGENT_SECRET: {{ $secrets.woodpecker_agent_secret | quote }}
+  agent:
+    forceRename: woodpecker-default-agent-secret
+    stringData:
+      WOODPECKER_AGENT_SECRET: {{ $secrets.woodpecker_agent_secret | quote }}
+
+networkpolicies:
+  namespace:
+    podSelector: {}
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - podSelector: {}
+  traefik:
+    # the woodpecker chart's server pods, deployed by the woodpecker release
+    podSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - server
+    policyTypes: [Ingress]
+    rules:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: traefik
+
+rawResources:
+  external:
+    forceRename: woodpecker-external
+    manifest:
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      spec:
+        entryPoints: [lan-https]
+        routes:
+          - match: Host(`{{ $app.external.dns_hostname }}`)
+            kind: Rule
+{{- if eq $app.external.type "forward-auth" }}
+            middlewares:
+              - name: authentik-forward-auth-external@file
+{{- end }}
+            services:
+              - name: woodpecker-server
+                port: 80
+  backup:
+    forceRename: backup
+    manifest:
+      apiVersion: k8up.io/v1
+      kind: Schedule
+      # only the chart's own volumes such that pipelines dont get backed up
+      spec: {{ (tpl (readFile "../../_lib/schedule.yaml.gotmpl") (dict "bucket" "woodpecker" "matchLabels" (dict "app.kubernetes.io/instance" "woodpecker") "Values" .Values) | fromYaml).spec | toYaml | nindent 8 }}
