@@ -80,7 +80,6 @@ service:
       http:
         port: 8000
   redis:
-    forceRename: paperless-redis
     controller: redis
     ports:
       redis:
@@ -137,7 +136,6 @@ networkpolicies:
 
 rawResources:
   paperless:
-    forceRename: paperless
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute

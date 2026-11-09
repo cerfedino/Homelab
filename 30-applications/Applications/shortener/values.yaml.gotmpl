@@ -58,7 +58,6 @@ controllers:
 
 service:
   app:
-    forceRename: shortener
     controller: shortener
     ports:
       http:
@@ -66,7 +65,6 @@ service:
 
 secrets:
   app:
-    forceRename: shortener
     stringData:
       password: {{ $secrets.chhoto_password | quote }}
       api_key: {{ $secrets.chhoto_api_key | quote }}
@@ -103,7 +101,6 @@ networkpolicies:
 
 rawResources:
   shortener:
-    forceRename: shortener
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
@@ -120,7 +117,7 @@ rawResources:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
-        entryPoints: [wg-public]
+        entryPoints: [wg-private, wg-public]
         routes:
           - match: Host(`{{ $host }}`) && !PathPrefix(`/api`) && !Path(`/`)
             kind: Rule

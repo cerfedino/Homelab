@@ -91,7 +91,6 @@ controllers:
 
 service:
   app:
-    forceRename: backrest
     controller: backrest
     ports:
       http:
@@ -154,7 +153,6 @@ networkpolicies:
 
 rawResources:
   backrest:
-    forceRename: backrest
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute

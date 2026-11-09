@@ -230,31 +230,26 @@ controllers:
 
 service:
   librechat:
-    forceRename: librechat
     controller: librechat
     ports:
       http:
         port: 3080
   meili:
-    forceRename: librechat-meili
     controller: meili
     ports:
       http:
         port: 7700
   mongo:
-    forceRename: librechat-mongo
     controller: mongo
     ports:
       mongo:
         port: 27017
   rag:
-    forceRename: librechat-rag
     controller: rag
     ports:
       http:
         port: 8000
   vectordb:
-    forceRename: librechat-vectordb
     controller: vectordb
     ports:
       postgres:
@@ -268,7 +263,6 @@ configMaps:
 
 secrets:
   env:
-    forceRename: librechat-env
     stringData:
       JWT_SECRET: {{ $secrets.jwt_secret | quote }}
       JWT_REFRESH_SECRET: {{ $secrets.jwt_refresh_secret | quote }}
@@ -280,7 +274,6 @@ secrets:
       MEILI_MASTER_KEY: {{ $secrets.meili_master_key | quote }}
       LITELLM_API_KEY: {{ $secrets.litellm_api_key | quote }}
   vectordb:
-    forceRename: librechat-vectordb
     stringData:
       password: {{ $secrets.vectordb_postgres_password | quote }}
 
@@ -370,7 +363,6 @@ networkpolicies:
 
 rawResources:
   librechat:
-    forceRename: librechat
     manifest:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
