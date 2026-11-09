@@ -1,6 +1,6 @@
 ---
 - name: Roll out the compose stacks
-  hosts: vps1
+  hosts: proxy_vps
   become: true
   tasks:
     - name: Find the stacks, every folder next to this playbook holding a compose.yaml
@@ -64,7 +64,7 @@
 
 # wg-portal owns these interfaces, so they can only be created once its stack is up
 - name: Create the WireGuard networks wg-portal runs
-  hosts: vps1
+  hosts: proxy_vps
   become: true
   vars_files:
     - wg-portal/secrets.enc.yaml

@@ -85,6 +85,9 @@ output "ansible_yaml_inventory" {
         pve = {
           hosts = { for n in toset([for _, v in var.vms : v.node_name]) : n => null }
         }
+        proxy_vps = {
+          hosts = { (var.proxy_vps.name) = null }
+        }
         external = {
           hosts = { for k, _ in var.external_hosts : k => null }
         }
