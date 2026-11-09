@@ -15,7 +15,7 @@ controllers:
       app:
         image:
           repository: golift/unpackerr
-          tag: "v0.16.1"
+          tag: "v1.0.0"
         env:
           TZ: Europe/Zurich
           UN_LOG_FILE: ""
