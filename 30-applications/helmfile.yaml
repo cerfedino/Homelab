@@ -362,7 +362,7 @@ releases:
     namespace: ai
     createNamespace: true
     chart: oci://ghcr.io/berriai/litellm-helm
-    version: "1.108.3"
+    version: "1.108.4"
     wait: true
     values:
       - Applications/ai/values-litellm.yaml.gotmpl
