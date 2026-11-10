@@ -520,41 +520,41 @@
         }
       }
     },
-    "opentofu@1.12.6": {
-      "last_modified": "2026-09-30T11:58:46Z",
-      "resolved": "github:NixOS/nixpkgs/c9fe7d12cd78d1adcd12dd15e24432dde5b155a0#opentofu",
+    "opentofu@1.13.2": {
+      "last_modified": "2026-11-03T03:15:56Z",
+      "resolved": "github:NixOS/nixpkgs/9a6cbf4722bdbbef65f9e0400452ca088e31dc4b#opentofu",
       "source": "devbox-search",
-      "version": "1.12.6",
+      "version": "1.13.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/d99b7zq0i8kj9hb7g2s2j8p6fc0dqg8f-opentofu-1.12.6",
+              "path": "/nix/store/k876k68i69ac2aj379dxqlcl437fyqyz-opentofu-1.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/d99b7zq0i8kj9hb7g2s2j8p6fc0dqg8f-opentofu-1.12.6"
+          "store_path": "/nix/store/k876k68i69ac2aj379dxqlcl437fyqyz-opentofu-1.13.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/y2zr47rkf7n72wa7l0s31z6mh4mn64a8-opentofu-1.12.6",
+              "path": "/nix/store/jiiyhyfvbfiyi4d46na0jz0xc0klnhib-opentofu-1.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/y2zr47rkf7n72wa7l0s31z6mh4mn64a8-opentofu-1.12.6"
+          "store_path": "/nix/store/jiiyhyfvbfiyi4d46na0jz0xc0klnhib-opentofu-1.13.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jckayac8whxc7h474wwby455rr2n2mqs-opentofu-1.12.6",
+              "path": "/nix/store/bx875d2x8plslrlcc410c58rsy3gh61x-opentofu-1.13.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/jckayac8whxc7h474wwby455rr2n2mqs-opentofu-1.12.6"
+          "store_path": "/nix/store/bx875d2x8plslrlcc410c58rsy3gh61x-opentofu-1.13.2"
         }
       }
     },
