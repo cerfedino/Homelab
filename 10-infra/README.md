@@ -7,6 +7,7 @@ In this stage we create all the infrastructure that the homelab stands on.
 - the VMs ([cloud-init](https://cloud-init.io) Ubuntu 22.04 LTS) and their [Proxmox](https://www.proxmox.com) configuration
 - the network bridges, LAN plus an internal network
 - S3 buckets and the CSI credentials
+- the VPS as an inventory host, and the WireGuard addressing
 - the inventory and infra values the later stages consume
 
 ## VMs
@@ -19,6 +20,8 @@ Each VM has two virtual NICs, each for a different purpose.
 
 - LAN network: each VM gets an IP on the LAN such that it can be reached directly from it.
 - Internal network: configured without a gateway, purely for VMs to talk to each other without going through the LAN.
+
+The WireGuard networks are declared here too: for each one, which hosts are on it and their addresses.
 
 ## State
 

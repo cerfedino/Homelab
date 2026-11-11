@@ -2,7 +2,7 @@
 
 This repository holds my Homelab setup. It's mostly composed of [OpenTofu](https://opentofu.org), [Ansible](https://docs.ansible.com), [Helm](https://helm.sh) amongst other things. I probably went a bit overboard with automation as I made sure I can go from nothing to VMs, networking, DNS, a [k3s](https://k3s.io) cluster, and the applications on it with a single `task` command. My homelab mostly serves as a playground for me to learn and experiment with new toys. This is my first experience with kubernetes so you might find a lot of things that are not best practice.
 
-There are three rules I try to stick to. The lab must be rebuildable from scratch: a fresh clone plus one [age](https://github.com/FiloSottile/age) key is enough, since inputs, secrets and tofu state(s) are committed encrypted. Wiring has a single source of truth: every hostname, address and credential lives in one encrypted tfvars set, and stages talk to each other only through files generated from it. And high availability is done on the cheap: three k3s servers and floating VIPs mean any single VM can fail without taking the cluster with it.
+There are some rules I try to stick to. The setup is rebuildable from scratch: a fresh clone plus one [age](https://github.com/FiloSottile/age) key is enough, since inputs, secrets and tofu state(s) are committed encrypted. Every hostname, address and credential lives in one encrypted tfvars set, and stages talk to each other only through files generated from it. High availability on the LAN is done with floating VIPs, such that any node can die without disruption, and remote access and proxying is done with a VPS and multiple Wireguard tunnels.
 
 ## The pipeline
 
@@ -16,11 +16,23 @@ flowchart LR
     boot -- k3s cluster --> apps
 ```
 
-- [`10-infra`](10-infra/README.md) turns tfvars into Proxmox VMs, network bridges, S3 buckets and Ansible inventory.
-- [`20-bootstrap`](20-bootstrap/README.md) configures the VMs: the k3s cluster, DNS, floating VIPs for HA etc.
-- [`30-applications`](30-applications/README.md) deploys storage, certificates, ingress, identity and the apps behind them.
+- [`10-infra`](10-infra/README.md) turns tfvars into Proxmox VMs, network bridges, remote VPS, WireGuard addressing, S3 buckets and Ansible inventory.
+- [`20-bootstrap`](20-bootstrap/README.md) configures the VMs and the VPS: the k3s cluster, DNS, floating VIPs for HA, WireGuard tunnels and firewalls.
+- [`30-applications`](30-applications/README.md) deploys storage, certificates, ingress, identity and the apps behind them, plus the HAProxy and wg-portal stacks on the VPS.
 
 Each stage has its own README going deeper into its design.
+
+## Remote access
+
+Nothing at home is exposed to the internet. A small VPS with a public address runs [HAProxy](https://www.haproxy.org) and [wg-portal](https://github.com/h44z/wg-portal), and the homelab dials out to it over three [WireGuard](https://www.wireguard.com) networks:
+
+- `wg-users`: the VPN people connect to. Users log in with their Authentik account and enroll their own devices through wg-portal.
+- `wg-trusted`: VPS to homelab, carries the VPN users' traffic.
+- `wg-untrusted`: VPS to homelab, carries traffic from the open internet.
+
+Each network ends at its own Traefik entrypoint, so an app is reachable from the internet, the VPN or the LAN simply by which traefik entrypoints its routes are attached to.
+
+![Access stack](docs/access-stack.drawio.png)
 
 ## Working in the repo
 

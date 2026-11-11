@@ -2,16 +2,17 @@
 
 # 20-bootstrap
 
-In this stage we run [Ansible](https://docs.ansible.com) against the VMs from `10-infra` and leave behind a working k3s cluster.
+In this stage we run [Ansible](https://docs.ansible.com) against the VMs from `10-infra` and the Proxy VPS, and leave behind a working k3s cluster.
 
 - node OS configuration
 - one [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) instance per VM
 - [kube-vip](https://kube-vip.io) for the floating VIPs
 - [k3s](https://k3s.io) itself, and the [Tailscale](https://tailscale.com) VPN for remote access
+- the WireGuard tunnels and nftables on the VMs and on the VPS
 
 ## DNS
 
-Every VM runs its own dnsmasq: it answers the lab's internal names and forwards everything else to upstream DNS servers. The reason for having dnsmasq on each VM is that the cluster doesn't depend on any single DNS node.
+Every machine runs its own dnsmasq: it answers the lab's internal names and forwards everything else to upstream DNS servers. The reason for having dnsmasq on each host is that the cluster doesn't depend on any single DNS node.
 
 ```mermaid
 flowchart TB
