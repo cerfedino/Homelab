@@ -1,7 +1,7 @@
 {{- $app := readFile "app.enc.yaml" | fromYaml }}
 {{- $host := index $app.hosts 0 }}
-{{- $wgPublic := index .Values.wireguard "wg-public" }}
-{{- $wgBackbone := index .Values.wireguard "wg-backbone" }}
+{{- $wgUntrusted := index .Values.wireguard "wg-untrusted" }}
+{{- $wgTrusted := index .Values.wireguard "wg-trusted" }}
 # Note to self: In order to have the actual LAN ip of a local client show up, I have to make sure that a traefik pod is guaranteed to run on the same node that is reached through the LAN kube-VIP, because otherwise kube-proxy would rewrite the source IP when forwarding the traffic to a node that has a traefik pod running. That's why we make Traefik a DaemonSet.
 
 service:
@@ -12,13 +12,13 @@ service:
     # prettier-ignore
     kube-vip.io/loadbalancerIPs: {{ .Values.kube_vip_svc_address | quote }}
   additionalServices:
-    # Answers on every node, reached only by the VPS over the wg-public WireGuard network
-    wg-public:
+    # Answers on every node, reached only by the VPS over the wg-untrusted WireGuard network
+    wg-untrusted:
       spec:
         type: NodePort
         externalTrafficPolicy: Local
-    # Same for the wg-private entrypoint, over the wg-backbone WireGuard network
-    wg-private:
+    # Same for the wg-trusted entrypoint
+    wg-trusted:
       spec:
         type: NodePort
         externalTrafficPolicy: Local
@@ -80,37 +80,37 @@ ports:
     transport:
       respondingTimeouts:
         readTimeout: 0
-  # Public apps, only reachable by the VPS over the wg-public WireGuard network
-  wg-public:
+  # Public apps, only reachable by the VPS over the wg-untrusted WireGuard network
+  wg-untrusted:
     port: 8444
     nodePort: {{ .Values.traefik_public_nodeport }}
     expose:
       default: false
-      wg-public: true
+      wg-untrusted: true
     http:
       tls:
         enabled: true
     # The VPS proxy passes the visitor's address
     proxyProtocol:
       trustedIPs:
-        - {{ index $wgPublic.peers $wgPublic.hub }}
+        - {{ index $wgUntrusted.peers $wgUntrusted.hub }}
     transport:
       respondingTimeouts:
         readTimeout: 0
-  # VPN users, only reachable by the VPS over the wg-backbone WireGuard network
-  wg-private:
+  # VPN users, only reachable by the VPS over the wg-trusted WireGuard network
+  wg-trusted:
     port: 8445
     nodePort: {{ .Values.traefik_private_nodeport }}
     expose:
       default: false
-      wg-private: true
+      wg-trusted: true
     http:
       tls:
         enabled: true
     # The VPS proxy passes the VPN user's address
     proxyProtocol:
       trustedIPs:
-        - {{ index $wgBackbone.peers $wgBackbone.hub }}
+        - {{ index $wgTrusted.peers $wgTrusted.hub }}
     transport:
       respondingTimeouts:
         readTimeout: 0

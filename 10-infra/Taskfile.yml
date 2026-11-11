@@ -28,4 +28,3 @@ tasks:
       - tofu output -show-sensitive -raw ansible_yaml_inventory > generated/generated.inventory.yaml
       - tofu output -show-sensitive -raw helmfile_values > generated/generated.infra.yaml
       - tofu output -show-sensitive -raw ssh_config > generated/generated.ssh_config
-      - ln -sfn "$REPO_ROOT/10-infra/generated/generated.ssh_config" ~/.ssh/config.d/homelab_config || true

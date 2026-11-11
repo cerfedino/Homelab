@@ -1,5 +1,5 @@
-{{- $wgPublic := index .Values.wireguard "wg-public" }}
-{{- $wgBackbone := index .Values.wireguard "wg-backbone" }}
+{{- $wgUntrusted := index .Values.wireguard "wg-untrusted" }}
+{{- $wgTrusted := index .Values.wireguard "wg-trusted" }}
 {{- $pve1 := readFile "app-pve1.enc.yaml" | fromYaml }}
 {{- $pbs1 := readFile "app-pbs1.enc.yaml" | fromYaml }}
 {{- $haos := readFile "app-haos.enc.yaml" | fromYaml }}
@@ -52,15 +52,15 @@ configMaps:
               service: haos
             wg-portal:
               rule: Host(`{{ index $wgportal.hosts 0 }}`)
-              entryPoints: [lan-https, wg-private]
+              entryPoints: [lan-https, wg-trusted]
               service: wg-portal
 
           services:
-            # The VPN enrollment page on the VPS, over the wg-backbone WireGuard network
+            # The VPN enrollment page on the VPS, over the wg-trusted WireGuard network
             wg-portal:
               loadBalancer:
                 servers:
-                  - url: "http://{{ index $wgBackbone.peers $wgBackbone.hub }}:8888"
+                  - url: "http://{{ index $wgTrusted.peers $wgTrusted.hub }}:8888"
             pve1:
               loadBalancer:
                 servers:
@@ -108,16 +108,16 @@ networkpolicies:
           ports:
             - port: 80
             - port: 443
-        # wg-public entrypoint is just the VPS, over the wg-public WireGuard network
+        # wg-untrusted entrypoint is just the VPS
         - from:
             - ipBlock:
-                cidr: {{ index $wgPublic.peers $wgPublic.hub }}/32
+                cidr: {{ index $wgUntrusted.peers $wgUntrusted.hub }}/32
           ports:
             - port: 8444
-        # wg-private entrypoint is just the VPS, over the wg-backbone WireGuard network
+        # wg-trusted entrypoint is just the VPS
         - from:
             - ipBlock:
-                cidr: {{ index $wgBackbone.peers $wgBackbone.hub }}/32
+                cidr: {{ index $wgTrusted.peers $wgTrusted.hub }}/32
           ports:
             - port: 8445
 

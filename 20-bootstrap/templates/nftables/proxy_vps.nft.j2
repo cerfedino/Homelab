@@ -39,7 +39,7 @@ table inet homelab {
 
 {% endfor %}
     # wg-portal's page, reached through Traefik on the nodes
-    iifname "wg-backbone" ip saddr { {{ wireguard['wg-backbone'].peers | dict2items | selectattr('key', 'in', groups['k3s_cluster']) | map(attribute='value') | join(', ') }} } tcp dport 8888 accept
+    iifname "wg-trusted" ip saddr { {{ wireguard['wg-trusted'].peers | dict2items | selectattr('key', 'in', groups['k3s_cluster']) | map(attribute='value') | join(', ') }} } tcp dport 8888 accept
   }
 }
 
@@ -53,7 +53,7 @@ flush chain ip filter DOCKER-USER
 
 table ip filter {
   chain DOCKER-USER {
-    # Lets backbone peers reach each other through this host
-    iifname "wg-backbone" oifname "wg-backbone" accept
+    # Lets wg-trusted peers reach each other through this host
+    iifname "wg-trusted" oifname "wg-trusted" accept
   }
 }

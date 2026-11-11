@@ -117,7 +117,7 @@ rawResources:
       apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       spec:
-        entryPoints: [wg-private, wg-public]
+        entryPoints: [wg-trusted, wg-untrusted]
         routes:
           - match: Host(`{{ $host }}`) && !PathPrefix(`/api`) && !Path(`/`)
             kind: Rule

@@ -11,33 +11,33 @@ table inet homelab {
   }
 
   # The WireGuard chains hook prerouting: kube-proxy rewrites a NodePort to the pod's address and port right after, so later hooks no longer see it
-  chain wg-backbone {
+  chain wg-trusted {
     type filter hook prerouting priority mangle; policy accept;
 
-    # Allows replies over the backbone to reach the peer
-    iifname "wg-backbone" ct state established,related accept
+    # Allows replies over the wg-trusted to reach the peer
+    iifname "wg-trusted" ct state established,related accept
 
     # Allows other peers to ping this one
-    iifname "wg-backbone" icmp type echo-request accept
+    iifname "wg-trusted" icmp type echo-request accept
 
-    # Allows the VPS to open connections to Traefik's wg-private entrypoint, for VPN users
-    iifname "wg-backbone" ip saddr {{ wireguard['wg-backbone'].peers[wireguard['wg-backbone'].hub] }} tcp dport {{ traefik_private_nodeport }} accept
+    # Allows the VPS to open connections to Traefik's wg-trusted entrypoint, for VPN users
+    iifname "wg-trusted" ip saddr {{ wireguard['wg-trusted'].peers[wireguard['wg-trusted'].hub] }} tcp dport {{ traefik_private_nodeport }} accept
 
-    # Doesn't allow anyone to initiate any other connection to the peer over the backbone
-    iifname "wg-backbone" drop
+    # Doesn't allow anyone to initiate any other connection to the peer over the wg-trusted
+    iifname "wg-trusted" drop
   }
 
-  # The VPS proxy reaches Traefik's wg-public entrypoint over the wg-public WireGuard network, nothing else comes in
-  chain wg-public {
+  # The VPS proxy reaches Traefik's wg-untrusted entrypoint, nothing else comes in
+  chain wg-untrusted {
     type filter hook prerouting priority mangle; policy accept;
 
     # Allows replies to reach the node
-    iifname "wg-public" ct state established,related accept
+    iifname "wg-untrusted" ct state established,related accept
 
-    # Allows the VPS to open connections to Traefik's wg-public entrypoint
-    iifname "wg-public" ip saddr {{ wireguard['wg-public'].peers[wireguard['wg-public'].hub] }} tcp dport {{ traefik_public_nodeport }} accept
+    # Allows the VPS to open connections to Traefik's wg-untrusted entrypoint
+    iifname "wg-untrusted" ip saddr {{ wireguard['wg-untrusted'].peers[wireguard['wg-untrusted'].hub] }} tcp dport {{ traefik_public_nodeport }} accept
 
     # Doesn't allow anything else in over this network
-    iifname "wg-public" drop
+    iifname "wg-untrusted" drop
   }
 }

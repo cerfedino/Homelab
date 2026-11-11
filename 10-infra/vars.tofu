@@ -365,7 +365,7 @@ variable "wireguard" {
   }
 }
 
-# Port on every k3s node where Traefik's wg-public entrypoint answers, reached only over the wg-public WireGuard network
+# Port on every k3s node where Traefik's wg-untrusted entrypoint answers, reached only over the WireGuard network of the same name
 variable "traefik_public_nodeport" {
   type = number
 
@@ -375,7 +375,7 @@ variable "traefik_public_nodeport" {
   }
 }
 
-# Port on every k3s node where Traefik's wg-private entrypoint answers, reached only over the wg-backbone WireGuard network
+# Port on every k3s node where Traefik's wg-trusted entrypoint answers, reached only over the WireGuard network of the same name
 variable "traefik_private_nodeport" {
   type = number
 

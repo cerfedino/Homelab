@@ -2,7 +2,7 @@ services:
   wg-portal:
     image: wgportal/wg-portal:v2.3.1
     restart: unless-stopped
-    # Creates the wg-private interface on the host
+    # Creates the wg-users interface on the host
     cap_add:
       - NET_ADMIN
     network_mode: host

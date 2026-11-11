@@ -23,6 +23,7 @@ controllers:
           DATABASE_URL: jdbc:mariadb://grimmory-db.media.svc.cluster.local:3306/grimmory
           DATABASE_USERNAME: grimmory
           DISK_TYPE: LOCAL
+          OIDC_ALLOW_UNSAFE_HOSTS: "true"
         envFrom:
           - secretRef:
               name: grimmory-db
