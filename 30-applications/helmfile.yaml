@@ -121,7 +121,7 @@ releases:
     namespace: traefik
     createNamespace: true
     chart: traefik/traefik
-    version: "42.1.3"
+    version: "42.2.0"
     wait: true
     disableValidation: true
     values:
