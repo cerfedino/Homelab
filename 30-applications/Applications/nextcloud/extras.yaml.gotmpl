@@ -319,7 +319,7 @@ networkpolicies:
                   kubernetes.io/metadata.name: ai
               podSelector:
                 matchLabels:
-                  app: nextcloud-mcp
+                  app.kubernetes.io/controller: nextcloud-mcp
           ports:
             - port: 80
 
