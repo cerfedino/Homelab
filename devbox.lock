@@ -103,53 +103,53 @@
         }
       }
     },
-    "ansible-navigator@26.8.0": {
-      "last_modified": "2026-08-27T07:16:00Z",
-      "resolved": "github:NixOS/nixpkgs/c27cdad491a991b11ed731760aa2ef8db0cb0410#ansible-navigator",
+    "ansible-navigator@26.10.0": {
+      "last_modified": "2026-11-16T14:48:49Z",
+      "resolved": "github:NixOS/nixpkgs/e21fec321d73511849707a7585e4ea155ee4bf40#ansible-navigator",
       "source": "devbox-search",
-      "version": "26.8.0",
+      "version": "26.10.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gxc8lda546jrbh2i82fczik4k5kz0908-ansible-navigator-26.8.0",
+              "path": "/nix/store/x9hbwqr87c7d07l8gshsn2iri7ba0cph-ansible-navigator-26.10.0",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/sxda789plk0h79ph0nahbrpvn71n30ia-ansible-navigator-26.8.0-dist"
+              "path": "/nix/store/m30agn2gnkafvs5jj4jykwx2snxkr4p2-ansible-navigator-26.10.0-dist"
             }
           ],
-          "store_path": "/nix/store/gxc8lda546jrbh2i82fczik4k5kz0908-ansible-navigator-26.8.0"
+          "store_path": "/nix/store/x9hbwqr87c7d07l8gshsn2iri7ba0cph-ansible-navigator-26.10.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/i6agz5m92gvnbpb3fzsm318cvn6124is-ansible-navigator-26.8.0",
+              "path": "/nix/store/4ay7id4m16b845glbh3fz67vqdlil78y-ansible-navigator-26.10.0",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/pr0m43xjn0ik5wnpr14nv4n0h4cgl3ap-ansible-navigator-26.8.0-dist"
+              "path": "/nix/store/hcpr67mpqcswpcg5hjb9rsvpn16bxq56-ansible-navigator-26.10.0-dist"
             }
           ],
-          "store_path": "/nix/store/i6agz5m92gvnbpb3fzsm318cvn6124is-ansible-navigator-26.8.0"
+          "store_path": "/nix/store/4ay7id4m16b845glbh3fz67vqdlil78y-ansible-navigator-26.10.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/kdzbrjrgfaj8sxs8z3xf1y1j8wpwpsgk-ansible-navigator-26.8.0",
+              "path": "/nix/store/sxgvxm9k6ssa9gyxxmwbjr9ik294cfgm-ansible-navigator-26.10.0",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/kzq8f8akhy4fjyg9jjp5hq23fgpmv7qp-ansible-navigator-26.8.0-dist"
+              "path": "/nix/store/krq2shldi0hpgk424hhag5qkqi3pxs4v-ansible-navigator-26.10.0-dist"
             }
           ],
-          "store_path": "/nix/store/kdzbrjrgfaj8sxs8z3xf1y1j8wpwpsgk-ansible-navigator-26.8.0"
+          "store_path": "/nix/store/sxgvxm9k6ssa9gyxxmwbjr9ik294cfgm-ansible-navigator-26.10.0"
         }
       }
     },
